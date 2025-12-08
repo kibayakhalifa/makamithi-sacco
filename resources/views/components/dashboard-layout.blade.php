@@ -1,315 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Makamithi Sacco - @yield('title', 'Dashboard')</title>
+    <title>Makamithi Sacco - @yield('title')</title>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
     </style>
 </head>
-<body class="bg-gray-50">
-    <!-- Sidebar Navigation -->
+
+<body class="bg-gray-100">
+
     <div class="flex h-screen">
+
         <!-- Sidebar -->
-        <div class="w-64 bg-blue-900 text-white hidden md:block">
-            <div class="p-6">
-                <h1 class="text-2xl font-bold">Makamithi Sacco</h1>
-                <p class="text-blue-200 text-sm mt-1">
+        <aside class="w-64 bg-white border-r hidden md:flex flex-col">
+            <div class="p-6 border-b">
+                <h1 class="text-xl font-semibold text-blue-900">Makamithi Sacco</h1>
+                <p class="text-gray-500 text-sm mt-1">
                     @auth
-                        {{ ucfirst(auth()->user()->role) }} Dashboard
+                        {{ ucfirst(auth()->user()->role) }} Panel
                     @endauth
                 </p>
             </div>
-            
-            <nav class="mt-6">
+
+            <nav class="flex-1 p-4 space-y-1">
+
                 @auth
                     @php
                         $userRole = auth()->user()->role;
                         $currentRoute = request()->route()->getName();
+                        $current = request()->route()->getName();
                     @endphp
-                    
-                    <!-- Member Navigation -->
+
+                    <!-- Member -->
                     @if($userRole === 'member')
-                        <a href="{{ route('member.dashboard') }}" 
-                           class="block py-3 px-6 hover:bg-blue-800 {{ $currentRoute === 'member.dashboard' ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
-                            📊 Dashboard
+                        <x-nav.link route="member.dashboard" current="{{ $current }}">📊 Dashboard</x-nav.link>
+                        <x-nav.link route="savings.index" current="{{ $current }}">💰 My Savings</x-nav.link>
+                        <x-nav.link route="loans.apply" current="{{ $current }}">📝 Apply Loan</x-nav.link>
+                        <x-nav.link route="profile.index" current="{{ $current }}">👤 My Profile</x-nav.link>
+                        <a href="{{ route('loans.top-up') }}" class="{{ $currentRoute === 'loans.top-up' ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}
+                                                  group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                            <span class="mr-3">🔄</span>
+                            Top-up Loan
                         </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            💰 My Savings
+                        
+                         <x-nav.link route="documents.index" current="{{ $current }}">📄 Documents</x-nav.link>
+                        <a href="{{ route('reports.index') }}" class="{{ str_starts_with($currentRoute, 'reports.') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}
+                                                          group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                            <span class="mr-3">📈</span>
+                            Reports
                         </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            📝 Apply Loan
-                        </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            📄 My Statements
-                        </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            👤 My Profile
-                        </a>
-                    
-                    <!-- Chairman Navigation -->
+
                     @elseif($userRole === 'chairman')
-                        <a href="{{ route('chairman.dashboard') }}" 
-                           class="block py-3 px-6 hover:bg-blue-800 {{ $currentRoute === 'chairman.dashboard' ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
-                            📊 Dashboard
+                        <x-nav.link route="chairman.dashboard" current="{{ $current }}">📊 Dashboard</x-nav.link>
+                        <x-nav.link route="chairman.loan-approvals" current="{{ $current }}">✅ Loan Approvals</x-nav.link>
+                        <a href="{{ route('reports.index') }}" class="{{ str_starts_with($currentRoute, 'reports.') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}
+                                                          group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                            <span class="mr-3">📈</span>
+                            Reports
                         </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            ✅ Loan Approvals
-                        </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            📈 Reports
-                        </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            👥 Members
-                        </a>
-                    
-                    <!-- Treasurer Navigation -->
+                        
+
+                        <x-nav.link route="chairman.members" current="{{ $current }}">👥 Members</x-nav.link>
+                        <x-nav.link route="documents.index" current="{{ $current }}">📄 Documents</x-nav.link>
+                        
+                        <!-- Treasurer Navigation -->
                     @elseif($userRole === 'treasurer')
-                        <a href="{{ route('treasurer.dashboard') }}" 
-                           class="block py-3 px-6 hover:bg-blue-800 {{ $currentRoute === 'treasurer.dashboard' ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
-                            📊 Dashboard
+                        <a href="{{ route('treasurer.dashboard') }}"
+                            class="{{ $currentRoute === 'treasurer.dashboard' ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}
+                                                                  group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                            <span class="mr-3">📊</span>
+                            Dashboard
                         </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            💳 Process Payments
+                        <a href="{{ route('treasurer.payments') }}"
+                            class="{{ $currentRoute === 'treasurer.payments' ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}
+                                                                  group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                            <span class="mr-3">💳</span>
+                            Process Payments
                         </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            💸 Expenses
+                        
+
+                        <a href="{{ route('reports.index') }}" class="{{ str_starts_with($currentRoute, 'reports.') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}
+                                                          group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                            <span class="mr-3">📈</span>
+                            Reports
                         </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            🏦 Bank Reconciliation
-                        </a>
-                    
-                    <!-- Secretary Navigation -->
+                        <x-nav.link route="documents.index" current="{{ $current }}">📄 Documents</x-nav.link>
+
                     @elseif($userRole === 'secretary')
-                        <a href="{{ route('secretary.dashboard') }}" 
-                           class="block py-3 px-6 hover:bg-blue-800 {{ $currentRoute === 'secretary.dashboard' ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
-                            📊 Dashboard
-                        </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            👥 Member Management
-                        </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            📧 Communications
-                        </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            📄 Documents
+                        <x-nav.link route="secretary.dashboard" current="{{ $current }}">📊 Dashboard</x-nav.link>
+                        <x-nav.link route="secretary.members" current="{{ $current }}">👥 Member Management</x-nav.link>
+                        <x-nav.link route="secretary.communications" current="{{ $current }}">📧 Communications</x-nav.link>
+                        <x-nav.link route="secretary.documents" current="{{ $current }}">📄 Documents</x-nav.link>
+                        <a href="{{ route('reports.index') }}" class="{{ str_starts_with($currentRoute, 'reports.') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}
+                                  group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                            <span class="mr-3">📈</span>
+                            Reports
                         </a>
                     @endif
-                    
-                    <!-- Common Links -->
-                    <div class="mt-8 border-t border-blue-800 pt-4">
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            ⚙️ Settings
-                        </a>
-                        <form method="POST" action="{{ route('logout') }}" class="mt-2">
+
+                    <div class="pt-6 mt-6 border-t">
+                        <x-nav.simple>⚙️ Settings</x-nav.simple>
+
+                        <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="block w-full text-left py-3 px-6 hover:bg-blue-800">
+                            <button
+                                class="w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition">
                                 🚪 Logout
                             </button>
                         </form>
                     </div>
                 @endauth
-            </nav>
-        </div>
 
-        <!-- Main Content Area -->
+            </nav>
+        </aside>
+
+
+        <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- Top Header -->
-            <header class="bg-white shadow-sm border-b">
-                <div class="px-6 py-4 flex justify-between items-center">
-                    <!-- Mobile menu button -->
-                    <button class="md:hidden text-gray-600 hover:text-gray-900" id="menuToggle">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                    </button>
-                    
-                    <!-- User info -->
-                    <div class="flex items-center space-x-4">
-                        <div class="text-right hidden md:block">
-                            <p class="font-semibold text-gray-800">
-                                @auth
-                                    {{ auth()->user()->name }}
-                                @endauth
-                            </p>
-                            <p class="text-sm text-gray-500">
-                                @auth
-                                    {{ ucfirst(auth()->user()->role) }} • {{ auth()->user()->employee_number ?? 'EMP001' }}
-                                @endauth
-                            </p>
-                        </div>
-                        <div class="relative">
-                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                <span class="text-blue-600 font-bold">
-                                    @auth
-                                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                                    @endauth
-                                </span>
-                            </div>
-                        </div>
+
+            <!-- Header -->
+            <header class="bg-white border-b px-6 py-4 flex justify-between items-center">
+
+                <!-- Mobile Toggle -->
+                <button id="menuToggle" class="md:hidden text-gray-700">
+                    ☰
+                </button>
+
+                <!-- User Info -->
+                <div class="flex items-center space-x-3">
+                    <div class="hidden md:block text-right">
+                        <p class="font-medium text-gray-800">{{ auth()->user()->name }}</p>
+                        <p class="text-xs text-gray-500">
+                            {{ ucfirst(auth()->user()->role) }} • {{ auth()->user()->employee_number ?? 'EMP001' }}
+                        </p>
+                    </div>
+
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-700">
+                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                     </div>
                 </div>
             </header>
 
-            <!-- Main Content -->
-            <main class="flex-1 overflow-y-auto p-4 md:p-8">
-                <!-- Flash Messages -->
+            <!-- Page Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+
                 @if(session('success'))
-                    <div class="mb-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded">
-                        <div class="flex items-center">
-                            <span class="mr-2">✅</span>
-                            <span>{{ session('success') }}</span>
-                        </div>
-                    </div>
+                    <x-alert.success>{{ session('success') }}</x-alert.success>
                 @endif
 
                 @if(session('error'))
-                    <div class="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded">
-                        <div class="flex items-center">
-                            <span class="mr-2">❌</span>
-                            <span>{{ session('error') }}</span>
-                        </div>
-                    </div>
+                    <x-alert.error>{{ session('error') }}</x-alert.error>
                 @endif
 
                 @if(session('warning'))
-                    <div class="mb-6 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded">
-                        <div class="flex items-center">
-                            <span class="mr-2">⚠️</span>
-                            <span>{{ session('warning') }}</span>
-                        </div>
-                    </div>
+                    <x-alert.warning>{{ session('warning') }}</x-alert.warning>
                 @endif
 
-                <!-- Page Content -->
                 @yield('content')
+
             </main>
 
             <!-- Footer -->
-            <footer class="bg-white border-t py-4 px-6">
-                <div class="flex flex-col md:flex-row justify-between items-center">
-                    <p class="text-gray-600 text-sm">
-                        &copy; {{ date('Y') }} Makamithi Sacco. All rights reserved.
-                    </p>
-                    <p class="text-gray-500 text-sm mt-2 md:mt-0">
-                        v1.0.0 • Employee Savings & Credit Cooperative Society
-                    </p>
-                </div>
+            <footer class="bg-white border-t py-4 px-6 text-center text-sm text-gray-500">
+                © {{ date('Y') }} Makamithi Sacco • Employee Savings & Credit Cooperative Society
             </footer>
         </div>
+
     </div>
 
-    <!-- Mobile Sidebar -->
-    <div id="mobileSidebar" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-black bg-opacity-50" id="mobileOverlay"></div>
-        <div class="relative w-64 h-full bg-blue-900 text-white">
-            <div class="p-6">
-                <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold">Makamithi Sacco</h1>
-                    <button id="closeMenu" class="text-white">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-                <p class="text-blue-200 text-sm mt-1">
-                    @auth
-                        {{ ucfirst(auth()->user()->role) }} Dashboard
-                    @endauth
-                </p>
+
+    <!-- MOBILE SIDEBAR -->
+    <div id="mobileSidebar" class="fixed inset-0 bg-black bg-opacity-40 z-50 hidden">
+        <div class="w-64 bg-white h-full shadow-lg p-6">
+
+            <div class="flex justify-between items-center">
+                <h1 class="text-xl font-semibold text-blue-900">Makamithi Sacco</h1>
+                <button id="closeMenu">✖</button>
             </div>
-            
-            <!-- Mobile Navigation (same as desktop) -->
-            <nav class="mt-6">
-                @auth
-                    @php
-                        $userRole = auth()->user()->role;
-                        $currentRoute = request()->route()->getName();
-                    @endphp
-                    
-                    @if($userRole === 'member')
-                        <a href="{{ route('member.dashboard') }}" class="block py-3 px-6 hover:bg-blue-800">
-                            📊 Dashboard
-                        </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            💰 My Savings
-                        </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            📝 Apply Loan
-                        </a>
-                    @elseif($userRole === 'chairman')
-                        <a href="{{ route('chairman.dashboard') }}" class="block py-3 px-6 hover:bg-blue-800">
-                            📊 Dashboard
-                        </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            ✅ Loan Approvals
-                        </a>
-                    @elseif($userRole === 'treasurer')
-                        <a href="{{ route('treasurer.dashboard') }}" class="block py-3 px-6 hover:bg-blue-800">
-                            📊 Dashboard
-                        </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            💳 Process Payments
-                        </a>
-                    @elseif($userRole === 'secretary')
-                        <a href="{{ route('secretary.dashboard') }}" class="block py-3 px-6 hover:bg-blue-800">
-                            📊 Dashboard
-                        </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            👥 Member Management
-                        </a>
-                    @endif
-                    
-                    <div class="mt-8 border-t border-blue-800 pt-4">
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="block w-full text-left py-3 px-6 hover:bg-blue-800">
-                                🚪 Logout
-                            </button>
-                        </form>
-                    </div>
-                @endauth
+
+            <p class="text-gray-500 text-sm mt-1">
+                {{ ucfirst(auth()->user()->role) }} Panel
+            </p>
+
+            <nav class="mt-6 space-y-2">
+                {{-- Same navigation items as desktop --}}
+                <a href="{{ route('member.dashboard') }}"
+                    class="block px-3 py-2 rounded hover:bg-gray-100">Dashboard</a>
             </nav>
         </div>
     </div>
 
-    <!-- JavaScript for Mobile Menu -->
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const menuToggle = document.getElementById('menuToggle');
-            const mobileSidebar = document.getElementById('mobileSidebar');
-            const mobileOverlay = document.getElementById('mobileOverlay');
-            const closeMenu = document.getElementById('closeMenu');
-            
-            if (menuToggle) {
-                menuToggle.addEventListener('click', function() {
-                    mobileSidebar.classList.remove('hidden');
-                });
-            }
-            
-            if (mobileOverlay) {
-                mobileOverlay.addEventListener('click', function() {
-                    mobileSidebar.classList.add('hidden');
-                });
-            }
-            
-            if (closeMenu) {
-                closeMenu.addEventListener('click', function() {
-                    mobileSidebar.classList.add('hidden');
-                });
-            }
-            
-            // Close mobile menu when clicking a link
-            document.querySelectorAll('#mobileSidebar a').forEach(link => {
-                link.addEventListener('click', function() {
-                    mobileSidebar.classList.add('hidden');
-                });
-            });
-        });
+        const menuToggle = document.getElementById('menuToggle');
+        const mobileSidebar = document.getElementById('mobileSidebar');
+        const closeMenu = document.getElementById('closeMenu');
+
+        if (menuToggle) menuToggle.onclick = () => mobileSidebar.classList.remove('hidden');
+        if (closeMenu) closeMenu.onclick = () => mobileSidebar.classList.add('hidden');
     </script>
+
 </body>
+
 </html>

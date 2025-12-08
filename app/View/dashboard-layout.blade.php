@@ -22,19 +22,21 @@
                 @auth
                     @if(auth()->user()->role === 'member')
                         <a href="{{ route('member.dashboard') }}"
-                            class="block py-3 px-6 hover:bg-blue-800 {{ request()->routeIs('member.dashboard') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
-                            📊 Member Dashboard
+                            class="block py-3 px-6 hover:bg-blue-800 {{ $currentRoute === 'member.dashboard' ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
+                            📊 Dashboard
                         </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
+                        <a href="{{ route('savings.index') }}"
+                            class="block py-3 px-6 hover:bg-blue-800 {{ str_starts_with($currentRoute, 'savings.') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
                             💰 My Savings
                         </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
+                        <a href="{{ route('loans.apply') }}"
+                            class="block py-3 px-6 hover:bg-blue-800 {{ str_starts_with($currentRoute, 'loans.') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
                             📝 Apply Loan
                         </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
+                        <a href="{{ route('profile.index') }}"
+                            class="block py-3 px-6 hover:bg-blue-800 {{ str_starts_with($currentRoute, 'profile.') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
                             👤 My Profile
                         </a>
-
                     @elseif(auth()->user()->role === 'chairman')
                         <a href="{{ route('chairman.dashboard') }}"
                             class="block py-3 px-6 hover:bg-blue-800 {{ request()->routeIs('chairman.dashboard') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">

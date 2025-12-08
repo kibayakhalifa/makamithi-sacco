@@ -3,187 +3,670 @@
 @section('title', 'Secretary Dashboard')
 
 @section('content')
-<div class="space-y-6">
-    <!-- Welcome Banner -->
-    <div class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white rounded-2xl p-6 shadow-lg">
-        <div class="flex justify-between items-center">
+<div class="space-y-8">
+
+    <!-- Header with Quick Actions -->
+    <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-                <h1 class="text-3xl font-bold">Secretary Dashboard</h1>
-                <p class="text-indigo-100 mt-2">Welcome, {{ auth()->user()->name }}! Manage member records and communications</p>
+                <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">Secretary Dashboard</h1>
+                <p class="text-gray-500 mt-1">
+                    Hello {{ auth()->user()->name }} — manage members, communications, and SACCO operations.
+                </p>
             </div>
             <div class="text-right">
-                <p class="text-indigo-100">New Members This Month</p>
-                <p class="text-2xl font-bold">5</p>
+                <p class="text-sm text-gray-500">Today</p>
+                <p class="text-xl font-semibold text-gray-800">{{ now()->format('d M Y') }}</p>
+                <p class="text-sm text-gray-500 mt-1">{{ now()->format('l') }}</p>
             </div>
         </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-indigo-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-gray-500 text-sm font-semibold uppercase">Total Members</h3>
-                    <p class="text-3xl font-bold mt-2">156</p>
+    <!-- Quick Actions Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Add New Member -->
+        <a href="{{ route('secretary.members') }}" class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition group">
+            <div class="flex items-center">
+                <div class="w-12 h-12 rounded-lg bg-gray-900 flex items-center justify-center mr-4 group-hover:bg-gray-800 transition">
+                    <span class="text-2xl text-white">👤</span>
                 </div>
-                <div class="bg-indigo-100 p-3 rounded-full">
-                    <span class="text-indigo-600 text-2xl">👥</span>
+                <div>
+                    <h3 class="font-semibold text-gray-900">Add Member</h3>
+                    <p class="text-sm text-gray-500">Register new employees</p>
+                </div>
+            </div>
+            <div class="mt-4 text-xs text-gray-400">
+                <span class="flex items-center">
+                    <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                    Requires Chairman approval
+                </span>
+            </div>
+        </a>
+
+        <!-- Loan Assistance -->
+        <a href="{{ route('secretary.loan-assist') }}" class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition group">
+            <div class="flex items-center">
+                <div class="w-12 h-12 rounded-lg bg-gray-800 flex items-center justify-center mr-4 group-hover:bg-gray-700 transition">
+                    <span class="text-2xl text-white">🤝</span>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-900">Loan Assistance</h3>
+                    <p class="text-sm text-gray-500">Help members apply</p>
+                </div>
+            </div>
+            <div class="mt-4 text-xs text-gray-400">
+                <span class="flex items-center">
+                    <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                    1.5× savings rule applies
+                </span>
+            </div>
+        </a>
+
+        <!-- Pending Approvals -->
+        <a href="{{ route('secretary.pending-approvals') }}" class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition group">
+            <div class="flex items-center">
+                <div class="w-12 h-12 rounded-lg bg-yellow-500 flex items-center justify-center mr-4 group-hover:bg-yellow-600 transition">
+                    <span class="text-2xl text-white">⏳</span>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-900">Pending Approvals</h3>
+                    <p class="text-sm text-gray-500">Awaiting Chairman</p>
+                </div>
+            </div>
+            <div class="mt-4">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                    8 pending
+                </span>
+            </div>
+        </a>
+
+        <!-- Communications -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition group cursor-pointer" onclick="openCommunications()">
+            <div class="flex items-center">
+                <div class="w-12 h-12 rounded-lg bg-blue-500 flex items-center justify-center mr-4 group-hover:bg-blue-600 transition">
+                    <span class="text-2xl text-white">📨</span>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-900">Communications</h3>
+                    <p class="text-sm text-gray-500">Send notifications</p>
+                </div>
+            </div>
+            <div class="mt-4 text-xs text-gray-400">
+                <span class="flex items-center">
+                    <span class="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                    SMS & Email ready
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Dashboard -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Total Members -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-sm text-gray-500">Total Members</p>
+                    <p class="text-3xl font-semibold mt-2 text-gray-900">156</p>
+                    <p class="text-xs text-green-600 mt-1">+12 this month</p>
+                </div>
+                <div class="text-3xl text-gray-300">👥</div>
+            </div>
+            <div class="mt-4 pt-4 border-t">
+                <div class="flex justify-between text-xs text-gray-500">
+                    <span>Active: 148</span>
+                    <span>Pending: 8</span>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
-            <div class="flex items-center justify-between">
+        <!-- Total Savings -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <div class="flex justify-between items-start">
                 <div>
-                    <h3 class="text-gray-500 text-sm font-semibold uppercase">Active Members</h3>
-                    <p class="text-3xl font-bold mt-2">148</p>
+                    <p class="text-sm text-gray-500">Total Savings</p>
+                    <p class="text-3xl font-semibold mt-2 text-gray-900">KES 4.5M</p>
+                    <p class="text-xs text-green-600 mt-1">+KES 150K this month</p>
                 </div>
-                <div class="bg-green-100 p-3 rounded-full">
-                    <span class="text-green-600 text-2xl">✅</span>
+                <div class="text-3xl text-gray-300">💰</div>
+            </div>
+            <div class="mt-4 pt-4 border-t">
+                <div class="flex justify-between text-xs text-gray-500">
+                    <span>Payroll: KES 4.2M</span>
+                    <span>Top-up: KES 300K</span>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-yellow-500">
-            <div class="flex items-center justify-between">
+        <!-- Active Loans -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <div class="flex justify-between items-start">
                 <div>
-                    <h3 class="text-gray-500 text-sm font-semibold uppercase">Pending Updates</h3>
-                    <p class="text-3xl font-bold mt-2">23</p>
+                    <p class="text-sm text-gray-500">Active Loans</p>
+                    <p class="text-3xl font-semibold mt-2 text-gray-900">KES 3.8M</p>
+                    <p class="text-xs text-blue-600 mt-1">24 active loans</p>
                 </div>
-                <div class="bg-yellow-100 p-3 rounded-full">
-                    <span class="text-yellow-600 text-2xl">📝</span>
+                <div class="text-3xl text-gray-300">📝</div>
+            </div>
+            <div class="mt-4 pt-4 border-t">
+                <div class="flex justify-between text-xs text-gray-500">
+                    <span>Normal: 22</span>
+                    <span>Top-up: 2</span>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-red-500">
-            <div class="flex items-center justify-between">
+        <!-- Meeting Schedule -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <div class="flex justify-between items-start">
                 <div>
-                    <h3 class="text-gray-500 text-sm font-semibold uppercase">Exited Members</h3>
-                    <p class="text-3xl font-bold mt-2">8</p>
+                    <p class="text-sm text-gray-500">Next Meeting</p>
+                    <p class="text-xl font-semibold mt-2 text-gray-900">15 Apr 2024</p>
+                    <p class="text-xs text-gray-500 mt-1">Monday, 2:00 PM</p>
                 </div>
-                <div class="bg-red-100 p-3 rounded-full">
-                    <span class="text-red-600 text-2xl">🚪</span>
+                <div class="text-3xl text-gray-300">📅</div>
+            </div>
+            <div class="mt-4 pt-4 border-t">
+                <div class="flex justify-between text-xs text-gray-500">
+                    <span>Agenda: Loan approvals</span>
+                    <span class="text-blue-600">Prepare</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- New Member Registrations -->
-    <div class="bg-white rounded-xl shadow-md p-6">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold text-gray-800">New Member Registrations</h2>
-            <button class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold">
-                Register New Member
-            </button>
-        </div>
-        
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead>
-                    <tr class="bg-gray-50">
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Employee</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Department</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Join Date</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Action</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200">
-                    @for($i = 1; $i <= 5; $i++)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4">
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
-                                    <span class="text-indigo-600 font-bold">M{{ $i }}</span>
-                                </div>
-                                <div>
-                                    <p class="font-semibold">New Member {{ $i }}</p>
-                                    <p class="text-gray-500 text-sm">EMP{{ 200 + $i }}</p>
-                                </div>
+    <!-- Two Column Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Left Column: Recent Activities -->
+        <div class="space-y-6">
+            <!-- Pending Member Approvals -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Pending Member Approvals</h3>
+                        <p class="text-sm text-gray-500">Awaiting Chairman review</p>
+                    </div>
+                    <a href="{{ route('secretary.pending-approvals') }}" class="text-sm text-gray-900 font-medium hover:text-gray-700">
+                        View all →
+                    </a>
+                </div>
+
+                <div class="space-y-4">
+                    @php
+                        $pendingMembers = [
+                            ['name' => 'Michael Otieno', 'emp' => 'EMP011', 'dept' => 'Finance', 'days' => 2],
+                            ['name' => 'Susan Njeru', 'emp' => 'EMP012', 'dept' => 'Marketing', 'days' => 1],
+                            ['name' => 'David Kiprop', 'emp' => 'EMP013', 'dept' => 'IT', 'days' => 0],
+                        ];
+                    @endphp
+
+                    @foreach($pendingMembers as $member)
+                    <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                                <span class="text-gray-600">{{ substr($member['name'], 0, 1) }}</span>
                             </div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <p>{{ ['Finance', 'HR', 'IT', 'Operations', 'Sales'][$i-1] }}</p>
-                            <p class="text-gray-500 text-sm">Makamithi Enterprises</p>
-                        </td>
-                        <td class="px-6 py-4">
-                            <p>{{ now()->subDays($i*2)->format('d M Y') }}</p>
-                            <p class="text-gray-500 text-sm">{{ $i*2 }} days ago</p>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="px-3 py-1 rounded-full text-sm font-semibold 
-                                {{ $i % 3 == 0 ? 'bg-yellow-100 text-yellow-800' : 
-                                   ($i % 3 == 1 ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800') }}">
-                                {{ $i % 3 == 0 ? 'Pending' : ($i % 3 == 1 ? 'Active' : 'Verified') }}
+                            <div>
+                                <p class="font-medium text-gray-900">{{ $member['name'] }}</p>
+                                <p class="text-xs text-gray-500">{{ $member['emp'] }} • {{ $member['dept'] }}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                {{ $member['days'] == 0 ? 'Today' : $member['days'] . ' days ago' }}
                             </span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex space-x-2">
-                                <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold text-sm">
-                                    Activate
-                                </button>
-                                <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-sm">
-                                    View
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    @endfor
-                </tbody>
-            </table>
-        </div>
-    </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
 
-    <!-- Quick Actions -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-white rounded-xl shadow-md p-6">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">Communication Tasks</h3>
-            <div class="space-y-4">
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-center">
-                        <span class="text-blue-500 mr-3">📧</span>
-                        <span>Pending Emails</span>
+            <!-- Recent Assisted Loans -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Recent Assisted Loans</h3>
+                        <p class="text-sm text-gray-500">Applications you helped with</p>
                     </div>
-                    <span class="font-bold">12</span>
+                    <span class="text-sm text-gray-900 font-medium">
+                        Total: 24
+                    </span>
                 </div>
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-center">
-                        <span class="text-green-500 mr-3">📱</span>
-                        <span>SMS to Send</span>
+
+                <div class="space-y-4">
+                    @php
+                        $assistedLoans = [
+                            ['member' => 'John Doe', 'amount' => 150000, 'date' => '2 days ago', 'status' => 'approved'],
+                            ['member' => 'Jane Smith', 'amount' => 75000, 'date' => '1 day ago', 'status' => 'processing'],
+                            ['member' => 'Robert Johnson', 'amount' => 200000, 'date' => '3 days ago', 'status' => 'pending'],
+                        ];
+                    @endphp
+
+                    @foreach($assistedLoans as $loan)
+                    <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition">
+                        <div>
+                            <p class="font-medium text-gray-900">{{ $loan['member'] }}</p>
+                            <p class="text-sm text-gray-500">KES {{ number_format($loan['amount']) }}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium 
+                                {{ $loan['status'] == 'approved' ? 'bg-green-100 text-green-800' : 
+                                   ($loan['status'] == 'processing' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800') }}">
+                                {{ ucfirst($loan['status']) }}
+                            </span>
+                            <p class="text-xs text-gray-500 mt-1">{{ $loan['date'] }}</p>
+                        </div>
                     </div>
-                    <span class="font-bold">8</span>
+                    @endforeach
                 </div>
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-center">
-                        <span class="text-yellow-500 mr-3">📄</span>
-                        <span>Documents to Process</span>
-                    </div>
-                    <span class="font-bold">15</span>
-                </div>
-                <button class="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-lg font-semibold">
-                    Send Bulk Notification
-                </button>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-md p-6">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">Quick Secretary Actions</h3>
-            <div class="space-y-3">
-                <button class="w-full bg-purple-500 hover:bg-purple-600 text-white py-3 rounded-lg font-semibold flex items-center justify-center">
-                    📋 Meeting Minutes
+        <!-- Right Column: Upcoming Tasks & Communications -->
+        <div class="space-y-6">
+            <!-- Upcoming Tasks -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Today's Tasks</h3>
+                        <p class="text-sm text-gray-500">Your agenda for today</p>
+                    </div>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                        4 tasks
+                    </span>
+                </div>
+
+                <div class="space-y-4">
+                    @php
+                        $tasks = [
+                            ['task' => 'Follow up on pending member approvals with Chairman', 'time' => '9:00 AM', 'priority' => 'high'],
+                            ['task' => 'Prepare meeting agenda for next SACCO meeting', 'time' => '10:30 AM', 'priority' => 'medium'],
+                            ['task' => 'Send loan application notifications to 3 members', 'time' => '2:00 PM', 'priority' => 'high'],
+                            ['task' => 'Update member records for payroll changes', 'time' => '4:00 PM', 'priority' => 'low'],
+                        ];
+                    @endphp
+
+                    @foreach($tasks as $task)
+                    <div class="flex items-start p-3 hover:bg-gray-50 rounded-lg transition">
+                        <div class="flex-shrink-0 mt-1">
+                            <div class="w-3 h-3 rounded-full 
+                                {{ $task['priority'] == 'high' ? 'bg-red-500' : 
+                                   ($task['priority'] == 'medium' ? 'bg-yellow-500' : 'bg-green-500') }}">
+                            </div>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <p class="text-gray-900">{{ $task['task'] }}</p>
+                            <div class="flex justify-between items-center mt-1">
+                                <p class="text-xs text-gray-500">{{ $task['time'] }}</p>
+                                <button class="text-xs text-gray-900 font-medium hover:text-gray-700">
+                                    Mark done
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Quick Communications -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Quick Communications</h3>
+                    <p class="text-sm text-gray-500">Send notifications to members</p>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- SMS Notification -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-2">
+                                    <span class="text-green-600">📱</span>
+                                </div>
+                                <span class="font-medium text-gray-900">SMS Notification</span>
+                            </div>
+                            <span class="text-xs text-gray-500">Remaining: 98</span>
+                        </div>
+                        <textarea class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" 
+                                  rows="2" placeholder="Type your message here..."></textarea>
+                        <div class="flex justify-between items-center mt-3">
+                            <select class="text-sm border border-gray-300 rounded-lg px-2 py-1">
+                                <option>Select Members</option>
+                                <option>All Members</option>
+                                <option>Pending Approvals</option>
+                                <option>Loan Applicants</option>
+                            </select>
+                            <button class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition">
+                                Send SMS
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Email Notification -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+                                    <span class="text-blue-600">✉️</span>
+                                </div>
+                                <span class="font-medium text-gray-900">Email Notification</span>
+                            </div>
+                        </div>
+                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-2" 
+                               placeholder="Subject">
+                        <textarea class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" 
+                                  rows="2" placeholder="Email content..."></textarea>
+                        <div class="flex justify-end mt-3">
+                            <button class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition">
+                                Send Email
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+<!-- Communications Modal -->
+<div id="communicationsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-semibold text-gray-900">Send Communications</h3>
+                <button onclick="closeCommunications()" class="text-gray-500 hover:text-gray-700">
+                    ✕
                 </button>
-                <button class="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold flex items-center justify-center">
-                    👥 Member Directory
+            </div>
+            <p class="text-gray-500 text-sm mt-1">Send notifications to SACCO members</p>
+        </div>
+
+        <div class="p-6 space-y-6">
+            <!-- Communication Type -->
+            <div>
+                <h4 class="text-lg font-medium text-gray-900 mb-4">Select Communication Type</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition text-left group"
+                            onclick="selectCommType('sms')">
+                        <div class="flex items-center mb-2">
+                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3 group-hover:bg-green-200 transition">
+                                <span class="text-green-600">📱</span>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">SMS Notification</p>
+                                <p class="text-sm text-gray-500">Quick text messages</p>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-400">Ideal for urgent updates</p>
+                    </button>
+                    <button class="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition text-left group"
+                            onclick="selectCommType('email')">
+                        <div class="flex items-center mb-2">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3 group-hover:bg-blue-200 transition">
+                                <span class="text-blue-600">✉️</span>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Email Notification</p>
+                                <p class="text-sm text-gray-500">Detailed communications</p>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-400">For formal announcements</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recipient Selection -->
+            <div id="recipientSection" class="hidden">
+                <h4 class="text-lg font-medium text-gray-900 mb-4">Select Recipients</h4>
+                <div class="space-y-3">
+                    <div class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input type="checkbox" class="rounded border-gray-300">
+                        <span class="ml-3 font-medium text-gray-900">All Members (156)</span>
+                    </div>
+                    <div class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input type="checkbox" class="rounded border-gray-300">
+                        <span class="ml-3 font-medium text-gray-900">Pending Approvals (8)</span>
+                    </div>
+                    <div class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input type="checkbox" class="rounded border-gray-300">
+                        <span class="ml-3 font-medium text-gray-900">Active Loan Holders (24)</span>
+                    </div>
+                    <div class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input type="checkbox" class="rounded border-gray-300">
+                        <span class="ml-3 font-medium text-gray-900">Specific Department</span>
+                        <select class="ml-3 text-sm border border-gray-300 rounded-lg px-2 py-1">
+                            <option>Select Department</option>
+                            <option>Finance</option>
+                            <option>Operations</option>
+                            <option>HR</option>
+                            <option>IT</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message Content -->
+            <div id="messageSection" class="hidden">
+                <h4 class="text-lg font-medium text-gray-900 mb-4">Message Content</h4>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Subject (Email only)</label>
+                    <input type="text" id="messageSubject"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4"
+                           placeholder="Meeting announcement, loan approval, etc.">
+                    
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Message *</label>
+                    <textarea id="messageContent" rows="4"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                              placeholder="Type your message here..."></textarea>
+                    <p class="text-xs text-gray-400 mt-2" id="charCount">0/160 characters</p>
+                </div>
+
+                <!-- Template Suggestions -->
+                <div class="mt-4">
+                    <p class="text-sm text-gray-700 mb-2">Quick Templates:</p>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="useTemplate('meeting')" class="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+                            📅 Meeting Reminder
+                        </button>
+                        <button onclick="useTemplate('approval')" class="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+                            ✅ Loan Approved
+                        </button>
+                        <button onclick="useTemplate('payment')" class="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+                            💳 Payment Due
+                        </button>
+                        <button onclick="useTemplate('savings')" class="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+                            💰 Savings Update
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview & Send -->
+            <div id="previewSection" class="hidden">
+                <h4 class="text-lg font-medium text-gray-900 mb-4">Preview & Send</h4>
+                <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                    <p class="text-sm text-gray-600 mb-2">Preview:</p>
+                    <div class="bg-white p-3 rounded border">
+                        <p class="font-medium text-gray-900 mb-1" id="previewSubject"></p>
+                        <p class="text-gray-700" id="previewMessage"></p>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2" id="previewRecipients"></p>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex justify-between pt-6 border-t">
+                <button onclick="prevCommStep()" id="prevBtn" class="hidden px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition">
+                    ← Back
                 </button>
-                <button class="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-lg font-semibold flex items-center justify-center">
-                    📊 Reports Generation
+                <button onclick="nextCommStep()" id="nextBtn" class="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition">
+                    Next: Select Recipients →
                 </button>
-                <button class="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg font-semibold flex items-center justify-center">
-                    📁 Document Archive
+                <button onclick="sendCommunication()" id="sendBtn" class="hidden px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition">
+                    📤 Send Now
                 </button>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    // Communications Modal
+    let currentStep = 0;
+    let commType = '';
+
+    function openCommunications() {
+        document.getElementById('communicationsModal').classList.remove('hidden');
+        resetCommSteps();
+    }
+
+    function closeCommunications() {
+        document.getElementById('communicationsModal').classList.add('hidden');
+        resetCommSteps();
+    }
+
+    function resetCommSteps() {
+        currentStep = 0;
+        commType = '';
+        document.getElementById('recipientSection').classList.add('hidden');
+        document.getElementById('messageSection').classList.add('hidden');
+        document.getElementById('previewSection').classList.add('hidden');
+        document.getElementById('prevBtn').classList.add('hidden');
+        document.getElementById('sendBtn').classList.add('hidden');
+        document.getElementById('nextBtn').classList.remove('hidden');
+        document.getElementById('nextBtn').textContent = 'Next: Select Recipients →';
+    }
+
+    function selectCommType(type) {
+        commType = type;
+        nextCommStep();
+    }
+
+    function nextCommStep() {
+        currentStep++;
+        
+        if (currentStep === 1) {
+            document.getElementById('recipientSection').classList.remove('hidden');
+            document.getElementById('prevBtn').classList.remove('hidden');
+            document.getElementById('nextBtn').textContent = 'Next: Compose Message →';
+        } else if (currentStep === 2) {
+            document.getElementById('messageSection').classList.remove('hidden');
+            document.getElementById('nextBtn').textContent = 'Next: Preview & Send →';
+            // Update character count for SMS
+            if (commType === 'sms') {
+                document.getElementById('messageContent').addEventListener('input', function() {
+                    const count = this.value.length;
+                    document.getElementById('charCount').textContent = `${count}/160 characters`;
+                });
+            }
+        } else if (currentStep === 3) {
+            document.getElementById('previewSection').classList.remove('hidden');
+            document.getElementById('nextBtn').classList.add('hidden');
+            document.getElementById('sendBtn').classList.remove('hidden');
+            
+            // Update preview
+            document.getElementById('previewSubject').textContent = 
+                document.getElementById('messageSubject').value || '(No subject)';
+            document.getElementById('previewMessage').textContent = 
+                document.getElementById('messageContent').value;
+            document.getElementById('previewRecipients').textContent = 
+                'Will be sent to selected recipients';
+        }
+    }
+
+    function prevCommStep() {
+        currentStep--;
+        
+        if (currentStep === 0) {
+            document.getElementById('recipientSection').classList.add('hidden');
+            document.getElementById('prevBtn').classList.add('hidden');
+            document.getElementById('nextBtn').textContent = 'Next: Select Recipients →';
+        } else if (currentStep === 1) {
+            document.getElementById('messageSection').classList.add('hidden');
+            document.getElementById('previewSection').classList.add('hidden');
+            document.getElementById('sendBtn').classList.add('hidden');
+            document.getElementById('nextBtn').classList.remove('hidden');
+            document.getElementById('nextBtn').textContent = 'Next: Compose Message →';
+        } else if (currentStep === 2) {
+            document.getElementById('previewSection').classList.add('hidden');
+            document.getElementById('sendBtn').classList.add('hidden');
+            document.getElementById('nextBtn').classList.remove('hidden');
+            document.getElementById('nextBtn').textContent = 'Next: Preview & Send →';
+        }
+    }
+
+    function useTemplate(type) {
+        const templates = {
+            'meeting': 'Dear member, please be reminded of our SACCO meeting on [Date] at [Time] in [Venue]. Your attendance is important.',
+            'approval': 'Congratulations! Your loan application has been approved. Amount: KES [Amount]. Please visit the office for further instructions.',
+            'payment': 'Reminder: Your loan payment of KES [Amount] is due on [Date]. Please ensure timely payment to avoid penalties.',
+            'savings': 'Your current savings balance is KES [Amount]. Thank you for your consistent contributions to the SACCO.'
+        };
+        
+        document.getElementById('messageContent').value = templates[type] || '';
+        
+        // Update character count
+        if (commType === 'sms') {
+            const count = document.getElementById('messageContent').value.length;
+            document.getElementById('charCount').textContent = `${count}/160 characters`;
+        }
+    }
+
+    function sendCommunication() {
+        const message = document.getElementById('messageContent').value;
+        
+        if (!message.trim()) {
+            alert('Please enter a message');
+            return;
+        }
+        
+        if (commType === 'sms' && message.length > 160) {
+            alert('SMS messages must be 160 characters or less');
+            return;
+        }
+        
+        // Show success message
+        alert(`${commType.toUpperCase()} notification sent successfully!`);
+        closeCommunications();
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('communicationsModal');
+        if (event.target == modal) {
+            closeCommunications();
+        }
+    }
+
+    // Task completion
+    document.querySelectorAll('[onclick*="Mark done"]').forEach(button => {
+        button.addEventListener('click', function() {
+            const taskItem = this.closest('.flex.items-start');
+            taskItem.style.opacity = '0.5';
+            this.textContent = '✓ Done';
+            this.disabled = true;
+            this.classList.remove('hover:text-gray-700');
+        });
+    });
+</script>
+
+<style>
+    .hover-lift:hover {
+        transform: translateY(-2px);
+        transition: transform 0.2s ease;
+    }
+    
+    .task-priority-high {
+        border-left: 4px solid #ef4444;
+    }
+    
+    .task-priority-medium {
+        border-left: 4px solid #f59e0b;
+    }
+    
+    .task-priority-low {
+        border-left: 4px solid #10b981;
+    }
+</style>
 @endsection
