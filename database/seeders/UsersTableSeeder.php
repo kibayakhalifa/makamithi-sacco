@@ -27,13 +27,6 @@ class UsersTableSeeder extends Seeder
                 'employee_number' => 'EMP002',
             ],
             [
-                'name' => 'Treasurer Wanjiru',
-                'email' => 'treasurer@makamithi.com',
-                'password' => Hash::make('password'),
-                'role' => 'treasurer',
-                'employee_number' => 'EMP003',
-            ],
-            [
                 'name' => 'Secretary Kamau',
                 'email' => 'secretary@makamithi.com',
                 'password' => Hash::make('password'),

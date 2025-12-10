@@ -4,166 +4,217 @@
 
 @section('content')
 <div class="space-y-6 font-sans">
-    <!-- Header Banner -->
-    <div class="bg-white/5 backdrop-blur-md rounded-2xl p-6 shadow-sm border border-gray-200">
-        <div class="flex flex-col md:flex-row justify-between items-center">
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-2xl p-6 border border-green-200 shadow-sm">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">Payment Processing</h1>
-                <p class="text-gray-500 mt-2">Process loan disbursements, withdrawals, and other payments</p>
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+                        <span class="text-orange-700 font-bold text-lg">1</span>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-900">Payment Processing</h1>
+                </div>
+                <p class="text-green-800">Process loan disbursements, savings withdrawals, and expenses</p>
             </div>
-            <div class="text-center md:text-right mt-4 md:mt-0">
-                <p class="text-gray-400 text-sm">Pending Payments</p>
-                <p class="text-4xl font-bold text-gray-900">KES 450,000</p>
-                <p class="text-gray-400 text-xs mt-1">15 payments to process</p>
+            <div class="text-center md:text-right">
+                <div class="bg-white rounded-xl px-4 py-3 shadow-sm">
+                    <p class="text-green-600 text-sm font-medium">Pending Payments</p>
+                    <p class="text-4xl font-bold text-gray-900">KES {{ number_format($paymentStats['total_pending'], 2) }}</p>
+                    <p class="text-gray-500 text-xs mt-1">{{ $paymentStats['pending_count'] }} payments to process</p>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Payment Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition">
             <div class="flex items-center justify-between">
                 <div>
-                    <h3 class="text-gray-500 text-sm font-medium uppercase">Pending Cheques</h3>
-                    <p class="text-3xl font-bold text-gray-900 mt-2">8</p>
-                    <p class="text-gray-600 text-sm mt-1">To be issued</p>
+                    <h3 class="text-gray-500 text-xs uppercase tracking-wider font-medium">Loan Disbursements</h3>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">{{ $pendingDisbursements->count() }}</p>
+                    <p class="text-gray-500 text-sm mt-1">KES {{ number_format($pendingDisbursements->sum('amount'), 2) }}</p>
                 </div>
-                <div class="bg-gray-100 p-3 rounded-full">
-                    <span class="text-gray-600 text-xl">🏦</span>
+                <div class="bg-orange-50 p-3 rounded-xl">
+                    <span class="text-orange-600 text-xl">🏦</span>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition">
+        <div class="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition">
             <div class="flex items-center justify-between">
                 <div>
-                    <h3 class="text-gray-500 text-sm font-medium uppercase">Bank Transfers</h3>
-                    <p class="text-3xl font-bold text-gray-900 mt-2">5</p>
-                    <p class="text-gray-600 text-sm mt-1">Awaiting transfer</p>
+                    <h3 class="text-gray-500 text-xs uppercase tracking-wider font-medium">Withdrawals</h3>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">{{ $pendingWithdrawals->count() }}</p>
+                    <p class="text-gray-500 text-sm mt-1">KES {{ number_format($pendingWithdrawals->sum('amount'), 2) }}</p>
                 </div>
-                <div class="bg-gray-100 p-3 rounded-full">
-                    <span class="text-gray-600 text-xl">💳</span>
+                <div class="bg-green-50 p-3 rounded-xl">
+                    <span class="text-green-600 text-xl">💰</span>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition">
+        <div class="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition">
             <div class="flex items-center justify-between">
                 <div>
-                    <h3 class="text-gray-500 text-sm font-medium uppercase">Processed Today</h3>
-                    <p class="text-3xl font-bold text-gray-900 mt-2">KES 120,000</p>
-                    <p class="text-gray-600 text-sm mt-1">3 payments</p>
+                    <h3 class="text-gray-500 text-xs uppercase tracking-wider font-medium">Expenses</h3>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">{{ $pendingExpenses->count() }}</p>
+                    <p class="text-gray-500 text-sm mt-1">KES {{ number_format($pendingExpenses->sum('amount'), 2) }}</p>
                 </div>
-                <div class="bg-gray-100 p-3 rounded-full">
-                    <span class="text-gray-600 text-xl">✅</span>
+                <div class="bg-orange-50 p-3 rounded-xl">
+                    <span class="text-orange-600 text-xl">💸</span>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition">
+        <div class="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition">
             <div class="flex items-center justify-between">
                 <div>
-                    <h3 class="text-gray-500 text-sm font-medium uppercase">Sacco Balance</h3>
-                    <p class="text-3xl font-bold text-gray-900 mt-2">KES 12.4M</p>
-                    <p class="text-gray-600 text-sm mt-1">Available funds</p>
+                    <h3 class="text-gray-500 text-xs uppercase tracking-wider font-medium">Today's Processed</h3>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">KES {{ number_format($paymentStats['today_completed'], 2) }}</p>
+                    <p class="text-gray-500 text-sm mt-1">Completed payments</p>
                 </div>
-                <div class="bg-gray-100 p-3 rounded-full">
-                    <span class="text-gray-600 text-xl">💰</span>
+                <div class="bg-green-50 p-3 rounded-xl">
+                    <span class="text-green-600 text-xl">✅</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Payment Processing Tabs -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <!-- Tabs -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <div class="border-b border-gray-200">
-            <nav class="flex overflow-x-auto -mb-px">
-                <button id="loanDisbursementTab" class="px-6 py-4 font-medium border-b-2 border-gray-900 text-gray-900 whitespace-nowrap">
-                    🏦 Loan Disbursements (6)
+            <nav class="flex overflow-x-auto">
+                <button onclick="switchTab('disbursements')" id="disbursementsTab" 
+                        class="px-6 py-4 font-medium border-b-2 border-orange-600 text-orange-700 whitespace-nowrap">
+                    🏦 Loan Disbursements ({{ $pendingDisbursements->count() }})
                 </button>
-                <button id="withdrawalTab" class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
-                    💰 Savings Withdrawals (4)
+                <button onclick="switchTab('withdrawals')" id="withdrawalsTab"
+                        class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
+                    💰 Savings Withdrawals ({{ $pendingWithdrawals->count() }})
                 </button>
-                
-                <button id="expenseTab" class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
-                    💸 Expenses (3)
+                <button onclick="switchTab('expenses')" id="expensesTab"
+                        class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
+                    💸 Expenses ({{ $pendingExpenses->count() }})
                 </button>
-                <button id="completedTab" class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
-                    ✅ Completed (24)
+                <button onclick="switchTab('completed')" id="completedTab"
+                        class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
+                    ✅ Completed ({{ $recentPayments->count() }})
                 </button>
             </nav>
         </div>
 
-        <!-- Loan Disbursements Content -->
-        <div id="loanDisbursementContent" class="p-6">
+        <!-- Loan Disbursements -->
+        <div id="disbursementsContent" class="p-6">
+            @if($pendingDisbursements->count() > 0)
             <div class="overflow-x-auto">
-                <table class="w-full">
+                <table class="w-full border-collapse">
                     <thead>
                         <tr class="bg-gray-50">
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Loan Details</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Beneficiary</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Approval Date</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment Method</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Loan Details</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Member</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Approval Date</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200">
-                        @php
-                            $disbursements = [
-                                ['id' => 1, 'loan' => 'LN-00123', 'amount' => 150000, 'name' => 'John Mule', 'emp' => 'EMP001', 'date' => 'Today', 'method' => 'Cheque', 'status' => 'Ready'],
-                                ['id' => 2, 'loan' => 'LN-00124', 'amount' => 200000, 'name' => 'Jane Wanjiru', 'emp' => 'EMP045', 'date' => 'Today', 'method' => 'Bank Transfer', 'status' => 'Ready'],
-                                ['id' => 3, 'loan' => 'LN-00125', 'amount' => 75000, 'name' => 'Peter Kamau', 'emp' => 'EMP023', 'date' => 'Yesterday', 'method' => 'Cheque', 'status' => 'Pending'],
-                                ['id' => 4, 'loan' => 'LN-00126', 'amount' => 300000, 'name' => 'Mary Njeri', 'emp' => 'EMP067', 'date' => '2 days ago', 'method' => 'Bank Transfer', 'status' => 'Ready'],
-                                ['id' => 5, 'loan' => 'LN-00127', 'amount' => 120000, 'name' => 'James Otieno', 'emp' => 'EMP089', 'date' => '2 days ago', 'method' => 'Cheque', 'status' => 'Ready'],
-                            ];
-                        @endphp
-                        
-                        @foreach($disbursements as $payment)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4">
-                                <p class="font-bold text-gray-900">KES {{ number_format($payment['amount'], 2) }}</p>
-                                <p class="text-gray-500 text-sm">Loan #{{ $payment['loan'] }}</p>
-                                <p class="text-gray-500 text-xs">5% fixed interest</p>
+                    <tbody>
+                        @foreach($pendingDisbursements as $loan)
+                        <tr class="hover:bg-gray-50 border-b">
+                            <td class="px-4 py-4">
+                                <p class="font-bold text-gray-900">KES {{ number_format($loan->amount, 2) }}</p>
+                                <p class="text-gray-500 text-sm">#{{ $loan->loan_number }}</p>
+                                <p class="text-gray-500 text-xs">5% interest • {{ $loan->period_months }} months</p>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-4 py-4">
                                 <div class="flex items-center">
                                     <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
                                         <span class="text-gray-700 font-medium">
-                                            {{ strtoupper(substr($payment['name'], 0, 1)) }}
+                                            {{ strtoupper(substr($loan->user->name, 0, 1)) }}
                                         </span>
                                     </div>
                                     <div>
-                                        <p class="font-medium text-gray-900">{{ $payment['name'] }}</p>
-                                        <p class="text-gray-500 text-sm">{{ $payment['emp'] }}</p>
+                                        <p class="font-medium text-gray-900">{{ $loan->user->name }}</p>
+                                        <p class="text-gray-500 text-sm">{{ $loan->user->employee_number }}</p>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4">
-                                <p class="text-gray-900">{{ $payment['date'] }}</p>
-                                <p class="text-gray-500 text-xs">By Chairman + Committee</p>
+                            <td class="px-4 py-4">
+                                <p class="text-gray-900">{{ $loan->approved_date?->format('d M Y') }}</p>
+                                <p class="text-gray-500 text-xs">By {{ $loan->approvedBy->name ?? 'Committee' }}</p>
                             </td>
-                            <td class="px-6 py-4">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
-                                    {{ $payment['method'] === 'Cheque' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800' }}">
-                                    {{ $payment['method'] }}
-                                </span>
+                            <td class="px-4 py-4">
+                                <div class="flex gap-2">
+                                    <button onclick="processLoan({{ $loan->id }})" 
+                                            class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                                        Disburse
+                                    </button>
+                                    <a href="{{ route('loans.show', $loan->id) }}" 
+                                       class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium">
+                                        View
+                                    </a>
+                                </div>
                             </td>
-                            <td class="px-6 py-4">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
-                                    {{ $payment['status'] === 'Ready' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                                    {{ $payment['status'] }}
-                                </span>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @else
+            <div class="text-center py-12">
+                <div class="text-4xl mb-4">✅</div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No Pending Disbursements</h3>
+                <p class="text-gray-500">All approved loans have been disbursed.</p>
+            </div>
+            @endif
+        </div>
+
+        <!-- Withdrawals -->
+        <div id="withdrawalsContent" class="p-6 hidden">
+            @if($pendingWithdrawals->count() > 0)
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Withdrawal Details</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Member</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Request Date</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($pendingWithdrawals as $withdrawal)
+                        <tr class="hover:bg-gray-50 border-b">
+                            <td class="px-4 py-4">
+                                <p class="font-bold text-gray-900">KES {{ number_format($withdrawal->amount, 2) }}</p>
+                                <p class="text-gray-500 text-sm">#{{ $withdrawal->transaction_ref }}</p>
+                                <p class="text-gray-500 text-xs">{{ $withdrawal->description }}</p>
                             </td>
-                            <td class="px-6 py-4">
-                                <div class="flex space-x-2">
-                                    <button onclick="processPayment({{ $payment['id'] }})" 
-                                            class="bg-gray-900 hover:bg-gray-800 text-white px-3 py-1.5 rounded text-sm font-medium">
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+                                        <span class="text-gray-700 font-medium">
+                                            {{ strtoupper(substr($withdrawal->user->name, 0, 1)) }}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">{{ $withdrawal->user->name }}</p>
+                                        <p class="text-gray-500 text-sm">Savings: KES {{ number_format($withdrawal->user->savings->available_savings ?? 0, 2) }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4">
+                                <p class="text-gray-900">{{ $withdrawal->created_at->format('d M Y') }}</p>
+                            </td>
+                            <td class="px-4 py-4">
+                                <div class="flex gap-2">
+                                    <button onclick="processWithdrawal({{ $withdrawal->id }})" 
+                                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
                                         Process
                                     </button>
-                                    <button onclick="viewPaymentDetails({{ $payment['id'] }})" 
-                                            class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1.5 rounded text-sm font-medium">
-                                        View
+                                    <button onclick="rejectWithdrawal({{ $withdrawal->id }})" 
+                                            class="bg-red-100 hover:bg-red-200 text-red-800 px-4 py-2 rounded-lg text-sm font-medium">
+                                        Reject
                                     </button>
                                 </div>
                             </td>
@@ -172,291 +223,321 @@
                     </tbody>
                 </table>
             </div>
-            
-            <div class="mt-6 flex justify-between items-center">
-                <p class="text-gray-500 text-sm">Showing 5 of 6 loan disbursements</p>
-                <button class="bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded-lg font-medium">
-                    Load More
+            @else
+            <div class="text-center py-12">
+                <div class="text-4xl mb-4">💰</div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No Pending Withdrawals</h3>
+                <p class="text-gray-500">All withdrawal requests have been processed.</p>
+            </div>
+            @endif
+        </div>
+
+        <!-- Expenses -->
+        <div id="expensesContent" class="p-6 hidden">
+            @if($pendingExpenses->count() > 0)
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Expense Details</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Category</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Requested By</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($pendingExpenses as $expense)
+                        <tr class="hover:bg-gray-50 border-b">
+                            <td class="px-4 py-4">
+                                <p class="font-bold text-gray-900">KES {{ number_format($expense->amount, 2) }}</p>
+                                <p class="text-gray-500 text-sm">#{{ $expense->expense_number }}</p>
+                                <p class="text-gray-500 text-xs">{{ $expense->description }}</p>
+                            </td>
+                            <td class="px-4 py-4">
+                                <span class="px-3 py-1 rounded-full text-xs font-medium
+                                    {{ $expense->category->color_class ?? 'bg-gray-100 text-gray-800' }}">
+                                    {{ $expense->category->name ?? 'Uncategorized' }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-4">
+                                <p class="font-medium text-gray-900">{{ $expense->requestedBy->name ?? 'N/A' }}</p>
+                                <p class="text-gray-500 text-xs">{{ $expense->created_at->format('d M Y') }}</p>
+                            </td>
+                            <td class="px-4 py-4">
+                                <div class="flex gap-2">
+                                    <button onclick="payExpense({{ $expense->id }})" 
+                                            class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                                        Pay
+                                    </button>
+                                    <a href="{{ route('expenses.show', $expense->id) }}" 
+                                       class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium">
+                                        View
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @else
+            <div class="text-center py-12">
+                <div class="text-4xl mb-4">💸</div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No Pending Expenses</h3>
+                <p class="text-gray-500">All approved expenses have been paid.</p>
+            </div>
+            @endif
+        </div>
+
+        <!-- Completed Payments -->
+        <div id="completedContent" class="p-6 hidden">
+            @if($recentPayments->count() > 0)
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Payment Details</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Type</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Member/Beneficiary</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Date</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($recentPayments as $payment)
+                        <tr class="hover:bg-gray-50 border-b">
+                            <td class="px-4 py-4">
+                                <p class="font-bold text-gray-900">KES {{ number_format($payment->amount, 2) }}</p>
+                                <p class="text-gray-500 text-sm">#{{ $payment->payment_ref }}</p>
+                                <p class="text-gray-500 text-xs">{{ $payment->payment_method }}</p>
+                            </td>
+                            <td class="px-4 py-4">
+                                @if($payment->loan_id)
+                                <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Loan</span>
+                                @elseif($payment->savings_transaction_id)
+                                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Withdrawal</span>
+                                @else
+                                <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">Expense</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-4">
+                                @if($payment->loan && $payment->loan->user)
+                                <p class="font-medium text-gray-900">{{ $payment->loan->user->name }}</p>
+                                <p class="text-gray-500 text-xs">{{ $payment->loan->user->employee_number }}</p>
+                                @elseif($payment->savingsTransaction && $payment->savingsTransaction->user)
+                                <p class="font-medium text-gray-900">{{ $payment->savingsTransaction->user->name }}</p>
+                                <p class="text-gray-500 text-xs">Savings Withdrawal</p>
+                                @else
+                                <p class="text-gray-500 text-sm">N/A</p>
+                                @endif
+                            </td>
+                            <td class="px-4 py-4">
+                                <p class="text-gray-900">{{ $payment->payment_date->format('d M Y') }}</p>
+                                <p class="text-gray-500 text-xs">{{ $payment->payment_date->format('h:i A') }}</p>
+                            </td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Completed</span>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @else
+            <div class="text-center py-12">
+                <div class="text-4xl mb-4">📋</div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No Recent Payments</h3>
+                <p class="text-gray-500">Payment history will appear here.</p>
+            </div>
+            @endif
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">Bulk Processing</h3>
+            <div class="space-y-3">
+                <button onclick="processAllCheques()" 
+                        class="w-full bg-orange-50 hover:bg-orange-100 text-orange-800 py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+                    🏦 Process All Cheques ({{ $pendingDisbursements->count() }})
+                </button>
+                <button onclick="processAllWithdrawals()" 
+                        class="w-full bg-green-50 hover:bg-green-100 text-green-800 py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+                    💰 Process All Withdrawals ({{ $pendingWithdrawals->count() }})
+                </button>
+                <button onclick="uploadPayroll()" 
+                        class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+                    📄 Upload Payroll Deductions
                 </button>
             </div>
         </div>
 
-        <!-- Other Tabs Content (Hidden by default) -->
-        <div id="withdrawalContent" class="p-6 hidden">
-            <div class="text-center py-8">
-                <div class="text-4xl mb-4">💰</div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Savings Withdrawals</h3>
-                <p class="text-gray-500">No pending withdrawal requests at the moment.</p>
-            </div>
-        </div>
-
-        
-
-        <div id="expenseContent" class="p-6 hidden">
-            <div class="text-center py-8">
-                <div class="text-4xl mb-4">💸</div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Expenses</h3>
-                <p class="text-gray-500">No expense approvals pending.</p>
-            </div>
-        </div>
-
-        <div id="completedContent" class="p-6 hidden">
-            <div class="text-center py-8">
-                <div class="text-4xl mb-4">✅</div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Completed Payments</h3>
-                <p class="text-gray-500">View completed payment history.</p>
+        <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">Payment Reports</h3>
+            <div class="space-y-3">
+                <button onclick="generatePaymentReport('daily')" 
+                        class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm flex justify-between items-center">
+                    <span>📊 Daily Payment Summary</span>
+                    <span class="text-gray-400">→</span>
+                </button>
+                <button onclick="generatePaymentReport('monthly')" 
+                        class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm flex justify-between items-center">
+                    <span>📈 Monthly Payment Report</span>
+                    <span class="text-gray-400">→</span>
+                </button>
+                <button onclick="exportPaymentHistory()" 
+                        class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm flex justify-between items-center">
+                    <span>💾 Export Payment History</span>
+                    <span class="text-gray-400">→</span>
+                </button>
             </div>
         </div>
     </div>
 
-    
-
-<!-- Processing Confirmation Modal -->
-<div id="processingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
-    <div class="bg-white rounded-xl p-6 max-w-md mx-4">
-        <div class="text-center">
-            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span class="text-green-600 text-2xl">✅</span>
-            </div>
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">Payment Processed</h3>
-            <p class="text-gray-600 mb-6" id="processingMessage">Payment has been successfully processed.</p>
-            <button onclick="closeProcessingModal()" 
-                    class="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 rounded-lg font-medium">
-                Close
-            </button>
-        </div>
-    </div>
 </div>
 
-<!-- JavaScript for Payment Processing -->
+<!-- JavaScript -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Tab switching
-    const tabs = {
-        loan: { 
-            tab: document.getElementById('loanDisbursementTab'), 
-            content: document.getElementById('loanDisbursementContent') 
-        },
-        withdrawal: { 
-            tab: document.getElementById('withdrawalTab'), 
-            content: document.getElementById('withdrawalContent') 
-        },
-        refund: { 
-            tab: document.getElementById('refundTab'), 
-            content: document.getElementById('refundContent') 
-        },
-        expense: { 
-            tab: document.getElementById('expenseTab'), 
-            content: document.getElementById('expenseContent') 
-        },
-        completed: { 
-            tab: document.getElementById('completedTab'), 
-            content: document.getElementById('completedContent') 
-        }
-    };
+// Tab switching
+function switchTab(tabName) {
+    // Hide all content
+    document.getElementById('disbursementsContent').classList.add('hidden');
+    document.getElementById('withdrawalsContent').classList.add('hidden');
+    document.getElementById('expensesContent').classList.add('hidden');
+    document.getElementById('completedContent').classList.add('hidden');
     
-    function activateTab(activeTab) {
-        // Deactivate all tabs
-        Object.values(tabs).forEach(({tab, content}) => {
-            if (tab && content) {
-                tab.classList.remove('border-b-2', 'border-gray-900', 'text-gray-900');
-                tab.classList.add('text-gray-500');
-                content.classList.add('hidden');
+    // Remove active from all tabs
+    document.getElementById('disbursementsTab').classList.remove('border-b-2', 'border-orange-600', 'text-orange-700');
+    document.getElementById('disbursementsTab').classList.add('text-gray-500');
+    document.getElementById('withdrawalsTab').classList.remove('border-b-2', 'border-orange-600', 'text-orange-700');
+    document.getElementById('withdrawalsTab').classList.add('text-gray-500');
+    document.getElementById('expensesTab').classList.remove('border-b-2', 'border-orange-600', 'text-orange-700');
+    document.getElementById('expensesTab').classList.add('text-gray-500');
+    document.getElementById('completedTab').classList.remove('border-b-2', 'border-orange-600', 'text-orange-700');
+    document.getElementById('completedTab').classList.add('text-gray-500');
+    
+    // Show selected content
+    document.getElementById(tabName + 'Content').classList.remove('hidden');
+    
+    // Activate selected tab
+    document.getElementById(tabName + 'Tab').classList.add('border-b-2', 'border-orange-600', 'text-orange-700');
+    document.getElementById(tabName + 'Tab').classList.remove('text-gray-500');
+}
+
+// Payment processing functions
+function processLoan(loanId) {
+    if (confirm('Process loan disbursement? This will issue a cheque.')) {
+        // Show cheque issuance modal or redirect
+        window.location.href = `/treasurer/loans/${loanId}/issue-cheque`;
+    }
+}
+
+function processWithdrawal(transactionId) {
+    if (confirm('Process this savings withdrawal?')) {
+        // AJAX call to process withdrawal
+        fetch(`/treasurer/withdrawals/${transactionId}/process`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Withdrawal processed successfully!');
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
             }
         });
-        
-        // Activate selected tab
-        if (tabs[activeTab].tab && tabs[activeTab].content) {
-            tabs[activeTab].tab.classList.add('border-b-2', 'border-gray-900', 'text-gray-900');
-            tabs[activeTab].tab.classList.remove('text-gray-500');
-            tabs[activeTab].content.classList.remove('hidden');
-        }
     }
-    
-    // Add click events to tabs
-    Object.entries(tabs).forEach(([key, {tab}]) => {
-        if (tab) {
-            tab.addEventListener('click', () => activateTab(key));
-        }
-    });
-    
-    // Select all checkbox
-    const selectAll = document.getElementById('selectAllPayments');
-    if (selectAll) {
-        selectAll.addEventListener('change', function() {
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]:not(#selectAllPayments)');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
-            });
+}
+
+function rejectWithdrawal(transactionId) {
+    const reason = prompt('Reason for rejection:');
+    if (reason) {
+        // AJAX call to reject withdrawal
+        fetch(`/treasurer/withdrawals/${transactionId}/reject`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ reason: reason })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Withdrawal rejected.');
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
         });
     }
-});
-
-// Modal functions
-function viewPaymentDetails(paymentId) {
-    const paymentDetails = document.getElementById('paymentDetails');
-    
-    // Mock payment data
-    const paymentData = {
-        1: {
-            loan: 'LN-00123',
-            amount: 150000,
-            name: 'John Mule',
-            emp: 'EMP001',
-            date: 'Today',
-            method: 'Cheque',
-            status: 'Ready',
-            interest: 'KES 7,500 (5% fixed)',
-            total: 'KES 157,500',
-            monthly: 'KES 6,562.50',
-            period: '24 months',
-            purpose: 'School Fees',
-            account: 'Equity Bank • 123-456-789',
-            committee: 'Chairman + Secretary'
-        }
-    };
-    
-    const payment = paymentData[paymentId] || paymentData[1];
-    
-    paymentDetails.innerHTML = `
-        <div class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <h4 class="font-semibold text-gray-700 mb-2">Payment Information</h4>
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <p class="font-bold text-2xl text-gray-900">KES ${payment.amount.toLocaleString()}</p>
-                        <p class="text-gray-600">Loan #${payment.loan}</p>
-                        <p class="text-gray-600">Method: ${payment.method}</p>
-                        <p class="text-gray-600">Status: <span class="font-medium">${payment.status}</span></p>
-                    </div>
-                </div>
-                
-                <div>
-                    <h4 class="font-semibold text-gray-700 mb-2">Beneficiary</h4>
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <p class="font-bold text-gray-900">${payment.name}</p>
-                        <p class="text-gray-600">${payment.emp} • Finance Department</p>
-                        <p class="text-gray-600">Account: ${payment.account}</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <p class="text-sm text-gray-600">Loan Details</p>
-                    <p class="text-lg font-bold text-gray-900">${payment.purpose}</p>
-                    <p class="text-sm text-gray-600">${payment.period} • ${payment.monthly}/month</p>
-                </div>
-                
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <p class="text-sm text-gray-600">Approval</p>
-                    <p class="text-lg font-bold text-gray-900">${payment.committee}</p>
-                    <p class="text-sm text-gray-600">Approved: ${payment.date}</p>
-                </div>
-            </div>
-            
-            <div>
-                <h4 class="font-semibold text-gray-700 mb-2">Payment Instructions</h4>
-                <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500">
-                    <p class="text-yellow-800 text-sm">
-                        ⚠️ Please ensure:
-                        <ul class="list-disc list-inside mt-2 space-y-1">
-                            <li>Cheque is signed by both signatories</li>
-                            <li>Payment voucher is attached</li>
-                            <li>Member acknowledgment form is ready</li>
-                            <li>Update system records after payment</li>
-                        </ul>
-                    </p>
-                </div>
-            </div>
-            
-            <div class="flex space-x-4">
-                <button onclick="confirmPayment(${paymentId})" class="flex-1 bg-gray-900 hover:bg-gray-800 text-white py-3 rounded-lg font-medium">
-                    ✅ Mark as Processed
-                </button>
-                <button onclick="printVoucher(${paymentId})" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 rounded-lg font-medium">
-                    🖨️ Print Voucher
-                </button>
-                <button onclick="closePaymentModal()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 rounded-lg font-medium">
-                    Cancel
-                </button>
-            </div>
-        </div>
-    `;
-    
-    document.getElementById('paymentModal').classList.remove('hidden');
 }
 
-function closePaymentModal() {
-    document.getElementById('paymentModal').classList.add('hidden');
-}
-
-function closeProcessingModal() {
-    document.getElementById('processingModal').classList.add('hidden');
-}
-
-function processPayment(paymentId) {
-    const paymentType = prompt('Enter payment reference/cheque number:');
-    if (paymentType) {
-        showProcessingMessage(`Payment #${paymentId} processed successfully. Reference: ${paymentType}`);
-        // In real app, would make API call here
+function payExpense(expenseId) {
+    // Show payment modal
+    const amount = prompt('Enter payment amount:');
+    if (amount && !isNaN(amount)) {
+        fetch(`/treasurer/expenses/${expenseId}/pay`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ amount: parseFloat(amount) })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Expense paid successfully!');
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        });
     }
 }
 
-function confirmPayment(paymentId) {
-    if (confirm('Confirm that this payment has been processed?')) {
-        showProcessingMessage(`Payment #${paymentId} marked as completed and records updated.`);
-        closePaymentModal();
+// Bulk processing
+function processAllCheques() {
+    if (confirm(`Issue cheques for all ${document.querySelectorAll('#disbursementsContent tr').length - 1} pending loans?`)) {
+        // Bulk processing logic
+        alert('Processing all cheques...');
+        // AJAX call here
     }
 }
 
-function showProcessingMessage(message) {
-    document.getElementById('processingMessage').textContent = message;
-    document.getElementById('processingModal').classList.remove('hidden');
-}
-
-function printVoucher(paymentId) {
-    alert(`Printing voucher for payment #${paymentId}...`);
-    // In real app, would generate PDF
-}
-
-function processBulkCheques() {
-    if (confirm('Issue cheques for all selected payments?')) {
-        showProcessingMessage('Cheques issued for 4 payments. Total: KES 670,000');
+function processAllWithdrawals() {
+    const count = document.querySelectorAll('#withdrawalsContent tr').length - 1;
+    if (count > 0 && confirm(`Process all ${count} withdrawal requests?`)) {
+        alert('Processing all withdrawals...');
+        // AJAX call here
     }
 }
 
-function processBulkTransfers() {
-    if (confirm('Process bank transfers for all selected payments?')) {
-        showProcessingMessage('Bank transfers initiated for 4 payments.');
+function uploadPayroll() {
+    window.location.href = '/treasurer/payroll/upload';
+}
+
+// Reports
+function generatePaymentReport(type) {
+    window.location.href = `/treasurer/reports/payments/${type}`;
+}
+
+function exportPaymentHistory() {
+    if (confirm('Export payment history to Excel?')) {
+        window.location.href = '/treasurer/payments/export';
     }
 }
 
-function markAsCompleted() {
-    if (confirm('Mark all selected payments as completed?')) {
-        showProcessingMessage('4 payments marked as completed.');
-    }
-}
-
-function exportPayments() {
-    alert('Exporting payment data to Excel...');
-}
-
-function checkBankBalance() {
-    showProcessingMessage('Bank balance refreshed. Current: KES 12,450,000.00');
-}
-
-// Close modal when clicking outside
-document.getElementById('paymentModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closePaymentModal();
-    }
-});
-
-document.getElementById('processingModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeProcessingModal();
-    }
+// Initialize first tab as active
+document.addEventListener('DOMContentLoaded', function() {
+    switchTab('disbursements');
 });
 </script>
 @endsection
