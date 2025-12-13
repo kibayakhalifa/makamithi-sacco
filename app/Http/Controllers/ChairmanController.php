@@ -232,4 +232,151 @@ class ChairmanController extends Controller
             'by_status' => $membersByStatus,
         ];
     }
+
+    // ============ LOAN APPROVALS ============
+
+    /**
+     * Chairman dashboard overview
+     */
+    public function dashboard()
+    {
+        $stats = [
+            'pending_members' => User::where('sacco_status', 'pending')->count(),
+            'pending_loans' => Loan::where('status', 'pending')->count(),
+            'pending_approvals' => User::where('sacco_status', 'pending')->count() + Loan::where('status', 'pending')->count(),
+            'approved_this_month' => Loan::where('status', 'approved')
+                ->whereMonth('approved_date', now()->month)
+                ->whereYear('approved_date', now()->year)
+                ->count(),
+            'total_members' => User::where('sacco_status', 'active')->count(),
+            'active_loans' => Loan::whereIn('status', ['active', 'disbursed'])->count(),
+            'total_disbursed' => Loan::whereIn('status', ['active', 'disbursed'])->sum('amount'),
+        ];
+
+        // Get pending members for approval
+        $pendingMembers = User::where('sacco_status', 'pending')
+            ->with('memberApproval.submittedBy')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        // Get pending loans for approval
+        $pendingLoans = Loan::where('status', 'pending')
+            ->with('user', 'user.savings')
+            ->orderBy('created_at', 'asc')
+            ->take(5)
+            ->get();
+
+        return view('chairman.dashboard', compact('stats', 'pendingMembers', 'pendingLoans'));
+    }
+
+    /**
+     * Show loan approvals dashboard
+     */
+    public function loanApprovals()
+    {
+        $stats = [
+            'pending_loans' => Loan::where('status', 'pending')->count(),
+            'approved_today' => Loan::where('status', 'approved')
+                ->whereDate('approved_date', today())
+                ->count(),
+            'total_approved' => Loan::where('status', 'approved')->count(),
+            'total_disbursed' => Loan::whereIn('status', ['active', 'disbursed'])->sum('amount'),
+        ];
+
+        $pendingLoans = Loan::where('status', 'pending')
+            ->with('user', 'user.savings')
+            ->orderBy('created_at', 'asc')
+            ->paginate(10);
+
+        $recentlyProcessed = Loan::whereIn('status', ['approved', 'rejected'])
+            ->with('user')
+            ->orderBy('approved_date', 'desc')
+            ->limit(5)
+            ->get();
+
+        return view('chairman.loan-approvals', compact('stats', 'pendingLoans', 'recentlyProcessed'));
+    }
+
+    /**
+     * Show individual loan for approval
+     */
+    public function viewLoanForApproval(Loan $loan)
+    {
+        // Always allow viewing the loan details here; approval actions are guarded elsewhere.
+        $loan->load(['user', 'user.savings', 'user.nextOfKin', 'payments', 'approver', 'disburser']);
+
+        return view('chairman.loan-approval-detail', compact('loan'));
+    }
+
+    /**
+     * Approve a loan application
+     */
+    public function approveLoanApplication(Request $request, Loan $loan)
+    {
+        $request->validate([
+            'notes' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        if ($loan->status !== 'pending') {
+            return redirect()->back()->with('error', 'This loan has already been processed.');
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $loan->update([
+                'status' => 'approved',
+                'approved_by' => auth()->id(),
+                'approved_date' => now(),
+            ]);
+
+            DB::commit();
+
+            // Notify member
+            $loan->user->notify(new \App\Notifications\LoanApproved($loan));
+
+            return redirect()->route('chairman.loan-approvals')
+                ->with('success', 'Loan approved! Amount: KES ' . number_format($loan->amount, 2));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Failed to approve loan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Reject a loan application
+     */
+    public function rejectLoanApplication(Request $request, Loan $loan)
+    {
+        $request->validate([
+            'rejection_reason' => ['required', 'string', 'max:500'],
+        ]);
+
+        if ($loan->status !== 'pending') {
+            return redirect()->back()->with('error', 'This loan has already been processed.');
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $loan->update([
+                'status' => 'rejected',
+                'approved_by' => auth()->id(),
+                'approved_date' => now(),
+                'rejection_reason' => $request->rejection_reason,
+            ]);
+
+            DB::commit();
+
+            // Notify member
+            $loan->user->notify(new \App\Notifications\LoanRejected($loan, $request->rejection_reason));
+
+            return redirect()->route('chairman.loan-approvals')
+                ->with('success', 'Loan application rejected.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Failed to reject loan: ' . $e->getMessage());
+        }
+    }
 }

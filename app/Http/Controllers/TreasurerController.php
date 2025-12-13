@@ -119,6 +119,18 @@ class TreasurerController extends Controller
         return view('treasurer.loans', compact('loanStats', 'loansByStatus'));
     }
 
+    /**
+     * Show loan detail for treasurer
+     */
+    public function viewLoan(Loan $loan)
+    {
+        $loan->load(['user', 'approver', 'disburser', 'payments' => function ($query) {
+            $query->orderBy('payment_date', 'asc');
+        }]);
+
+        return view('treasurer.loan-detail', compact('loan'));
+    }
+
     // ============ 3. SAVINGS SUMMARY ============
     public function savings()
     {
@@ -161,6 +173,61 @@ class TreasurerController extends Controller
             'withdrawalRequests',
             'topSavers'
         ));
+    }
+
+    // In App\Http\Controllers\TreasurerController.php
+    public function recordLoanPayment(Request $request, $loanId)
+    {
+        // Validate the request
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'payment_date' => 'nullable|date',
+            'payment_method' => 'nullable|string|in:cash,mpesa,bank,cheque',
+            'notes' => 'nullable|string',
+        ]);
+
+        try {
+            // Find the loan
+            $loan = Loan::findOrFail($loanId);
+
+            // Create payment record
+            $payment = new Payment([
+                'loan_id' => $loan->id,
+                'user_id' => $loan->user_id,
+                'amount' => $request->amount,
+                'payment_date' => $request->payment_date ?? now(),
+                'payment_method' => $request->payment_method ?? 'cash',
+                'reference_number' => 'PAY-'.time().rand(100, 999),
+                'notes' => $request->notes,
+                'recorded_by' => auth()->id(),
+            ]);
+
+            $payment->save();
+
+            // Update loan balance
+            $loan->remaining_balance -= $request->amount;
+
+            // If loan is fully paid
+            if ($loan->remaining_balance <= 0) {
+                $loan->status = 'paid';
+                $loan->paid_date = now();
+            }
+
+            $loan->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment recorded successfully',
+                'payment' => $payment,
+                'new_balance' => $loan->remaining_balance,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error recording payment: '.$e->getMessage(),
+            ], 500);
+        }
     }
 
     // ============ 4. EXPENSES TRACKING ============
@@ -404,6 +471,7 @@ class TreasurerController extends Controller
     /**
      * Issue cheque for loan disbursement
      * From requirements: "Issuing of the cheque and recording of the same is done by the treasurer"
+     * When cheque is issued, member's loan eligibility is reduced by the loan amount
      */
     public function issueCheque(Request $request, $loanId)
     {
@@ -449,6 +517,15 @@ class TreasurerController extends Controller
                 'issue_notes' => $request->issue_notes,
             ]);
 
+            // Reduce member's loan eligibility by the disbursed loan amount
+            // Loan eligibility = savings * 1.5, so we reduce available savings
+            $member = $loan->user;
+            if ($member->savings) {
+                $reductionAmount = $loan->amount / 1.5; // Reverse the 1.5x calculation
+                $newAvailableSavings = max(0, $member->savings->available_savings - $reductionAmount);
+                $member->savings->update(['available_savings' => $newAvailableSavings]);
+            }
+
             DB::commit();
 
             // Send notification to member about cheque
@@ -458,13 +535,79 @@ class TreasurerController extends Controller
             // ]);
 
             return redirect()->route('treasurer.payments')
-                ->with('success', 'Cheque '.$cheque->cheque_number.' issued for loan '.$loan->loan_number);
+                ->with('success', 'Cheque '.$cheque->cheque_number.' issued for loan '.$loan->loan_number.'. Member eligibility reduced.');
 
         } catch (\Exception $e) {
             DB::rollBack();
 
             return redirect()->back()
                 ->with('error', 'Cheque issuance failed: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Disburse an approved loan directly
+     */
+    public function disburseLoan(Request $request, $loanId)
+    {
+        $request->validate([
+            'payment_method' => 'required|in:cash,bank_transfer,mobile_money,cheque',
+            'reference_number' => 'nullable|string|max:100',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $loan = Loan::with('user')->findOrFail($loanId);
+
+        if ($loan->status !== 'approved') {
+            return redirect()->back()
+                ->with('error', 'Loan must be approved before disbursement.');
+        }
+
+        DB::beginTransaction();
+        try {
+            // Update loan status to disbursed
+            $loan->update([
+                'status' => 'disbursed',
+                'disbursed_by' => auth()->id(),
+                'disbursed_date' => now(),
+                'next_payment_date' => now()->addMonth(),
+            ]);
+
+            // Create payment record for disbursement
+            \App\Models\Payment::create([
+                'loan_id' => $loan->id,
+                'user_id' => $loan->user_id,
+                'type' => 'disbursement',
+                'amount' => $loan->amount,
+                'payment_method' => $request->payment_method,
+                'reference_number' => $request->reference_number,
+                'status' => 'completed',
+                'processed_by' => auth()->id(),
+                'processed_date' => now(),
+                'notes' => $request->notes,
+            ]);
+
+            // Reduce member's loan eligibility (same logic as cheque issuance)
+            $member = $loan->user;
+            if ($member && $member->savings) {
+                $reductionAmount = $loan->amount / 1.5;
+                $newAvailableSavings = max(0, $member->savings->available_savings - $reductionAmount);
+                $member->savings->update(['available_savings' => $newAvailableSavings]);
+            }
+
+            DB::commit();
+
+            // Send notification to member about disbursement
+            $loan->user->notify(new \App\Notifications\LoanDisbursed($loan));
+
+            return redirect()->route('treasurer.loans')
+                ->with('success', 'Loan '.$loan->loan_number.' has been disbursed successfully!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->back()
+                ->with('error', 'Loan disbursement failed: '.$e->getMessage());
         }
     }
 
@@ -706,6 +849,40 @@ class TreasurerController extends Controller
 
             return redirect()->back()
                 ->with('error', 'Withdrawal processing failed: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Reject withdrawal request
+     */
+    public function rejectWithdrawal(Request $request, $transactionId)
+    {
+        $transaction = SavingsTransaction::findOrFail($transactionId);
+
+        if ($transaction->type !== 'withdrawal' || $transaction->status !== 'pending') {
+            return redirect()->back()
+                ->with('error', 'Invalid withdrawal request.');
+        }
+
+        DB::beginTransaction();
+        try {
+            // Update transaction status to rejected
+            $transaction->update([
+                'status' => 'rejected',
+                'processed_by' => auth()->id(),
+                'processed_date' => now(),
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('treasurer.savings')
+                ->with('success', 'Withdrawal request rejected successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->back()
+                ->with('error', 'Rejection failed: '.$e->getMessage());
         }
     }
 
@@ -967,6 +1144,4 @@ class TreasurerController extends Controller
 
         return $totalSavings - $loanReceivables - $expenses + 1200000;
     }
-
-    
 }

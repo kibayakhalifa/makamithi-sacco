@@ -37,6 +37,8 @@ class Loan extends Model
         'expected_completion_date',
         'actual_completion_date',
         'next_payment_date',
+        'rejection_reason',
+        'support_document',
     ];
 
     protected $casts = [
@@ -81,7 +83,7 @@ class Loan extends Model
 
     public function payments()
     {
-        return $this->hasMany(LoanPayment::class);
+        return $this->hasMany(Payment::class, 'loan_id');
     }
 
     public function chequeRecord()

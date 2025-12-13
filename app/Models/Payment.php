@@ -15,6 +15,7 @@ class Payment extends Model
         'savings_transaction_id',
         'expense_id',
         'user_id',
+        'type',
         'amount',
         'principal',
         'interest',
@@ -26,6 +27,8 @@ class Payment extends Model
         'payment_date',
         'posted_date',
         'posted_by',
+        'processed_by',
+        'processed_date',
         'reconciled',
         'reconciled_at',
         'reconciliation_id',
@@ -134,9 +137,16 @@ class Payment extends Model
 
     public function getTypeAttribute()
     {
-        if ($this->loan_id) return 'loan_payment';
-        if ($this->savings_transaction_id) return 'savings_withdrawal';
-        if ($this->expense_id) return 'expense_payment';
+        if ($this->loan_id) {
+            return 'loan_payment';
+        }
+        if ($this->savings_transaction_id) {
+            return 'savings_withdrawal';
+        }
+        if ($this->expense_id) {
+            return 'expense_payment';
+        }
+
         return 'other';
     }
 
@@ -148,7 +158,7 @@ class Payment extends Model
             'expense_payment' => 'Expense Payment',
             'other' => 'Other',
         ];
-        
+
         return $types[$this->type] ?? 'Unknown';
     }
 
@@ -157,20 +167,53 @@ class Payment extends Model
         if ($this->loan && $this->loan->user) {
             return $this->loan->user->name;
         }
-        
+
         if ($this->savingsTransaction && $this->savingsTransaction->user) {
             return $this->savingsTransaction->user->name;
         }
-        
+
         if ($this->expense) {
             return $this->expense->requestedBy->name ?? 'Expense Payment';
         }
-        
+
         return 'Unknown';
     }
 
     public function getFormattedAmountAttribute()
     {
-        return 'KES ' . number_format($this->amount, 2);
+        return 'KES '.number_format($this->amount, 2);
+    }
+
+    // Add this method to your existing Payment class:
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($payment) {
+            if (empty($payment->payment_ref)) {
+                $date = date('Ymd');
+                $lastPayment = self::where('payment_ref', 'like', "PAY-{$date}-%")
+                    ->orderBy('payment_ref', 'desc')
+                    ->first();
+
+                if ($lastPayment) {
+                    $lastNumber = intval(substr($lastPayment->payment_ref, -5));
+                    $sequence = str_pad($lastNumber + 1, 5, '0', STR_PAD_LEFT);
+                } else {
+                    $sequence = '00001';
+                }
+
+                $payment->payment_ref = "PAY-{$date}-{$sequence}";
+            }
+
+            // Set defaults
+            if (empty($payment->payment_date)) {
+                $payment->payment_date = now();
+            }
+
+            if (empty($payment->status)) {
+                $payment->status = 'completed';
+            }
+        });
     }
 }

@@ -359,7 +359,7 @@
                         </div>
                         <p id="progressText" class="text-xs text-gray-500 text-center">28.3% repaid</p>
 
-                        <a href="{{ route('loans.top-up') }}" id="topupButton"
+                        <a href="{{ route('member.loans.topup') }}" id="topupButton"
                             class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold transition flex items-center justify-center hidden">
                             🚀 Apply for Top-up
                         </a>
@@ -384,7 +384,7 @@
                         <button
                             class="w-full bg-gray-50 hover:bg-gray-100 text-gray-900 py-3 rounded-lg font-semibold transition">💰
                             Calculate Different Amount</button>
-                        <a href="{{ route('savings.index') }}"
+                        <a href="{{ route('member.savings.index') }}"
                             class="w-full bg-gray-50 hover:bg-gray-100 text-gray-900 py-3 rounded-lg font-semibold flex justify-center">💎
                             Increase My Savings</a>
                     </div>

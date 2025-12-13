@@ -118,34 +118,41 @@
             <div id="pendingContent" class="p-6">
                 @if($loansByStatus['pending']->count() > 0)
                     <div class="overflow-x-auto">
-                        <table class="w-full border-collapse">
+                        <table class="w-full border-collapse" style="border:1px solid #e5e7eb;">
                             <thead>
                                 <tr class="bg-gray-50">
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Loan
-                                        Details</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
+                                        #</th>
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
+                                        Loan Details</th>
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
                                         Member</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
                                         Applied Date</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
                                         Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($loansByStatus['pending'] as $loan)
-                                    <tr class="hover:bg-gray-50 border-b">
-                                        <td class="px-4 py-4">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3 border border-gray-200 text-gray-700">{{ $loop->iteration }}</td>
+                                        <td class="px-4 py-3 border border-gray-200">
                                             <p class="font-bold text-gray-900">KES {{ number_format($loan->amount, 2) }}</p>
                                             <p class="text-gray-500 text-sm">#{{ $loan->loan_number }}</p>
                                             <p class="text-gray-500 text-xs">{{ $loan->purpose }}</p>
                                         </td>
-                                        <td class="px-4 py-4">
+                                        <td class="px-4 py-3 border border-gray-200">
                                             <div class="flex items-center">
                                                 <div
                                                     class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
-                                                    <span class="text-gray-700 font-medium">
-                                                        {{ strtoupper(substr($loan->user->name, 0, 1)) }}
-                                                    </span>
+                                                    <span
+                                                        class="text-gray-700 font-medium">{{ strtoupper(substr($loan->user->name, 0, 1)) }}</span>
                                                 </div>
                                                 <div>
                                                     <p class="font-medium text-gray-900">{{ $loan->user->name }}</p>
@@ -156,14 +163,18 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="px-4 py-4">
+                                        <td class="px-4 py-3 border border-gray-200">
                                             <p class="text-gray-900">{{ $loan->created_at->format('d M Y') }}</p>
                                             <p class="text-gray-500 text-xs">{{ $loan->created_at->diffForHumans() }}</p>
                                         </td>
-                                        <td class="px-4 py-4">
-                                            <span class="px-3 py-1 bg-orange-100 text-orange-800 text-xs rounded-full font-medium">
-                                                Pending Approval
-                                            </span>
+                                        <td class="px-4 py-3 border border-gray-200">
+                                            <span
+                                                class="px-3 py-1 bg-orange-100 text-orange-800 text-xs rounded-full font-medium">Pending
+                                                Approval</span>
+                                            <div class="mt-2">
+                                                <a href="{{ route('treasurer.loans.view', $loan->id) }}"
+                                                    class="inline-block mt-1 text-sm text-blue-600 hover:underline">View</a>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -183,40 +194,50 @@
             <div id="approvedContent" class="p-6 hidden">
                 @if($loansByStatus['approved']->count() > 0)
                     <div class="overflow-x-auto">
-                        <table class="w-full border-collapse">
+                        <table class="w-full border-collapse" style="border:1px solid #e5e7eb;">
                             <thead>
                                 <tr class="bg-gray-50">
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Loan
-                                        Details</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
+                                        #</th>
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
+                                        Loan Details</th>
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
                                         Member</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
                                         Approved Date</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
                                         Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($loansByStatus['approved'] as $loan)
-                                    <tr class="hover:bg-gray-50 border-b">
-                                        <td class="px-4 py-4">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3 border border-gray-200 text-gray-700">{{ $loop->iteration }}</td>
+                                        <td class="px-4 py-3 border border-gray-200">
                                             <p class="font-bold text-gray-900">KES {{ number_format($loan->amount, 2) }}</p>
                                             <p class="text-gray-500 text-sm">#{{ $loan->loan_number }}</p>
                                             <p class="text-gray-500 text-xs">5% interest • {{ $loan->period_months }} months</p>
                                         </td>
-                                        <td class="px-4 py-4">
+                                        <td class="px-4 py-3 border border-gray-200">
                                             <p class="font-medium text-gray-900">{{ $loan->user->name }}</p>
                                             <p class="text-gray-500 text-sm">{{ $loan->user->employee_number }}</p>
                                         </td>
-                                        <td class="px-4 py-4">
+                                        <td class="px-4 py-3 border border-gray-200">
                                             <p class="text-gray-900">{{ $loan->approved_date?->format('d M Y') ?? 'N/A' }}</p>
                                             <p class="text-gray-500 text-xs">By {{ $loan->approvedBy->name ?? 'Committee' }}</p>
                                         </td>
-                                        <td class="px-4 py-4">
-                                            <a href="{{ route('treasurer.payments') }}?loan={{ $loan->id }}"
-                                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
-                                                Disburse
-                                            </a>
+                                        <td class="px-4 py-3 border border-gray-200">
+                                            <div class="flex gap-2">
+                                                <a href="{{ route('treasurer.loans.view', $loan->id) }}"
+                                                    class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium">View</a>
+                                                <a href="{{ route('treasurer.payments') }}?loan={{ $loan->id }}"
+                                                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Disburse</a>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -236,36 +257,45 @@
             <div id="activeContent" class="p-6 hidden">
                 @if($loansByStatus['active']->count() > 0)
                     <div class="overflow-x-auto">
-                        <table class="w-full border-collapse">
+                        <table class="w-full border-collapse" style="border:1px solid #e5e7eb;">
                             <thead>
                                 <tr class="bg-gray-50">
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Loan
-                                        Details</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
+                                        #</th>
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
+                                        Loan Details</th>
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
                                         Member</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
                                         Balance</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Next
-                                        Payment</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
+                                        Next Payment</th>
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
                                         Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($loansByStatus['active'] as $loan)
-                                    <tr class="hover:bg-gray-50 border-b">
-                                        <td class="px-4 py-4">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3 border border-gray-200 text-gray-700">{{ $loop->iteration }}</td>
+                                        <td class="px-4 py-3 border border-gray-200">
                                             <p class="font-bold text-gray-900">#{{ $loan->loan_number }}</p>
                                             <p class="text-gray-500 text-sm">{{ $loan->purpose }}</p>
                                             <p class="text-gray-500 text-xs">KES
                                                 {{ number_format($loan->monthly_payment, 2) }}/month
                                             </p>
                                         </td>
-                                        <td class="px-4 py-4">
+                                        <td class="px-4 py-3 border border-gray-200">
                                             <p class="font-medium text-gray-900">{{ $loan->user->name }}</p>
                                             <p class="text-gray-500 text-sm">{{ $loan->user->employee_number }}</p>
                                         </td>
-                                        <td class="px-4 py-4">
+                                        <td class="px-4 py-3 border border-gray-200">
                                             <p class="font-bold text-gray-900">KES {{ number_format($loan->remaining_balance, 2) }}
                                             </p>
                                             <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
@@ -275,22 +305,20 @@
                                             <p class="text-gray-500 text-xs mt-1">{{ number_format($loan->percentage_paid, 1) }}%
                                                 paid</p>
                                         </td>
-                                        <td class="px-4 py-4">
+                                        <td class="px-4 py-3 border border-gray-200">
                                             <p class="text-gray-900">{{ $loan->next_payment_date?->format('d M Y') ?? 'N/A' }}</p>
                                             <p class="text-gray-500 text-xs">
                                                 {{ $loan->next_payment_date ? $loan->next_payment_date->diffForHumans() : '' }}
                                             </p>
                                         </td>
-                                        <td class="px-4 py-4">
+                                        <td class="px-4 py-3 border border-gray-200">
                                             <div class="flex gap-2">
                                                 <button onclick="recordPayment({{ $loan->id }})"
                                                     class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
                                                     Record Payment
                                                 </button>
-                                                <button onclick="viewLoanDetails({{ $loan->id }})"
-                                                    class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium">
-                                                    View
-                                                </button>
+                                                <a href="{{ route('treasurer.loans.view', $loan->id) }}"
+                                                    class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium">View</a>
                                             </div>
                                         </td>
                                     </tr>
@@ -311,38 +339,50 @@
             <div id="rejectedContent" class="p-6 hidden">
                 @if($loansByStatus['rejected']->count() > 0)
                     <div class="overflow-x-auto">
-                        <table class="w-full border-collapse">
+                        <table class="w-full border-collapse" style="border:1px solid #e5e7eb;">
                             <thead>
                                 <tr class="bg-gray-50">
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Loan
-                                        Details</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
+                                        #</th>
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
+                                        Loan Details</th>
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
                                         Member</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
                                         Rejected Date</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
                                         Reason</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($loansByStatus['rejected'] as $loan)
-                                    <tr class="hover:bg-gray-50 border-b">
-                                        <td class="px-4 py-4">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3 border border-gray-200 text-gray-700">{{ $loop->iteration }}</td>
+                                        <td class="px-4 py-3 border border-gray-200">
                                             <p class="font-bold text-gray-900">KES {{ number_format($loan->amount, 2) }}</p>
                                             <p class="text-gray-500 text-sm">#{{ $loan->loan_number }}</p>
                                             <p class="text-gray-500 text-xs">{{ $loan->purpose }}</p>
                                         </td>
-                                        <td class="px-4 py-4">
+                                        <td class="px-4 py-3 border border-gray-200">
                                             <p class="font-medium text-gray-900">{{ $loan->user->name }}</p>
                                             <p class="text-gray-500 text-sm">{{ $loan->user->employee_number }}</p>
                                         </td>
-                                        <td class="px-4 py-4">
+                                        <td class="px-4 py-3 border border-gray-200">
                                             <p class="text-gray-900">{{ $loan->rejected_date?->format('d M Y') ?? 'N/A' }}</p>
                                             <p class="text-gray-500 text-xs">By {{ $loan->rejectedBy->name ?? 'Committee' }}</p>
                                         </td>
-                                        <td class="px-4 py-4">
+                                        <td class="px-4 py-3 border border-gray-200">
                                             <p class="text-red-600 text-sm">{{ $loan->rejection_reason ?? 'No reason provided' }}
                                             </p>
+                                            <div class="mt-2">
+                                                <a href="{{ route('treasurer.loans.view', $loan->id) }}"
+                                                    class="inline-block mt-1 text-sm text-blue-600 hover:underline">View</a>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -432,46 +472,55 @@
             <div id="paidContent" class="p-6 hidden">
                 @if($loansByStatus['paid']->count() > 0)
                     <div class="overflow-x-auto">
-                        <table class="w-full border-collapse">
+                        <table class="w-full border-collapse" style="border:1px solid #e5e7eb;">
                             <thead>
                                 <tr class="bg-gray-50">
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Loan
-                                        Details</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
+                                        #</th>
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
+                                        Loan Details</th>
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
                                         Member</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Paid
-                                        Date</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">Total
-                                        Paid</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-b">
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
+                                        Paid Date</th>
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
+                                        Total Paid</th>
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase border border-gray-200">
                                         Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($loansByStatus['paid'] as $loan)
-                                    <tr class="hover:bg-gray-50 border-b">
-                                        <td class="px-4 py-4">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3 border border-gray-200 text-gray-700">{{ $loop->iteration }}</td>
+                                        <td class="px-4 py-3 border border-gray-200">
                                             <p class="font-bold text-gray-900">#{{ $loan->loan_number }}</p>
                                             <p class="text-gray-500 text-sm">KES {{ number_format($loan->amount, 2) }}</p>
                                             <p class="text-gray-500 text-xs">{{ $loan->period_months }} months</p>
                                         </td>
-                                        <td class="px-4 py-4">
+                                        <td class="px-4 py-3 border border-gray-200">
                                             <p class="font-medium text-gray-900">{{ $loan->user->name }}</p>
                                             <p class="text-gray-500 text-sm">{{ $loan->user->employee_number }}</p>
                                         </td>
-                                        <td class="px-4 py-4">
+                                        <td class="px-4 py-3 border border-gray-200">
                                             <p class="text-gray-900">{{ $loan->paid_date?->format('d M Y') ?? 'N/A' }}</p>
                                             <p class="text-gray-500 text-xs">Loan completed</p>
                                         </td>
-                                        <td class="px-4 py-4">
+                                        <td class="px-4 py-3 border border-gray-200">
                                             <p class="font-bold text-green-600">KES {{ number_format($loan->total_repayable, 2) }}
                                             </p>
                                             <p class="text-gray-500 text-xs">Incl. interest</p>
                                         </td>
-                                        <td class="px-4 py-4">
-                                            <span class="px-3 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">
-                                                Fully Paid
-                                            </span>
+                                        <td class="px-4 py-3 border border-gray-200">
+                                            <span
+                                                class="px-3 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">Fully
+                                                Paid</span>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -519,7 +568,7 @@
             <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
                 <h3 class="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
                 <div class="space-y-3">
-                    <a href="{{ route('loans.apply') }}"
+                    <a href="{{ route('member.loans.apply') }}"
                         class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2">
                         <span>➕</span> New Loan Application
                     </a>
@@ -560,8 +609,56 @@
         function recordPayment(loanId) {
             const amount = prompt('Enter payment amount (KES):');
             if (amount && !isNaN(amount)) {
-                // Redirect to payment page or make AJAX call
-                window.location.href = `/treasurer/loans/${loanId}/payment?amount=${amount}`;
+                // Show loading
+                const button = event.target;
+                const originalText = button.innerHTML;
+                button.innerHTML = 'Processing...';
+                button.disabled = true;
+
+                // Use the correct route - match what's in your route list
+                fetch(`/treasurer/loans/${loanId}/payment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: parseFloat(amount),
+                        payment_date: new Date().toISOString().split('T')[0],
+                        payment_method: 'cash',
+                        notes: 'Payment recorded via treasurer dashboard'
+                    })
+                })
+                    .then(response => {
+                        // Check if response is OK
+                        if (response.status === 422) {
+                            return response.json().then(data => {
+                                throw new Error(data.message || 'Validation error');
+                            });
+                        }
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            alert('✅ Payment recorded successfully!');
+                            // Reload the page to see updated balance
+                            location.reload();
+                        } else {
+                            alert('❌ Error: ' + (data.message || 'Unknown error'));
+                            button.innerHTML = originalText;
+                            button.disabled = false;
+                        }
+                    })
+                    .catch(error => {
+                        alert('❌ Error: ' + error.message);
+                        console.error('Payment error:', error);
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    });
             }
         }
 

@@ -12,13 +12,7 @@ class UsersTableSeeder extends Seeder
     {
         // Create test users with different roles
         $users = [
-            [
-                'name' => 'John Mule',
-                'email' => 'member@makamithi.com',
-                'password' => Hash::make('password'),
-                'role' => 'member',
-                'employee_number' => 'EMP001',
-            ],
+            
             [
                 'name' => 'Chairman Maina',
                 'email' => 'chairman@makamithi.com',

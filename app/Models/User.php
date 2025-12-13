@@ -54,7 +54,7 @@ class User extends Authenticatable
     
     public function savings()
     {
-        return $this->hasOne(Savings::class);
+        return $this->hasOne(Saving::class);
     }
 
     public function loans()

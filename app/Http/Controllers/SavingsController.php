@@ -49,13 +49,13 @@ class SavingsController extends Controller
             // Record transaction
             SavingsTransaction::recordTransaction([
                 'user_id' => $userId,
-                'saving_id' => $saving->id,
-                'transaction_type' => 'deposit',
+                'transaction_ref' => 'TOPUP-' . str_pad($userId, 5, '0', STR_PAD_LEFT) . '-' . time(),
+                'type' => 'voluntary_deposit',
                 'amount' => $amount,
                 'balance_before' => $balanceBefore,
                 'balance_after' => $saving->available_savings,
                 'description' => $request->description ?? 'Voluntary top-up',
-                'transaction_date' => now(),
+                'transaction_date' => now()->toDateString(),
                 'status' => 'completed',
             ]);
 

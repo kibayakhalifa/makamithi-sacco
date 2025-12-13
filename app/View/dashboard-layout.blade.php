@@ -25,16 +25,16 @@
                             class="block py-3 px-6 hover:bg-blue-800 {{ $currentRoute === 'member.dashboard' ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
                             📊 Dashboard
                         </a>
-                        <a href="{{ route('savings.index') }}"
-                            class="block py-3 px-6 hover:bg-blue-800 {{ str_starts_with($currentRoute, 'savings.') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
+                        <a href="{{ route('member.savings.index') }}"
+                            class="block py-3 px-6 hover:bg-blue-800 {{ str_starts_with($currentRoute, 'member.savings.') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
                             💰 My Savings
                         </a>
-                        <a href="{{ route('loans.apply') }}"
-                            class="block py-3 px-6 hover:bg-blue-800 {{ str_starts_with($currentRoute, 'loans.') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
+                        <a href="{{ route('member.loans.apply') }}"
+                            class="block py-3 px-6 hover:bg-blue-800 {{ str_starts_with($currentRoute, 'member.loans.') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
                             📝 Apply Loan
                         </a>
-                        <a href="{{ route('profile.index') }}"
-                            class="block py-3 px-6 hover:bg-blue-800 {{ str_starts_with($currentRoute, 'profile.') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
+                        <a href="{{ route('member.profile') }}"
+                            class="block py-3 px-6 hover:bg-blue-800 {{ str_starts_with($currentRoute, 'member.profile') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
                             👤 My Profile
                         </a>
                     @elseif(auth()->user()->role === 'chairman')

@@ -1,11 +1,16 @@
 <?php
 
 use App\Http\Controllers\ChairmanController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\LoanController;
+use App\Http\Controllers\MemberController;
+use App\Http\Controllers\MemberLoanController;
+use App\Http\Controllers\MemberReportController;
+use App\Http\Controllers\MemberSavingsController;
 use App\Http\Controllers\SavingsController;
 use App\Http\Controllers\SecretaryController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TreasurerController;
-use App\Http\Controllers\DocumentController;
 use Illuminate\Support\Facades\Route;
 
 // Home page - Show different content based on auth status
@@ -65,77 +70,52 @@ Route::middleware(['auth'])->group(function () {
         return redirect('/');
     })->name('logout');
 
-    // ---------- MEMBER ROUTES ----------
-    Route::middleware(['auth', 'role:member'])->group(function () {
+    // Member Routes (requires authentication and member role)
+    Route::middleware(['auth', 'role:member'])->prefix('member')->name('member.')->group(function () {
+        // Dashboard
+        Route::get('/dashboard', [MemberController::class, 'dashboard'])->name('dashboard');
 
-        // Member Dashboard
-        Route::get('/member/dashboard', function () {
-            return view('member.dashboard');
-        })->name('member.dashboard');
+        // Profile
+        Route::get('/profile', [MemberController::class, 'profile'])->name('profile');
+        Route::patch('/profile', [MemberController::class, 'updateProfile'])->name('profile.update');
+        Route::put('/profile/password', [MemberController::class, 'updatePassword'])->name('profile.password');
 
-        // Savings routes
-        Route::prefix('savings')->group(function () {
-            Route::get('/', function () {
-                return view('savings.index');
-            })->name('savings.index');
+        // Savings
+        Route::get('/savings', [MemberSavingsController::class, 'index'])->name('savings.index');
+        Route::post('/savings/topup', [MemberSavingsController::class, 'topup'])->name('savings.topup');
+        Route::post('/savings/withdrawal-request', [MemberSavingsController::class, 'withdrawalRequest'])->name('savings.withdrawal-request');
 
-            Route::get('/statements', function () {
-                return view('savings.statements');
-            })->name('savings.statements');
+        // Loans
+        Route::get('/loans', [MemberLoanController::class, 'index'])->name('loans.index');
+        Route::get('/loans/apply', [MemberLoanController::class, 'create'])->name('loans.apply');
+        Route::post('/loans/apply', [MemberLoanController::class, 'store'])->name('loans.store');
+        Route::get('/loans/{loan}', [MemberLoanController::class, 'show'])->name('loans.show');
+        Route::get('/loans/{loan}/topup', [MemberLoanController::class, 'topup'])->name('loans.topup');
+        Route::post('/loans/{loan}/topup', [MemberLoanController::class, 'storeTopup'])->name('loans.topup.store');
 
-            Route::get('/withdrawal', function () {
-                return view('savings.withdrawal');
-            })->name('savings.withdrawal');
-        });
-
-        // Loan routes
-        Route::prefix('loans')->group(function () {
-            Route::get('/apply', function () {
-                return view('loans.apply');
-            })->name('loans.apply');
-
-            Route::get('/my-loans', function () {
-                return view('loans.my-loans');
-            })->name('loans.my-loans');
-
-            Route::get('/top-up', function () {
-                return view('loans.top-up');
-            })->name('loans.top-up');
-        });
-
-        // Profile routes
-        Route::prefix('profile')->group(function () {
-            Route::get('/', function () {
-                return view('profile.index');
-            })->name('profile.index');
-
-            Route::get('/edit', function () {
-                return view('profile.edit');
-            })->name('profile.edit');
-
-            Route::get('/next-of-kin', function () {
-                return view('profile.next-of-kin');
-            })->name('profile.next-of-kin');
-        });
+        // Reports
+        Route::get('/reports', [MemberReportController::class, 'index'])->name('reports.index');
+        Route::post('/reports/generate', [MemberReportController::class, 'generate'])->name('reports.generate');
+        Route::get('/reports/download/{report}', [MemberReportController::class, 'download'])->name('reports.download');
     });
 
     // ---------- CHAIRMAN ROUTES ----------
     Route::middleware(['auth', 'role:chairman'])->group(function () {
 
         // Chairman Dashboard
-        Route::get('/chairman/dashboard', function () {
-            return view('chairman.dashboard');
-        })->name('chairman.dashboard');
+        Route::get('/chairman/dashboard', [ChairmanController::class, 'dashboard'])->name('chairman.dashboard');
 
         // Chairman specific routes
-        Route::prefix('chairman')->group(function () {
-            Route::get('/loan-approvals', function () {
-                return view('chairman.loan-approvals');
-            })->name('chairman.loan-approvals');
+        Route::prefix('chairman')->name('chairman.')->group(function () {
+            // Loan Approvals
+            Route::get('/loan-approvals', [ChairmanController::class, 'loanApprovals'])->name('loan-approvals');
+            Route::get('/loans/{loan}/approve', [ChairmanController::class, 'viewLoanForApproval'])->name('loans.approve-view');
+            Route::post('/loans/{loan}/approve', [ChairmanController::class, 'approveLoanApplication'])->name('loans.approve');
+            Route::post('/loans/{loan}/reject', [ChairmanController::class, 'rejectLoanApplication'])->name('loans.reject');
 
             Route::get('/members', function () {
                 return view('chairman.members');
-            })->name('chairman.members');
+            })->name('members');
         });
     });
 
@@ -164,18 +144,18 @@ Route::middleware(['auth'])->group(function () {
                 return view('secretary.loan-assist');
             })->name('secretary.loan-assist');
 
-            // Dummy POST routes for forms (will work with JavaScript dummy data)
-            Route::post('/members', function () {
-                // Mock successful submission
-                return redirect()->route('secretary.dashboard')
-                    ->with('success', 'Member added successfully! Waiting for Chairman approval.');
-            })->name('secretary.members.store');
+            // Loan Approvals
+            Route::get('/loan-approvals', [SecretaryController::class, 'loanApprovals'])->name('secretary.loan-approvals');
+            Route::get('/loan-approvals/{loan}', [SecretaryController::class, 'loanApprovalDetail'])->name('secretary.loan-approval-detail');
+            Route::post('/loan-approvals/{loan}/approve', [SecretaryController::class, 'approveLoanApplication'])->name('secretary.loans.approve');
+            Route::post('/loan-approvals/{loan}/reject', [SecretaryController::class, 'rejectLoanApplication'])->name('secretary.loans.reject');
 
-            Route::post('/assisted-loans', function () {
-                // Mock successful submission
-                return redirect()->route('secretary.dashboard')
-                    ->with('success', 'Loan application submitted! Sent to Chairman for approval.');
-            })->name('secretary.loans.assisted');
+            // Loan History
+            Route::get('/loan-history', [SecretaryController::class, 'loanHistory'])->name('secretary.loan-history');
+
+            // Note: real POST routes for member creation and assisted loans are defined
+            // further below and should be used. Removed dummy closures to allow the
+            // controller implementations to receive form submissions.
         });
         // Secretary Communications
         Route::get('/secretary/communications', function () {
@@ -245,7 +225,6 @@ Route::middleware(['auth'])->group(function () {
     // Chairman Routes
     Route::prefix('chairman')->middleware(['auth', 'role:chairman'])->group(function () {
         Route::post('/members/{member}/approve', [ChairmanController::class, 'approveMember'])->name('chairman.members.approve');
-        Route::post('/loans/{loan}/approve', [ChairmanController::class, 'approveLoan'])->name('chairman.loans.approve');
     });
 
     Route::middleware(['auth', 'role:treasurer'])->prefix('treasurer')->name('treasurer.')->group(function () {
@@ -257,6 +236,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/payments', [TreasurerController::class, 'payments'])->name('payments');
         Route::post('/loans/{loan}/process-payment', [TreasurerController::class, 'processLoanPayment'])->name('loans.process-payment');
         Route::post('/loans/{loan}/issue-cheque', [TreasurerController::class, 'issueCheque'])->name('loans.issue-cheque');
+        Route::post('/loans/{loan}/disburse', [TreasurerController::class, 'disburseLoan'])->name('loans.disburse');
+        // Add this route definition
+        Route::post('/loans/{loan}/payment', [TreasurerController::class, 'recordLoanPayment'])
+        ->name('treasurer.loans.record-payment')
+        ->name('treasurer.loans.payment'); // Multiple names
         Route::post('/payroll/process-deductions', [TreasurerController::class, 'processPayrollDeductions'])->name('payroll.process-deductions');
         Route::post('/withdrawals/{transaction}/process', [TreasurerController::class, 'processWithdrawal'])->name('withdrawals.process');
         Route::post('/withdrawals/{transaction}/reject', [TreasurerController::class, 'rejectWithdrawal'])->name('withdrawals.reject');
@@ -264,6 +248,7 @@ Route::middleware(['auth'])->group(function () {
 
         // 2. Loans Management
         Route::get('/loans', [TreasurerController::class, 'loans'])->name('loans');
+        Route::get('/loans/{loan}/view', [TreasurerController::class, 'viewLoan'])->name('loans.view');
         Route::post('/loans/{loan}/payment', [TreasurerController::class, 'recordLoanPayment'])->name('loans.record-payment');
         Route::post('/loans/send-reminders', [TreasurerController::class, 'sendPaymentReminders'])->name('loans.send-reminders');
         Route::post('/loans/update-rates', [TreasurerController::class, 'updateInterestRates'])->name('loans.update-rates');
@@ -373,5 +358,28 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/loans/apply', [LoanController::class, 'apply'])->name('member.loans.apply');
         Route::post('/savings/topup', [SavingsController::class, 'topup'])->name('member.savings.topup');
     });
-    
+
+    // ============ SETTINGS ROUTES ============
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
+        Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.update-profile');
+        Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.update-password');
+        Route::put('/settings/notifications', [SettingsController::class, 'updateNotifications'])->name('settings.update-notifications');
+        Route::delete('/settings/delete-account', [SettingsController::class, 'deleteAccount'])->name('settings.delete-account');
+    });
+    Route::post('/reports/generate', [\App\Http\Controllers\ReportController::class, 'generate'])
+        ->name('reports.generate');
+
+    Route::get('/check-session-now', function () {
+        session()->put('test_time', now()->toDateTimeString());
+
+        return response()->json([
+            'session_id' => session()->getId(),
+            'session_token' => session()->token(),
+            'test_value' => session()->get('test_time'),
+            'session_in_db' => \DB::table('sessions')
+                ->where('id', session()->getId())
+                ->exists(),
+        ]);
+    });
 });

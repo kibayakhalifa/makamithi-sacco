@@ -19,12 +19,12 @@ class CheckTopupEligibility
         $repaymentPercentage = 28.3; // Would be calculated from database
         
         if (!$hasActiveLoan) {
-            return redirect()->route('loans.apply')
+            return redirect()->route('member.loans.apply')
                 ->with('error', 'You need an active loan to access top-up facility.');
         }
         
         if ($repaymentPercentage < 50) {
-            return redirect()->route('loans.apply')
+            return redirect()->route('member.loans.apply')
                 ->with('warning', 'You need to repay 50% of your current loan to qualify for top-up.');
         }
         

@@ -11,17 +11,19 @@ class SavingsTransaction extends Model
 
     protected $fillable = [
         'user_id',
-        'saving_id',
-        'transaction_type', // 'deposit', 'withdrawal', 'interest', 'adjustment'
+        'transaction_ref',
+        'type', // 'payroll_deduction', 'voluntary_deposit', 'withdrawal', 'interest_credit', 'adjustment'
         'amount',
         'balance_before',
         'balance_after',
-        'reference',
+        'status', // 'pending', 'completed', 'failed', 'reversed'
         'description',
+        'payment_method',
+        'reference_number',
         'transaction_date',
-        'processed_by',
-        'approved_by',
-        'status', // 'pending', 'completed', 'rejected'
+        'posted_date',
+        'posted_by',
+        'notes',
     ];
 
     protected $casts = [
@@ -57,12 +59,12 @@ class SavingsTransaction extends Model
     
     public function scopeDeposits($query)
     {
-        return $query->where('transaction_type', 'deposit');
+        return $query->whereIn('type', ['payroll_deduction', 'voluntary_deposit', 'interest_credit']);
     }
 
     public function scopeWithdrawals($query)
     {
-        return $query->where('transaction_type', 'withdrawal');
+        return $query->where('type', 'withdrawal');
     }
 
     public function scopeCompleted($query)
@@ -89,15 +91,15 @@ class SavingsTransaction extends Model
     {
         return self::create([
             'user_id' => $data['user_id'],
-            'saving_id' => $data['saving_id'],
-            'transaction_type' => $data['transaction_type'],
+            'transaction_ref' => $data['transaction_ref'] ?? 'TRX-' . uniqid(),
+            'type' => $data['type'],
             'amount' => $data['amount'],
             'balance_before' => $data['balance_before'],
             'balance_after' => $data['balance_after'],
-            'reference' => $data['reference'] ?? uniqid('TRX-'),
-            'description' => $data['description'],
-            'transaction_date' => $data['transaction_date'] ?? now(),
-            'processed_by' => $data['processed_by'] ?? auth()->id(),
+            'reference_number' => $data['reference_number'] ?? null,
+            'description' => $data['description'] ?? null,
+            'transaction_date' => $data['transaction_date'] ?? now()->toDateString(),
+            'posted_by' => $data['posted_by'] ?? auth()->id(),
             'status' => $data['status'] ?? 'completed',
         ]);
     }
