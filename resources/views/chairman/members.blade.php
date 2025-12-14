@@ -58,7 +58,14 @@
                 <div class="mt-4 pt-4 border-t">
                     <div class="flex justify-between text-xs text-gray-500">
                         <span>New: {{ $pendingMembersList->where('days_pending', 0)->count() }}</span>
-                        <span>Oldest: {{ $pendingMembersList->max('days_pending') ?? 0 }} days</span>
+                        @php
+                            $oldestDays = $pendingMembersList->max('days_pending') ?? 0;
+                            $oldestDate = \Carbon\Carbon::now()->subDays($oldestDays);
+                        @endphp
+
+                        <span>Oldest: {{ $oldestDate->diffForHumans() }}</span>
+
+
                     </div>
                 </div>
             </div>
@@ -86,9 +93,12 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-sm text-gray-500">Total Savings</p>
-                        <p class="text-3xl font-semibold mt-2 text-gray-900">KES {{ number_format($stats['total_savings']) }}</p>
+                        <p class="text-3xl font-semibold mt-2 text-gray-900">KES
+                            {{ number_format($stats['total_savings']) }}
+                        </p>
                         @if($stats['monthly_savings_increase'] > 0)
-                            <p class="text-xs text-green-600 mt-1">+KES {{ number_format($stats['monthly_savings_increase']) }} this month</p>
+                            <p class="text-xs text-green-600 mt-1">+KES {{ number_format($stats['monthly_savings_increase']) }}
+                                this month</p>
                         @else
                             <p class="text-xs text-gray-500 mt-1">No increase this month</p>
                         @endif
@@ -98,7 +108,8 @@
                 <div class="mt-4 pt-4 border-t">
                     <div class="flex justify-between text-xs text-gray-500">
                         <span>Members: {{ $stats['active_members'] ?? 0 }}</span>
-                        <span>Avg: KES {{ $stats['total_members'] > 0 ? number_format($stats['total_savings'] / $stats['total_members']) : 0 }}</span>
+                        <span>Avg: KES
+                            {{ $stats['total_members'] > 0 ? number_format($stats['total_savings'] / $stats['total_members']) : 0 }}</span>
                     </div>
                 </div>
             </div>
@@ -128,10 +139,14 @@
                         <thead>
                             <tr class="bg-gray-50 border-b-2 border-gray-300">
                                 <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">No.</th>
-                                <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Employee #</th>
-                                <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Name & Details</th>
-                                <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Employment Info</th>
-                                <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Submitted</th>
+                                <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Employee #
+                                </th>
+                                <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Name &
+                                    Details</th>
+                                <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Employment
+                                    Info</th>
+                                <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Submitted
+                                </th>
                                 <th class="px-6 py-3 text-left text-gray-600 font-semibold">Actions</th>
                             </tr>
                         </thead>
@@ -147,7 +162,8 @@
                                         <div class="font-medium text-gray-900">{{ $member['name'] }}</div>
                                         <div class="text-gray-500 text-xs">{{ $member['email'] }}</div>
                                         <div class="mt-1">
-                                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            <span
+                                                class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
                                                 {{ $member['days_pending'] == 0 ? 'Today' : $member['days_pending'] . ' days ago' }}
                                             </span>
                                         </div>
@@ -155,7 +171,8 @@
                                     <td class="px-6 py-4 border-r border-gray-300">
                                         <div class="text-gray-700">{{ $member['department'] }}</div>
                                         <div class="text-gray-500 text-xs">{{ $member['position'] }}</div>
-                                        <div class="text-gray-500 text-xs mt-1">KES {{ number_format($member['salary']) }}/month</div>
+                                        <div class="text-gray-500 text-xs mt-1">KES {{ number_format($member['salary']) }}/month
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 border-r border-gray-300">
                                         <div class="text-gray-700">{{ $member['submitted_date']->format('d M Y') }}</div>
@@ -163,16 +180,21 @@
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="relative inline-block group">
-                                            <button class="px-4 py-2 bg-gray-600 text-white rounded-lg text-xs font-medium hover:bg-gray-700 transition flex items-center gap-1">
+                                            <button
+                                                class="px-4 py-2 bg-gray-600 text-white rounded-lg text-xs font-medium hover:bg-gray-700 transition flex items-center gap-1">
                                                 Actions ▼
                                             </button>
-                                            <div class="hidden group-hover:block absolute right-0 mt-0 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                                            <div
+                                                class="hidden group-hover:block absolute right-0 mt-0 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                                                 <button onclick="viewMemberDetails({{ $member['id'] }})"
-                                                    class="w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 border-b border-gray-200 text-sm">👁 Review</button>
+                                                    class="w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 border-b border-gray-200 text-sm">👁
+                                                    Review</button>
                                                 <button onclick="approveMember({{ $member['id'] }})"
-                                                    class="w-full text-left px-4 py-2 text-green-600 hover:bg-green-50 border-b border-gray-200 text-sm">✓ Approve</button>
+                                                    class="w-full text-left px-4 py-2 text-green-600 hover:bg-green-50 border-b border-gray-200 text-sm">✓
+                                                    Approve</button>
                                                 <button onclick="rejectMember({{ $member['id'] }})"
-                                                    class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 text-sm">✗ Reject</button>
+                                                    class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 text-sm">✗
+                                                    Reject</button>
                                             </div>
                                         </div>
                                     </td>
@@ -223,11 +245,15 @@
                     <thead>
                         <tr class="bg-gray-50 border-b-2 border-gray-300">
                             <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">No.</th>
-                            <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Member #</th>
+                            <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Member #
+                            </th>
                             <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Name</th>
-                            <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Department</th>
-                            <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Savings</th>
-                            <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Loan Eligibility</th>
+                            <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Department
+                            </th>
+                            <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Savings
+                            </th>
+                            <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Loan
+                                Eligibility</th>
                             <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Status</th>
                             <th class="px-6 py-3 text-left text-gray-600 font-semibold">Actions</th>
                         </tr>
@@ -237,7 +263,9 @@
                         @foreach($allMembers as $index => $member)
                             <tr class="border-b border-gray-300 hover:bg-gray-50 transition">
                                 <td class="px-6 py-4 text-gray-900 font-medium border-r border-gray-300">{{ $index + 1 }}</td>
-                                <td class="px-6 py-4 font-mono text-gray-900 border-r border-gray-300">{{ $member['employee_number'] }}</td>
+                                <td class="px-6 py-4 font-mono text-gray-900 border-r border-gray-300">
+                                    {{ $member['employee_number'] }}
+                                </td>
                                 <td class="px-6 py-4 border-r border-gray-300">
                                     <div class="font-medium text-gray-900">{{ $member['name'] }}</div>
                                     <div class="text-gray-500 text-xs">{{ $member['email'] }}</div>
@@ -250,31 +278,44 @@
                                     <div class="font-medium text-gray-900">KES {{ number_format($member['savings']) }}</div>
                                 </td>
                                 <td class="px-6 py-4 border-r border-gray-300">
-                                    <div class="font-medium text-gray-900">KES {{ number_format($member['loan_eligibility']) }}</div>
+                                    <div class="font-medium text-gray-900">KES {{ number_format($member['loan_eligibility']) }}
+                                    </div>
                                     <div class="text-gray-500 text-xs">1.5× savings rule</div>
                                 </td>
                                 <td class="px-6 py-4 border-r border-gray-300">
                                     @if($member['status'] === 'active')
-                                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">✅ Active</span>
+                                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">✅
+                                            Active</span>
                                     @elseif($member['status'] === 'pending')
-                                        <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">⏳ Pending</span>
+                                        <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">⏳
+                                            Pending</span>
                                     @else
-                                        <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">❌ Inactive</span>
+                                        <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">❌
+                                            Inactive</span>
                                     @endif
                                     @if($member['loan_status'] === 'default')
-                                        <div class="mt-1"><span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">⚠️ Defaulting</span></div>
+                                        <div class="mt-1"><span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">⚠️
+                                                Defaulting</span></div>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="relative inline-block group">
-                                        <button class="px-4 py-2 bg-gray-600 text-white rounded-lg text-xs font-medium hover:bg-gray-700 transition flex items-center gap-1">
+                                        <button
+                                            class="px-4 py-2 bg-gray-600 text-white rounded-lg text-xs font-medium hover:bg-gray-700 transition flex items-center gap-1">
                                             Actions ▼
                                         </button>
-                                        <div class="hidden group-hover:block absolute right-0 mt-0 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                                            <button onclick="viewMemberDetails({{ $member['id'] }})" class="w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 border-b border-gray-200 text-sm">👁 View</button>
+                                        <div
+                                            class="hidden group-hover:block absolute right-0 mt-0 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                                            <button onclick="viewMemberDetails({{ $member['id'] }})"
+                                                class="w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 border-b border-gray-200 text-sm">👁
+                                                View</button>
                                             @if($member['status'] === 'pending')
-                                                <button onclick="approveMember({{ $member['id'] }})" class="w-full text-left px-4 py-2 text-green-600 hover:bg-green-50 border-b border-gray-200 text-sm">✓ Approve</button>
-                                                <button onclick="rejectMember({{ $member['id'] }})" class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 text-sm">✗ Reject</button>
+                                                <button onclick="approveMember({{ $member['id'] }})"
+                                                    class="w-full text-left px-4 py-2 text-green-600 hover:bg-green-50 border-b border-gray-200 text-sm">✓
+                                                    Approve</button>
+                                                <button onclick="rejectMember({{ $member['id'] }})"
+                                                    class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 text-sm">✗
+                                                    Reject</button>
                                             @endif
                                         </div>
                                     </div>
@@ -287,7 +328,9 @@
 
             <!-- Pagination -->
             <div class="flex justify-between items-center mt-8 pt-6 border-t">
-                <p class="text-sm text-gray-500" id="paginationInfo">Showing {{ $allMembers->count() }} of {{ $allMembers->count() }} members</p>
+                <p class="text-sm text-gray-500" id="paginationInfo">Showing {{ $allMembers->count() }} of
+                    {{ $allMembers->count() }} members
+                </p>
                 <div class="flex space-x-2">
                     <!-- Simple pagination for now -->
                     <span class="text-sm text-gray-500">All members loaded</span>
@@ -305,7 +348,8 @@
                         <div>
                             <div class="flex justify-between text-sm mb-1">
                                 <span class="text-gray-700">{{ $dept['name'] }}</span>
-                                <span class="font-medium text-gray-900">{{ $dept['count'] }} members ({{ $dept['percentage'] }}%)</span>
+                                <span class="font-medium text-gray-900">{{ $dept['count'] }} members
+                                    ({{ $dept['percentage'] }}%)</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-2">
                                 <div class="bg-blue-600 h-2 rounded-full" style="width: {{ $dept['percentage'] }}%"></div>
@@ -320,12 +364,14 @@
                 <h3 class="text-lg font-semibold text-gray-900 mb-6">Member Status Overview</h3>
                 <div class="grid grid-cols-2 gap-6">
                     <div class="text-center p-4 border border-gray-200 rounded-lg">
-                        <div class="text-3xl font-semibold text-green-600 mb-2">{{ $statusOverview['active_members'] }}</div>
+                        <div class="text-3xl font-semibold text-green-600 mb-2">{{ $statusOverview['active_members'] }}
+                        </div>
                         <p class="text-gray-700">Active Members</p>
                         <p class="text-xs text-gray-500 mt-1">Can access all SACCO services</p>
                     </div>
                     <div class="text-center p-4 border border-gray-200 rounded-lg">
-                        <div class="text-3xl font-semibold text-yellow-600 mb-2">{{ $statusOverview['pending_approval'] }}</div>
+                        <div class="text-3xl font-semibold text-yellow-600 mb-2">{{ $statusOverview['pending_approval'] }}
+                        </div>
                         <p class="text-gray-700">Pending Approval</p>
                         <p class="text-xs text-gray-500 mt-1">Awaiting your review</p>
                     </div>
@@ -436,47 +482,47 @@
                 const row = document.createElement('tr');
                 row.className = 'border-b border-gray-300 hover:bg-gray-50 transition';
                 row.innerHTML = `
-                    <td class="px-6 py-4 text-gray-900 font-medium border-r border-gray-300">${index + 1}</td>
-                    <td class="px-6 py-4 font-mono text-gray-900 border-r border-gray-300">${member.employee_number}</td>
-                    <td class="px-6 py-4 border-r border-gray-300">
-                        <div class="font-medium text-gray-900">${member.name}</div>
-                        <div class="text-gray-500 text-xs">${member.email}</div>
-                    </td>
-                    <td class="px-6 py-4 text-gray-700 border-r border-gray-300">
-                        ${member.department}
-                        <div class="text-gray-500 text-xs">${member.position}</div>
-                    </td>
-                    <td class="px-6 py-4 border-r border-gray-300">
-                        <div class="font-medium text-gray-900">KES ${member.savings.toLocaleString()}</div>
-                    </td>
-                    <td class="px-6 py-4 border-r border-gray-300">
-                        <div class="font-medium text-gray-900">KES ${member.loan_eligibility.toLocaleString()}</div>
-                        <div class="text-gray-500 text-xs">1.5× savings rule</div>
-                    </td>
-                    <td class="px-6 py-4 border-r border-gray-300">
-                        ${member.status === 'active' ?
+                                <td class="px-6 py-4 text-gray-900 font-medium border-r border-gray-300">${index + 1}</td>
+                                <td class="px-6 py-4 font-mono text-gray-900 border-r border-gray-300">${member.employee_number}</td>
+                                <td class="px-6 py-4 border-r border-gray-300">
+                                    <div class="font-medium text-gray-900">${member.name}</div>
+                                    <div class="text-gray-500 text-xs">${member.email}</div>
+                                </td>
+                                <td class="px-6 py-4 text-gray-700 border-r border-gray-300">
+                                    ${member.department}
+                                    <div class="text-gray-500 text-xs">${member.position}</div>
+                                </td>
+                                <td class="px-6 py-4 border-r border-gray-300">
+                                    <div class="font-medium text-gray-900">KES ${member.savings.toLocaleString()}</div>
+                                </td>
+                                <td class="px-6 py-4 border-r border-gray-300">
+                                    <div class="font-medium text-gray-900">KES ${member.loan_eligibility.toLocaleString()}</div>
+                                    <div class="text-gray-500 text-xs">1.5× savings rule</div>
+                                </td>
+                                <td class="px-6 py-4 border-r border-gray-300">
+                                    ${member.status === 'active' ?
                         '<span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">✅ Active</span>' :
                         member.status === 'pending' ?
                             '<span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">⏳ Pending</span>' :
                             '<span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">❌ Inactive</span>'}
-                        ${member.loan_status === 'default' ?
+                                    ${member.loan_status === 'default' ?
                         '<div class="mt-1"><span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">⚠️ Defaulting</span></div>' : ''}
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="relative inline-block group">
-                            <button class="px-4 py-2 bg-gray-600 text-white rounded-lg text-xs font-medium hover:bg-gray-700 transition flex items-center gap-1">
-                                Actions ▼
-                            </button>
-                            <div class="hidden group-hover:block absolute right-0 mt-0 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                                <button onclick="viewMemberDetails(${member.id})" class="w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 border-b border-gray-200 text-sm">👁 View</button>
-                                ${member.status === 'pending' ? `
-                                    <button onclick="approveMember(${member.id})" class="w-full text-left px-4 py-2 text-green-600 hover:bg-green-50 border-b border-gray-200 text-sm">✓ Approve</button>
-                                    <button onclick="rejectMember(${member.id})" class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 text-sm">✗ Reject</button>
-                                ` : ''}
-                            </div>
-                        </div>
-                    </td>
-                `;
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="relative inline-block group">
+                                        <button class="px-4 py-2 bg-gray-600 text-white rounded-lg text-xs font-medium hover:bg-gray-700 transition flex items-center gap-1">
+                                            Actions ▼
+                                        </button>
+                                        <div class="hidden group-hover:block absolute right-0 mt-0 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                                            <button onclick="viewMemberDetails(${member.id})" class="w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 border-b border-gray-200 text-sm">👁 View</button>
+                                            ${member.status === 'pending' ? `
+                                                <button onclick="approveMember(${member.id})" class="w-full text-left px-4 py-2 text-green-600 hover:bg-green-50 border-b border-gray-200 text-sm">✓ Approve</button>
+                                                <button onclick="rejectMember(${member.id})" class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 text-sm">✗ Reject</button>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                </td>
+                            `;
                 tbody.appendChild(row);
             });
 
@@ -490,7 +536,7 @@
             try {
                 const response = await fetch(`/chairman/member/${id}/details`);
                 const data = await response.json();
-                
+
                 if (data.success) {
                     const member = data.member;
                     currentMemberId = id;
@@ -498,97 +544,97 @@
                     document.getElementById('modalMemberNumber').textContent = `Member: ${member.employee_number}`;
 
                     const detailsHtml = `
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Personal Information -->
-                            <div>
-                                <h4 class="text-lg font-medium text-gray-900 mb-4">Personal Information</h4>
-                                <div class="space-y-3">
-                                    <div>
-                                        <p class="text-sm text-gray-500">Full Name</p>
-                                        <p class="font-medium text-gray-900">${member.name}</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-gray-500">Email Address</p>
-                                        <p class="font-medium text-gray-900">${member.email}</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-gray-500">Phone Number</p>
-                                        <p class="font-medium text-gray-900">${member.phone}</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-gray-500">Date Joined</p>
-                                        <p class="font-medium text-gray-900">${member.date_joined}</p>
-                                    </div>
-                                </div>
-                            </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <!-- Personal Information -->
+                                        <div>
+                                            <h4 class="text-lg font-medium text-gray-900 mb-4">Personal Information</h4>
+                                            <div class="space-y-3">
+                                                <div>
+                                                    <p class="text-sm text-gray-500">Full Name</p>
+                                                    <p class="font-medium text-gray-900">${member.name}</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm text-gray-500">Email Address</p>
+                                                    <p class="font-medium text-gray-900">${member.email}</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm text-gray-500">Phone Number</p>
+                                                    <p class="font-medium text-gray-900">${member.phone}</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm text-gray-500">Date Joined</p>
+                                                    <p class="font-medium text-gray-900">${member.date_joined}</p>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                            <!-- Employment Details -->
-                            <div>
-                                <h4 class="text-lg font-medium text-gray-900 mb-4">Employment Details</h4>
-                                <div class="space-y-3">
-                                    <div>
-                                        <p class="text-sm text-gray-500">Department</p>
-                                        <p class="font-medium text-gray-900">${member.department}</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-gray-500">Position</p>
-                                        <p class="font-medium text-gray-900">${member.position}</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-gray-500">Employee Number</p>
-                                        <p class="font-medium text-gray-900">${member.employee_number}</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-gray-500">Member Status</p>
-                                        <p class="font-medium ${member.status === 'active' ? 'text-green-600' : member.status === 'pending' ? 'text-yellow-600' : 'text-red-600'}">
-                                            ${member.status.charAt(0).toUpperCase() + member.status.slice(1)}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                                        <!-- Employment Details -->
+                                        <div>
+                                            <h4 class="text-lg font-medium text-gray-900 mb-4">Employment Details</h4>
+                                            <div class="space-y-3">
+                                                <div>
+                                                    <p class="text-sm text-gray-500">Department</p>
+                                                    <p class="font-medium text-gray-900">${member.department}</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm text-gray-500">Position</p>
+                                                    <p class="font-medium text-gray-900">${member.position}</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm text-gray-500">Employee Number</p>
+                                                    <p class="font-medium text-gray-900">${member.employee_number}</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm text-gray-500">Member Status</p>
+                                                    <p class="font-medium ${member.status === 'active' ? 'text-green-600' : member.status === 'pending' ? 'text-yellow-600' : 'text-red-600'}">
+                                                        ${member.status.charAt(0).toUpperCase() + member.status.slice(1)}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                            <!-- Financial Summary -->
-                            <div class="md:col-span-2">
-                                <h4 class="text-lg font-medium text-gray-900 mb-4">Financial Summary</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div class="bg-gray-50 p-4 rounded-lg">
-                                        <p class="text-sm text-gray-500">Total Savings</p>
-                                        <p class="text-2xl font-semibold text-gray-900">KES ${member.savings.toLocaleString()}</p>
-                                    </div>
-                                    <div class="bg-gray-50 p-4 rounded-lg">
-                                        <p class="text-sm text-gray-500">Loan Eligibility</p>
-                                        <p class="text-2xl font-semibold text-gray-900">KES ${member.loan_eligibility.toLocaleString()}</p>
-                                        <p class="text-xs text-gray-500 mt-1">Based on 1.5× savings rule</p>
-                                    </div>
-                                    <div class="bg-gray-50 p-4 rounded-lg">
-                                        <p class="text-sm text-gray-500">Loan Status</p>
-                                        <p class="text-xl font-semibold ${member.loan_status === 'active' ? 'text-blue-600' : member.loan_status === 'default' ? 'text-red-600' : 'text-gray-600'}">
-                                            ${member.loan_status_text}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                                        <!-- Financial Summary -->
+                                        <div class="md:col-span-2">
+                                            <h4 class="text-lg font-medium text-gray-900 mb-4">Financial Summary</h4>
+                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                <div class="bg-gray-50 p-4 rounded-lg">
+                                                    <p class="text-sm text-gray-500">Total Savings</p>
+                                                    <p class="text-2xl font-semibold text-gray-900">KES ${member.savings.toLocaleString()}</p>
+                                                </div>
+                                                <div class="bg-gray-50 p-4 rounded-lg">
+                                                    <p class="text-sm text-gray-500">Loan Eligibility</p>
+                                                    <p class="text-2xl font-semibold text-gray-900">KES ${member.loan_eligibility.toLocaleString()}</p>
+                                                    <p class="text-xs text-gray-500 mt-1">Based on 1.5× savings rule</p>
+                                                </div>
+                                                <div class="bg-gray-50 p-4 rounded-lg">
+                                                    <p class="text-sm text-gray-500">Loan Status</p>
+                                                    <p class="text-xl font-semibold ${member.loan_status === 'active' ? 'text-blue-600' : member.loan_status === 'default' ? 'text-red-600' : 'text-gray-600'}">
+                                                        ${member.loan_status_text}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                            <!-- Action Buttons -->
-                            ${member.status === 'pending' ? `
-                            <div class="md:col-span-2 pt-6 border-t">
-                                <h4 class="text-lg font-medium text-gray-900 mb-4">Approval Actions</h4>
-                                <div class="flex space-x-4">
-                                    <button onclick="approveMember(${member.id})"
-                                            class="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition flex items-center">
-                                        <span class="mr-2">✅</span>
-                                        Approve Member
-                                    </button>
-                                    <button onclick="rejectMember(${member.id})"
-                                            class="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition flex items-center">
-                                        <span class="mr-2">❌</span>
-                                        Reject Member
-                                    </button>
-                                </div>
-                            </div>
-                            ` : ''}
-                        </div>
-                    `;
+                                        <!-- Action Buttons -->
+                                        ${member.status === 'pending' ? `
+                                        <div class="md:col-span-2 pt-6 border-t">
+                                            <h4 class="text-lg font-medium text-gray-900 mb-4">Approval Actions</h4>
+                                            <div class="flex space-x-4">
+                                                <button onclick="approveMember(${member.id})"
+                                                        class="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition flex items-center">
+                                                    <span class="mr-2">✅</span>
+                                                    Approve Member
+                                                </button>
+                                                <button onclick="rejectMember(${member.id})"
+                                                        class="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition flex items-center">
+                                                    <span class="mr-2">❌</span>
+                                                    Reject Member
+                                                </button>
+                                            </div>
+                                        </div>
+                                        ` : ''}
+                                    </div>
+                                `;
 
                     document.getElementById('memberDetailsContent').innerHTML = detailsHtml;
                     document.getElementById('memberDetailsModal').classList.remove('hidden');

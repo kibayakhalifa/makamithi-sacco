@@ -6,6 +6,7 @@ use App\Models\Loan;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class LoanController extends Controller
 {

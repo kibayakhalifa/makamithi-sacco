@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\ChairmanController;
+use App\Http\Controllers\CommunicationController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\MemberLoanController;
 use App\Http\Controllers\MemberReportController;
 use App\Http\Controllers\MemberSavingsController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\SavingsController;
 use App\Http\Controllers\SecretaryController;
 use App\Http\Controllers\SettingsController;
@@ -352,4 +354,18 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/reports/generate', [\App\Http\Controllers\ReportController::class, 'generate'])
         ->name('reports.generate');
 
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/communications', [CommunicationController::class, 'index'])->name('communications.index');
+        Route::get('/communications/create', [CommunicationController::class, 'create'])->middleware('role:chairman,secretary,treasurer')->name('communications.create');
+        Route::post('/communications', [CommunicationController::class, 'store'])->middleware('role:chairman,secretary,treasurer')->name('communications.store');
+        Route::get('/communications/{communication}', [CommunicationController::class, 'show'])->name('communications.show');
+    });
+    Route::get('/notifications/{notification}',
+        [NotificationController::class, 'open']
+    )->name('notifications.open');
+    
+    Route::get('/communications/{communication}', [CommunicationController::class, 'show'])->name('communications.show');
+    Route::delete('/communications/{communication}', [CommunicationController::class, 'destroy'])->name('communications.destroy');
+    Route::get('/communications/{communication}/edit', [CommunicationController::class, 'edit'])->name('communications.edit');
+    Route::put('/communications/{communication}', [CommunicationController::class, 'update'])->name('communications.update');
 });

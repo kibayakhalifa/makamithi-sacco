@@ -57,6 +57,8 @@
                         <x-nav.link route="member.loans.index" current="{{ $current }}">📜 My Loans</x-nav.link>
                         <x-nav.link route="documents.index" current="{{ $current }}">📄 Documents</x-nav.link>
                         <x-nav.link route="member.reports.index" current="{{ $current }}">📈 Reports</x-nav.link>
+                        <x-nav.link route="communications.index" current="{{ $current }}">📧 Communications</x-nav.link>
+
 
                         {{-- CHAIRMAN --}}
                     @elseif($userRole === 'chairman')
@@ -65,6 +67,8 @@
                         <x-nav.link route="reports.index" current="{{ $current }}">📈 Reports</x-nav.link>
                         <x-nav.link route="chairman.members" current="{{ $current }}">👥 Members</x-nav.link>
                         <x-nav.link route="documents.index" current="{{ $current }}">📄 Documents</x-nav.link>
+                        <x-nav.link route="communications.index" current="{{ $current }}">📧 Communications</x-nav.link>
+
 
                         {{-- TREASURER --}}
                     @elseif($userRole === 'treasurer')
@@ -79,6 +83,8 @@
                         <x-nav.link route="treasurer.financial-reports" current="{{ $current }}">📈 Financial
                             Reports</x-nav.link>
                         <x-nav.link route="documents.index" current="{{ $current }}">📄 Documents</x-nav.link>
+                        <x-nav.link route="communications.index" current="{{ $current }}">📧 Communications</x-nav.link>
+
 
                         {{-- SECRETARY --}}
                     @elseif($userRole === 'secretary')
@@ -120,7 +126,31 @@
 
                 <button id="menuToggle" class="md:hidden text-gray-700 text-2xl">☰</button>
 
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-4">
+
+                    <!-- Notifications -->
+                    @auth
+                        <div class="relative">
+                            <a href="{{ route('communications.index') }}"
+                                class="relative text-gray-600 hover:text-green-700">
+                                🔔
+                                @php
+                                    $unreadCount = auth()->user()
+                                        ->notifications()
+                                        ->whereNull('read_at')
+                                        ->count();
+                                @endphp
+
+
+                                @if($unreadCount > 0)
+                                    <span class="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-1.5 rounded-full">
+                                        {{ $unreadCount }}
+                                    </span>
+                                @endif
+                            </a>
+                        </div>
+                    @endauth
+
                     <div class="hidden md:block text-right">
                         <p class="font-medium text-green-800">{{ auth()->user()->name }}</p>
                         <p class="text-xs text-green-600">
@@ -133,6 +163,7 @@
                         {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                     </div>
                 </div>
+
             </header>
 
             <!-- Page Body -->
@@ -191,6 +222,8 @@
                         <x-nav.link route="member.loans.index" current="{{ $current }}">📜 My Loans</x-nav.link>
                         <x-nav.link route="documents.index" current="{{ $current }}">📄 Documents</x-nav.link>
                         <x-nav.link route="member.reports.index" current="{{ $current }}">📈 Reports</x-nav.link>
+                        <x-nav.link route="communications.index" current="{{ $current }}">📧 Communications</x-nav.link>
+
 
                         {{-- CHAIRMAN --}}
                     @elseif($userRole === 'chairman')
@@ -199,6 +232,8 @@
                         <x-nav.link route="chairman.members" current="{{ $current }}">👥 Members</x-nav.link>
                         <x-nav.link route="reports.index" current="{{ $current }}">📈 Reports</x-nav.link>
                         <x-nav.link route="documents.index" current="{{ $current }}">📄 Documents</x-nav.link>
+                        <x-nav.link route="communications.index" current="{{ $current }}">📧 Communications</x-nav.link>
+
 
                         {{-- TREASURER --}}
                     @elseif($userRole === 'treasurer')
@@ -213,6 +248,8 @@
                         <x-nav.link route="treasurer.financial-reports" current="{{ $current }}">📈 Financial
                             Reports</x-nav.link>
                         <x-nav.link route="documents.index" current="{{ $current }}">📄 Documents</x-nav.link>
+                        <x-nav.link route="communications.index" current="{{ $current }}">📧 Communications</x-nav.link>
+
 
                         {{-- SECRETARY --}}
                     @elseif($userRole === 'secretary')

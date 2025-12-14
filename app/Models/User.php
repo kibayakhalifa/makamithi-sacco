@@ -251,4 +251,9 @@ class User extends Authenticatable
 
         return false;
     }
+
+    public function notifications()
+    {
+        return $this->hasMany(\App\Models\Notification::class);
+    }
 }

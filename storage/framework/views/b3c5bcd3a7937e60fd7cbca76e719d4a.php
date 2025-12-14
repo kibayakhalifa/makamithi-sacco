@@ -183,6 +183,26 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
+                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'communications.index','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('nav.link'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['route' => 'communications.index','current' => ''.e($current).'']); ?>📧 Communications <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+
 
                         
                     <?php elseif($userRole === 'chairman'): ?>
@@ -281,6 +301,26 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
+                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'communications.index','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('nav.link'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['route' => 'communications.index','current' => ''.e($current).'']); ?>📧 Communications <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+
 
                         
                     <?php elseif($userRole === 'treasurer'): ?>
@@ -457,6 +497,26 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
+                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'communications.index','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('nav.link'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['route' => 'communications.index','current' => ''.e($current).'']); ?>📧 Communications <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+
 
                         
                     <?php elseif($userRole === 'secretary'): ?>
@@ -606,7 +666,32 @@
 
                 <button id="menuToggle" class="md:hidden text-gray-700 text-2xl">☰</button>
 
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-4">
+
+                    <!-- Notifications -->
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->guard()->check()): ?>
+                        <div class="relative">
+                            <a href="<?php echo e(route('communications.index')); ?>"
+                                class="relative text-gray-600 hover:text-green-700">
+                                🔔
+                                <?php
+                                    $unreadCount = auth()->user()
+                                        ->notifications()
+                                        ->whereNull('read_at')
+                                        ->count();
+                                ?>
+
+
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($unreadCount > 0): ?>
+                                    <span class="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-1.5 rounded-full">
+                                        <?php echo e($unreadCount); ?>
+
+                                    </span>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            </a>
+                        </div>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
                     <div class="hidden md:block text-right">
                         <p class="font-medium text-green-800"><?php echo e(auth()->user()->name); ?></p>
                         <p class="text-xs text-green-600">
@@ -621,6 +706,7 @@
 
                     </div>
                 </div>
+
             </header>
 
             <!-- Page Body -->
@@ -859,6 +945,26 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
+                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'communications.index','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('nav.link'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['route' => 'communications.index','current' => ''.e($current).'']); ?>📧 Communications <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+
 
                         
                     <?php elseif($userRole === 'chairman'): ?>
@@ -957,6 +1063,26 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
+                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'communications.index','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('nav.link'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['route' => 'communications.index','current' => ''.e($current).'']); ?>📧 Communications <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+
 
                         
                     <?php elseif($userRole === 'treasurer'): ?>
@@ -1133,6 +1259,26 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
+                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'communications.index','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('nav.link'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['route' => 'communications.index','current' => ''.e($current).'']); ?>📧 Communications <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+
 
                         
                     <?php elseif($userRole === 'secretary'): ?>
