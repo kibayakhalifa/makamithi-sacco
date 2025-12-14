@@ -343,8 +343,11 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
             <!-- M-Pesa Details -->
             <div id="mpesaDetails" class="hidden space-y-3">
                 <div>
-                    <label class="block text-sm font-medium text-gray-900 mb-1">M-Pesa Number</label>
-                    <input type="text" name="mpesa_number" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="07XX XXX XXX">
+                    <label class="block text-sm font-medium text-gray-900 mb-1">M-Pesa Number *</label>
+                    <input type="text" name="mpesa_number" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg" 
+                        placeholder="07XX XXX XXX"
+                        required>
                 </div>
             </div>
 
@@ -368,33 +371,119 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
 </div>
 
 <script>
-    // Toggle bank/mpesa details based on payment method
-    document.querySelector('select[name="payment_method"]').addEventListener('change', function() {
-        document.getElementById('bankDetails').style.display = this.value === 'bank_transfer' ? 'block' : 'none';
-        document.getElementById('mpesaDetails').style.display = this.value === 'mpesa' ? 'block' : 'none';
-    });
-
-    // Close modal when clicking outside
-    document.getElementById('topupModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            this.classList.add('hidden');
-        }
-    });
-
-    document.getElementById('withdrawalModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            this.classList.add('hidden');
-        }
-    });
-
-    function updateWithdrawalAmount() {
-        const reason = document.getElementById('withdrawal_reason').value;
-        if (reason) {
-            document.getElementById('withdrawalWarning').style.display = 'block';
+// Fix for withdrawal modal payment method toggle
+document.addEventListener('DOMContentLoaded', function() {
+    // Function to toggle payment details based on selected method
+    function toggleWithdrawalPaymentDetails() {
+        const paymentSelect = document.querySelector('#withdrawalModal select[name="payment_method"]');
+        const bankDetails = document.getElementById('bankDetails');
+        const mpesaDetails = document.getElementById('mpesaDetails');
+        
+        if (!paymentSelect || !bankDetails || !mpesaDetails) return;
+        
+        const value = paymentSelect.value;
+        
+        if (value === 'bank_transfer') {
+            bankDetails.classList.remove('hidden');
+            mpesaDetails.classList.add('hidden');
+            // Make bank fields required
+            bankDetails.querySelectorAll('input').forEach(input => {
+                input.required = true;
+                input.disabled = false;
+            });
+            // Make M-Pesa fields not required
+            mpesaDetails.querySelectorAll('input').forEach(input => {
+                input.required = false;
+                input.disabled = true;
+            });
+        } else if (value === 'mpesa') {
+            bankDetails.classList.add('hidden');
+            mpesaDetails.classList.remove('hidden');
+            // Make bank fields not required
+            bankDetails.querySelectorAll('input').forEach(input => {
+                input.required = false;
+                input.disabled = true;
+            });
+            // Make M-Pesa field required
+            mpesaDetails.querySelectorAll('input').forEach(input => {
+                input.required = true;
+                input.disabled = false;
+            });
         } else {
-            document.getElementById('withdrawalWarning').style.display = 'none';
+            bankDetails.classList.add('hidden');
+            mpesaDetails.classList.add('hidden');
+            // Remove required from all
+            bankDetails.querySelectorAll('input').forEach(input => {
+                input.required = false;
+                input.disabled = true;
+            });
+            mpesaDetails.querySelectorAll('input').forEach(input => {
+                input.required = false;
+                input.disabled = true;
+            });
         }
     }
+    
+    // Set up payment method toggle for withdrawal modal
+    const withdrawalPaymentSelect = document.querySelector('#withdrawalModal select[name="payment_method"]');
+    if (withdrawalPaymentSelect) {
+        withdrawalPaymentSelect.addEventListener('change', toggleWithdrawalPaymentDetails);
+        // Initialize on page load
+        toggleWithdrawalPaymentDetails();
+    }
+    
+    // Set up payment method toggle for topup modal (if needed)
+    const topupPaymentSelect = document.querySelector('#topupModal select[name="payment_method"]');
+    if (topupPaymentSelect) {
+        topupPaymentSelect.addEventListener('change', function() {
+            // Add any topup-specific logic here if needed
+            console.log('Topup payment method changed to:', this.value);
+        });
+    }
+    
+    // Close modals when clicking outside
+    document.getElementById('topupModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.add('hidden');
+        }
+    });
+    
+    document.getElementById('withdrawalModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.add('hidden');
+        }
+    });
+    
+    // Close modals with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.getElementById('topupModal')?.classList.add('hidden');
+            document.getElementById('withdrawalModal')?.classList.add('hidden');
+        }
+    });
+    
+    // Update withdrawal amount warning
+    function updateWithdrawalAmount() {
+        const reason = document.getElementById('withdrawal_reason')?.value;
+        const warning = document.getElementById('withdrawalWarning');
+        if (warning) {
+            warning.style.display = reason ? 'block' : 'none';
+        }
+    }
+    
+    const withdrawalReasonSelect = document.getElementById('withdrawal_reason');
+    if (withdrawalReasonSelect) {
+        withdrawalReasonSelect.addEventListener('change', updateWithdrawalAmount);
+    }
+    
+    // Initialize everything
+    console.log('Savings page JavaScript loaded successfully');
+    
+    // Debug helper: show which modal elements exist
+    console.log('Topup Modal:', document.getElementById('topupModal') ? 'Exists' : 'Not found');
+    console.log('Withdrawal Modal:', document.getElementById('withdrawalModal') ? 'Exists' : 'Not found');
+    console.log('Withdrawal Payment Select:', withdrawalPaymentSelect ? 'Exists' : 'Not found');
+});
 </script>
 <?php $__env->stopSection(); ?>
 

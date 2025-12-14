@@ -624,7 +624,7 @@
             </header>
 
             <!-- Page Body -->
-            <main class="flex-1 overflow-y-auto p-6">
+            <main class="flex-1 overflow-y-auto p-4 md:p-6">
 
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
                     <?php if (isset($component)) { $__componentOriginalf192f9e16cd34f43530f7484bbd899b4 = $component; } ?>

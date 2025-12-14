@@ -3,233 +3,384 @@
 @section('title', 'Documents')
 
 @section('content')
-<div class="space-y-8">
+<div class="space-y-6">
 
     <!-- Header -->
-    <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-                <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">Document Management</h1>
-                <p class="text-gray-500 mt-1">
-                    Manage SACCO documents, meeting minutes, and member files
-                </p>
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <span class="text-blue-700 font-bold">📁</span>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-semibold text-gray-900">Document Management</h1>
+                        <p class="text-gray-500 text-sm md:text-base">Manage SACCO documents, meeting minutes, and member files</p>
+                    </div>
+                </div>
             </div>
-            <div class="flex space-x-3">
+            <div class="flex gap-3">
                 <button onclick="openUploadModal()"
-                        class="px-6 py-3 rounded-lg bg-gray-900 text-white font-medium hover:bg-gray-800 transition flex items-center">
-                    <span class="mr-2">📎</span>
-                    Upload Document
+                    class="px-6 py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition flex items-center gap-2">
+                    <span>📎</span> Upload Document
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Documents Dashboard -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <!-- Total Documents -->
-        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition">
-            <div class="flex justify-between items-start">
+    <!-- Document Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between">
                 <div>
-                    <div class="flex items-center mb-3">
-                        <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-3">
-                            <span class="text-gray-600 text-xl">📁</span>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">Total Documents</p>
-                            <p class="text-2xl font-semibold mt-1 text-gray-900">248</p>
-                        </div>
-                    </div>
-                    <p class="text-xs text-gray-400">4.2 GB total storage</p>
+                    <h3 class="text-gray-500 text-xs uppercase tracking-wider font-medium">Total Documents</h3>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">248</p>
+                    <p class="text-gray-500 text-sm mt-1">4.2 GB storage</p>
                 </div>
-                <div class="text-right">
-                    <div class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                        78% used
-                    </div>
+                <div class="bg-blue-50 p-3 rounded-lg">
+                    <span class="text-blue-600 text-xl">📁</span>
                 </div>
             </div>
-            <div class="mt-4 pt-4 border-t">
-                <div class="flex justify-between text-xs text-gray-500">
-                    <span class="flex items-center">
-                        <span class="w-2 h-2 bg-blue-500 rounded-full mr-1"></span>
-                        156 member files
-                    </span>
-                    <button onclick="viewAllDocuments()" class="text-gray-900 hover:text-gray-700 font-medium">
-                        View All
-                    </button>
-                </div>
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <span class="text-blue-600 text-xs font-medium">78% used</span>
             </div>
         </div>
 
-        <!-- Meeting Minutes -->
-        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition">
-            <div class="flex justify-between items-start">
+        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between">
                 <div>
-                    <div class="flex items-center mb-3">
-                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                            <span class="text-blue-600 text-xl">📝</span>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">Meeting Minutes</p>
-                            <p class="text-2xl font-semibold mt-1 text-gray-900">36</p>
-                        </div>
-                    </div>
-                    <p class="text-xs text-gray-400">Last: 10 Apr 2024</p>
+                    <h3 class="text-gray-500 text-xs uppercase tracking-wider font-medium">Meeting Minutes</h3>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">36</p>
+                    <p class="text-gray-500 text-sm mt-1">Last: 10 Apr 2024</p>
                 </div>
-                <div class="text-right">
-                    <div class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        3 pending
-                    </div>
+                <div class="bg-green-50 p-3 rounded-lg">
+                    <span class="text-green-600 text-xl">📝</span>
                 </div>
             </div>
-            <div class="mt-4 pt-4 border-t">
-                <div class="flex justify-between text-xs text-gray-500">
-                    <span class="flex items-center">
-                        <span class="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
-                        All approved
-                    </span>
-                    <button onclick="addMinutes()" class="text-gray-900 hover:text-gray-700 font-medium">
-                        Add Minutes
-                    </button>
-                </div>
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <span class="text-green-600 text-xs font-medium">3 pending approval</span>
             </div>
         </div>
 
-        <!-- Loan Documents -->
-        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition">
-            <div class="flex justify-between items-start">
+        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between">
                 <div>
-                    <div class="flex items-center mb-3">
-                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3">
-                            <span class="text-green-600 text-xl">📄</span>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">Loan Documents</p>
-                            <p class="text-2xl font-semibold mt-1 text-gray-900">84</p>
-                        </div>
-                    </div>
-                    <p class="text-xs text-gray-400">24 active loans</p>
+                    <h3 class="text-gray-500 text-xs uppercase tracking-wider font-medium">Loan Documents</h3>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">84</p>
+                    <p class="text-gray-500 text-sm mt-1">24 active loans</p>
                 </div>
-                <div class="text-right">
-                    <div class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        12 pending
-                    </div>
+                <div class="bg-orange-50 p-3 rounded-lg">
+                    <span class="text-orange-600 text-xl">📄</span>
                 </div>
             </div>
-            <div class="mt-4 pt-4 border-t">
-                <div class="flex justify-between text-xs text-gray-500">
-                    <span class="flex items-center">
-                        <span class="w-2 h-2 bg-yellow-500 rounded-full mr-1"></span>
-                        Avg: 3.5 per loan
-                    </span>
-                    <button onclick="viewLoanDocs()" class="text-gray-900 hover:text-gray-700 font-medium">
-                        Review
-                    </button>
-                </div>
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <span class="text-orange-600 text-xs font-medium">12 pending review</span>
             </div>
         </div>
 
-        <!-- Member Files -->
-        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition">
-            <div class="flex justify-between items-start">
+        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between">
                 <div>
-                    <div class="flex items-center mb-3">
-                        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-3">
-                            <span class="text-purple-600 text-xl">👤</span>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">Member Files</p>
-                            <p class="text-2xl font-semibold mt-1 text-gray-900">156</p>
-                        </div>
-                    </div>
-                    <p class="text-xs text-gray-400">All 156 members</p>
+                    <h3 class="text-gray-500 text-xs uppercase tracking-wider font-medium">Member Files</h3>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">156</p>
+                    <p class="text-gray-500 text-sm mt-1">All 156 members</p>
                 </div>
-                <div class="text-right">
-                    <div class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                        8 incomplete
-                    </div>
+                <div class="bg-purple-50 p-3 rounded-lg">
+                    <span class="text-purple-600 text-xl">👤</span>
                 </div>
             </div>
-            <div class="mt-4 pt-4 border-t">
-                <div class="flex justify-between text-xs text-gray-500">
-                    <span class="flex items-center">
-                        <span class="w-2 h-2 bg-red-500 rounded-full mr-1"></span>
-                        Review needed
-                    </span>
-                    <button onclick="checkMemberFiles()" class="text-gray-900 hover:text-gray-700 font-medium">
-                        Check Files
-                    </button>
-                </div>
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <span class="text-purple-600 text-xs font-medium">8 incomplete</span>
             </div>
         </div>
     </div>
 
-    <!-- Two Column Layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Left Column: Recent Documents & Uploads -->
-        <div class="space-y-6">
-            <!-- Recent Documents -->
-            <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900">Recent Documents</h3>
-                        <p class="text-sm text-gray-500">Last 7 days</p>
-                    </div>
-                    <button onclick="viewRecentDocs()" class="text-sm text-gray-900 font-medium hover:text-gray-700">
-                        View all →
-                    </button>
+    <!-- Tabs -->
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="border-b border-gray-200">
+            <nav class="flex overflow-x-auto">
+                <button onclick="switchTab('all')" id="allTab"
+                    class="px-6 py-4 font-medium border-b-2 border-blue-600 text-blue-700 whitespace-nowrap">
+                    📁 All Documents
+                </button>
+                <button onclick="switchTab('minutes')" id="minutesTab"
+                    class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
+                    📝 Meeting Minutes
+                </button>
+                <button onclick="switchTab('loans')" id="loansTab"
+                    class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
+                    📄 Loan Documents
+                </button>
+                <button onclick="switchTab('members')" id="membersTab"
+                    class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
+                    👤 Member Files
+                </button>
+                <button onclick="switchTab('categories')" id="categoriesTab"
+                    class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
+                    📊 Categories
+                </button>
+            </nav>
+        </div>
+
+        <!-- All Documents -->
+        <div id="allContent" class="p-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">All Documents</h3>
+                    <p class="text-gray-500 text-sm">Complete document repository</p>
                 </div>
-
-                <div class="space-y-4">
-                    @php
-                        $recentDocs = [
-                            ['name' => 'SACCO Meeting Minutes - April 10.pdf', 'type' => 'minutes', 'size' => '2.4 MB', 'uploaded' => '2 hours ago', 'uploader' => 'Secretary'],
-                            ['name' => 'Loan Application - John Doe.docx', 'type' => 'loan', 'size' => '1.2 MB', 'uploaded' => '1 day ago', 'uploader' => 'John Doe'],
-                            ['name' => 'Member Register - Q1 2024.xlsx', 'type' => 'register', 'size' => '3.8 MB', 'uploaded' => '2 days ago', 'uploader' => 'Secretary'],
-                            ['name' => 'Bank Statement - March 2024.pdf', 'type' => 'financial', 'size' => '4.2 MB', 'uploaded' => '3 days ago', 'uploader' => 'Treasurer'],
-                        ];
-                    @endphp
-
-                    @foreach($recentDocs as $doc)
-                    <div class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                        <div class="flex items-start justify-between">
-                            <div class="flex items-start">
-                                <div class="w-10 h-10 rounded-lg {{ $doc['type'] == 'minutes' ? 'bg-blue-100' : ($doc['type'] == 'loan' ? 'bg-green-100' : 'bg-gray-100') }} flex items-center justify-center mr-3">
-                                    <span class="{{ $doc['type'] == 'minutes' ? 'text-blue-600' : ($doc['type'] == 'loan' ? 'text-green-600' : 'text-gray-600') }}">
-                                        {{ $doc['type'] == 'minutes' ? '📝' : ($doc['type'] == 'loan' ? '📄' : '📊') }}
-                                    </span>
-                                </div>
-                                <div>
-                                    <p class="font-medium text-gray-900">{{ $doc['name'] }}</p>
-                                    <div class="flex items-center space-x-3 mt-1">
-                                        <span class="text-xs text-gray-500">{{ $doc['size'] }}</span>
-                                        <span class="text-xs text-gray-500">•</span>
-                                        <span class="text-xs text-gray-500">{{ $doc['uploaded'] }}</span>
-                                        <span class="text-xs text-gray-500">•</span>
-                                        <span class="text-xs text-gray-500">By {{ $doc['uploader'] }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex space-x-2">
-                                <button class="p-2 text-gray-500 hover:text-gray-700" title="Download">
-                                    ⬇️
-                                </button>
-                                <button class="p-2 text-gray-500 hover:text-gray-700" title="Preview">
-                                    👁️
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    @endforeach
+                <div class="flex gap-2">
+                    <input type="text" placeholder="Search documents..."
+                        class="px-4 py-2 border border-gray-300 rounded-lg text-sm w-full md:w-auto"
+                        id="searchInput">
+                    <select class="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+                        id="categoryFilter">
+                        <option value="">All Categories</option>
+                        <option value="minutes">Meeting Minutes</option>
+                        <option value="loans">Loan Documents</option>
+                        <option value="members">Member Files</option>
+                        <option value="financial">Financial Reports</option>
+                    </select>
                 </div>
             </div>
 
-            <!-- Quick Upload -->
-            <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                <div class="mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900">Quick Upload</h3>
-                    <p class="text-sm text-gray-500">Upload documents quickly</p>
-                </div>
+            @php
+                $recentDocs = [
+                    ['name' => 'SACCO Meeting Minutes - April 10.pdf', 'type' => 'minutes', 'size' => '2.4 MB', 'uploaded' => '2 hours ago', 'uploader' => 'Secretary', 'category' => 'Meeting Minutes'],
+                    ['name' => 'Loan Application - John Doe.docx', 'type' => 'loan', 'size' => '1.2 MB', 'uploaded' => '1 day ago', 'uploader' => 'John Doe', 'category' => 'Loan Documents'],
+                    ['name' => 'Member Register - Q1 2024.xlsx', 'type' => 'register', 'size' => '3.8 MB', 'uploaded' => '2 days ago', 'uploader' => 'Secretary', 'category' => 'Member Files'],
+                    ['name' => 'Bank Statement - March 2024.pdf', 'type' => 'financial', 'size' => '4.2 MB', 'uploaded' => '3 days ago', 'uploader' => 'Treasurer', 'category' => 'Financial Reports'],
+                    ['name' => 'SACCO Constitution.pdf', 'type' => 'policy', 'size' => '5.1 MB', 'uploaded' => '1 week ago', 'uploader' => 'Chairman', 'category' => 'Policies'],
+                    ['name' => 'Loan Repayment Schedule.xlsx', 'type' => 'loan', 'size' => '2.8 MB', 'uploaded' => '1 week ago', 'uploader' => 'Treasurer', 'category' => 'Loan Documents'],
+                ];
+            @endphp
 
+            <div class="overflow-x-auto border border-gray-300 rounded-lg">
+                <table class="min-w-full divide-y divide-gray-200 border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                #
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Document
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Category
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Size
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Uploaded
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Uploader
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach($recentDocs as $index => $doc)
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium border border-gray-300">
+                                {{ $index + 1 }}
+                            </td>
+                            <td class="px-4 py-3 border border-gray-300">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 {{ $doc['type'] == 'minutes' ? 'bg-green-50' : ($doc['type'] == 'loan' ? 'bg-orange-50' : 'bg-blue-50') }} rounded-lg flex items-center justify-center mr-3">
+                                        <span class="{{ $doc['type'] == 'minutes' ? 'text-green-600' : ($doc['type'] == 'loan' ? 'text-orange-600' : 'text-blue-600') }} text-sm">
+                                            {{ $doc['type'] == 'minutes' ? '📝' : ($doc['type'] == 'loan' ? '📄' : '📁') }}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900 text-sm">{{ $doc['name'] }}</p>
+                                        <p class="text-gray-500 text-xs">{{ $doc['type'] }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap border border-gray-300">
+                                <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800 border border-gray-200">
+                                    {{ $doc['category'] }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 border border-gray-300">
+                                {{ $doc['size'] }}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 border border-gray-300">
+                                {{ $doc['uploaded'] }}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700 border border-gray-300">
+                                {{ $doc['uploader'] }}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap border border-gray-300">
+                                <div class="flex gap-2">
+                                    <button onclick="downloadDocument('{{ $doc['name'] }}')"
+                                        class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1.5 rounded text-xs font-medium">
+                                        Download
+                                    </button>
+                                    <button onclick="previewDocument('{{ $doc['name'] }}')"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium">
+                                        Preview
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Meeting Minutes -->
+        <div id="minutesContent" class="p-6 hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Meeting Minutes</h3>
+                    <p class="text-gray-500 text-sm">SACCO meeting records</p>
+                </div>
+                <button onclick="addMeetingMinutes()"
+                    class="px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition flex items-center gap-2">
+                    <span>📝</span> Add Minutes
+                </button>
+            </div>
+
+            @php
+                $meetings = [
+                    ['date' => '10 Apr 2024', 'title' => 'Monthly SACCO Meeting', 'attendees' => 8, 'status' => 'approved', 'size' => '2.4 MB'],
+                    ['date' => '27 Mar 2024', 'title' => 'Loan Committee Meeting', 'attendees' => 5, 'status' => 'approved', 'size' => '1.8 MB'],
+                    ['date' => '13 Mar 2024', 'title' => 'Monthly SACCO Meeting', 'attendees' => 8, 'status' => 'approved', 'size' => '2.1 MB'],
+                    ['date' => '28 Feb 2024', 'title' => 'Emergency Meeting', 'attendees' => 6, 'status' => 'draft', 'size' => '1.5 MB'],
+                ];
+            @endphp
+
+            <div class="overflow-x-auto border border-gray-300 rounded-lg">
+                <table class="min-w-full divide-y divide-gray-200 border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Meeting Date
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Title
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Attendees
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Status
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Size
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach($meetings as $meeting)
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium border border-gray-300">
+                                {{ $meeting['date'] }}
+                            </td>
+                            <td class="px-4 py-3 border border-gray-300">
+                                <p class="font-medium text-gray-900 text-sm">{{ $meeting['title'] }}</p>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 border border-gray-300">
+                                {{ $meeting['attendees'] }} members
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap border border-gray-300">
+                                <span class="px-2 py-1 text-xs rounded-full {{ $meeting['status'] == 'approved' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-orange-100 text-orange-800 border border-orange-200' }}">
+                                    {{ ucfirst($meeting['status']) }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 border border-gray-300">
+                                {{ $meeting['size'] }}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap border border-gray-300">
+                                <div class="flex gap-2">
+                                    <button onclick="viewMeeting('{{ $meeting['title'] }}')"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium">
+                                        View
+                                    </button>
+                                    @if($meeting['status'] == 'draft')
+                                    <button onclick="editMeeting('{{ $meeting['title'] }}')"
+                                        class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1.5 rounded text-xs font-medium">
+                                        Edit
+                                    </button>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Categories -->
+        <div id="categoriesContent" class="p-6 hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Document Categories</h3>
+                    <p class="text-gray-500 text-sm">Organized by document type</p>
+                </div>
+                <button onclick="manageCategories()"
+                    class="px-4 py-2 rounded-lg bg-purple-600 text-white text-sm font-medium hover:bg-purple-700 transition flex items-center gap-2">
+                    <span>⚙️</span> Manage Categories
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @php
+                    $categories = [
+                        ['name' => 'Meeting Minutes', 'count' => 36, 'icon' => '📝', 'color' => 'green'],
+                        ['name' => 'Loan Documents', 'count' => 84, 'icon' => '📄', 'color' => 'orange'],
+                        ['name' => 'Member Files', 'count' => 156, 'icon' => '👤', 'color' => 'purple'],
+                        ['name' => 'Financial Reports', 'count' => 24, 'icon' => '💰', 'color' => 'blue'],
+                        ['name' => 'Policies & Procedures', 'count' => 12, 'icon' => '📋', 'color' => 'red'],
+                        ['name' => 'Correspondence', 'count' => 48, 'icon' => '✉️', 'color' => 'indigo'],
+                    ];
+                @endphp
+
+                @foreach($categories as $category)
+                <div class="border border-gray-200 rounded-lg p-4 hover:border-gray-300 hover:shadow-md transition bg-white">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-{{ $category['color'] }}-50 rounded-lg flex items-center justify-center">
+                                <span class="text-{{ $category['color'] }}-600 text-lg">{{ $category['icon'] }}</span>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">{{ $category['name'] }}</p>
+                                <p class="text-gray-500 text-sm">{{ $category['count'] }} documents</p>
+                            </div>
+                        </div>
+                        <span class="text-gray-400">→</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="viewCategory('{{ $category['name'] }}')"
+                            class="flex-1 bg-gray-900 hover:bg-gray-800 text-white py-2 rounded text-xs font-medium">
+                            View Documents
+                        </button>
+                        <button onclick="editCategory('{{ $category['name'] }}')"
+                            class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-2 rounded text-xs font-medium">
+                            Edit
+                        </button>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Upload & Categories -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Upload</h3>
+            <div class="space-y-4">
                 <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition cursor-pointer"
                      onclick="document.getElementById('fileInput').click()">
                     <div class="text-4xl mb-4">📎</div>
@@ -238,193 +389,93 @@
                     <input type="file" id="fileInput" class="hidden" multiple onchange="handleFileUpload(event)">
                 </div>
 
-                <div class="mt-4 space-y-3" id="uploadQueue">
+                <div class="space-y-3" id="uploadQueue">
                     <!-- Upload queue will appear here -->
                 </div>
 
-                <div class="mt-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                    <select class="w-full px-4 py-3 border border-gray-300 rounded-lg">
+                <div class="flex gap-2">
+                    <select class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm">
                         <option value="">Select category...</option>
                         <option value="minutes">Meeting Minutes</option>
                         <option value="loan">Loan Documents</option>
                         <option value="member">Member Files</option>
                         <option value="financial">Financial Reports</option>
-                        <option value="other">Other Documents</option>
                     </select>
-                </div>
-
-                <div class="mt-6 flex justify-end">
                     <button onclick="processUploads()"
-                            class="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition flex items-center">
-                        <span class="mr-2">📤</span>
-                        Upload All
+                        class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition">
+                        Upload
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Right Column: Document Categories & Management -->
-        <div class="space-y-6">
-            <!-- Document Categories -->
-            <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900">Document Categories</h3>
-                        <p class="text-sm text-gray-500">Organized by type</p>
-                    </div>
-                    <button onclick="manageCategories()" class="text-sm text-gray-900 font-medium hover:text-gray-700">
-                        Manage
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @php
-                        $categories = [
-                            ['name' => 'Meeting Minutes', 'count' => 36, 'icon' => '📝', 'color' => 'blue'],
-                            ['name' => 'Loan Documents', 'count' => 84, 'icon' => '📄', 'color' => 'green'],
-                            ['name' => 'Member Files', 'count' => 156, 'icon' => '👤', 'color' => 'purple'],
-                            ['name' => 'Financial Reports', 'count' => 24, 'icon' => '💰', 'color' => 'yellow'],
-                            ['name' => 'Policies & Procedures', 'count' => 12, 'icon' => '📋', 'color' => 'red'],
-                            ['name' => 'Correspondence', 'count' => 48, 'icon' => '✉️', 'color' => 'indigo'],
-                        ];
-                    @endphp
-
-                    @foreach($categories as $category)
-                    <div class="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition cursor-pointer group"
-                         onclick="viewCategory('{{ $category['name'] }}')">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 rounded-lg bg-{{ $category['color'] }}-100 flex items-center justify-center mr-3">
-                                    <span class="text-{{ $category['color'] }}-600">{{ $category['icon'] }}</span>
-                                </div>
-                                <div>
-                                    <p class="font-medium text-gray-900">{{ $category['name'] }}</p>
-                                    <p class="text-sm text-gray-500">{{ $category['count'] }} documents</p>
-                                </div>
-                            </div>
-                            <span class="text-gray-400 group-hover:text-gray-600">→</span>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <div class="space-y-3">
+                <button onclick="openUploadModal()"
+                    class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm">
+                    <span>📎</span> Upload Document
+                </button>
+                <button onclick="addMeetingMinutes()"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm">
+                    <span>📝</span> Add Meeting Minutes
+                </button>
+                <button onclick="generateReport('storage')"
+                    class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm">
+                    <span>📊</span> Storage Report
+                </button>
+                <button onclick="exportDocumentList()"
+                    class="w-full bg-gray-600 hover:bg-gray-700 text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm">
+                    <span>💾</span> Export Document List
+                </button>
             </div>
-
-            <!-- Meeting Minutes Management -->
-            <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900">Meeting Minutes</h3>
-                        <p class="text-sm text-gray-500">Recent SACCO meetings</p>
-                    </div>
-                    <button onclick="addMeetingMinutes()" class="text-sm text-gray-900 font-medium hover:text-gray-700">
-                        + Add Minutes
-                    </button>
-                </div>
-
-                <div class="space-y-4">
-                    @php
-                        $meetings = [
-                            ['date' => '10 Apr 2024', 'title' => 'Monthly SACCO Meeting', 'attendees' => 8, 'status' => 'approved', 'size' => '2.4 MB'],
-                            ['date' => '27 Mar 2024', 'title' => 'Loan Committee Meeting', 'attendees' => 5, 'status' => 'approved', 'size' => '1.8 MB'],
-                            ['date' => '13 Mar 2024', 'title' => 'Monthly SACCO Meeting', 'attendees' => 8, 'status' => 'approved', 'size' => '2.1 MB'],
-                            ['date' => '28 Feb 2024', 'title' => 'Emergency Meeting', 'attendees' => 6, 'status' => 'draft', 'size' => '1.5 MB'],
-                        ];
-                    @endphp
-
-                    @foreach($meetings as $meeting)
-                    <div class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                        <div class="flex justify-between items-start mb-3">
-                            <div>
-                                <p class="font-medium text-gray-900">{{ $meeting['title'] }}</p>
-                                <p class="text-sm text-gray-500">{{ $meeting['date'] }} • {{ $meeting['attendees'] }} attendees</p>
-                            </div>
-                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium 
-                                {{ $meeting['status'] == 'approved' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
-                                {{ ucfirst($meeting['status']) }}
-                            </span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-500">{{ $meeting['size'] }}</span>
-                            <div class="flex space-x-2">
-                                <button class="text-xs text-gray-900 hover:text-gray-700">View</button>
-                                <button class="text-xs text-gray-900 hover:text-gray-700">Download</button>
-                                @if($meeting['status'] == 'draft')
-                                <button class="text-xs text-gray-900 hover:text-gray-700">Edit</button>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-
-            
         </div>
     </div>
 
 </div>
 
 <!-- Upload Modal -->
-<div id="uploadModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div class="p-6 border-b">
+<div id="uploadModal" class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 hidden items-center justify-center p-4 transition-opacity duration-200">
+    <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="p-6 border-b border-gray-200">
             <div class="flex justify-between items-center">
                 <h3 class="text-xl font-semibold text-gray-900">Upload Document</h3>
-                <button onclick="closeUploadModal()" class="text-gray-500 hover:text-gray-700">
-                    ✕
+                <button onclick="closeUploadModal()"
+                    class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors">
+                    <span class="text-gray-500 hover:text-gray-700">✕</span>
                 </button>
             </div>
             <p class="text-gray-500 text-sm mt-1">Upload and categorize a new document</p>
         </div>
 
         <div class="p-6 space-y-6">
-            <!-- Document Details -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Document Title *</label>
                 <input type="text" id="docTitle"
-                       class="w-full px-4 py-3 border border-gray-300 rounded-lg"
-                       placeholder="e.g., SACCO Meeting Minutes - April 2024">
+                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors"
+                    placeholder="e.g., SACCO Meeting Minutes - April 2024">
             </div>
 
-            <!-- Category Selection -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    <button class="p-3 border border-gray-200 rounded-lg hover:border-gray-900 transition text-center doc-category"
-                            onclick="selectCategory('minutes')">
-                        <div class="text-2xl mb-2">📝</div>
-                        <p class="text-sm font-medium">Meeting Minutes</p>
+                    @foreach([
+                        ['id' => 'minutes', 'icon' => '📝', 'name' => 'Meeting Minutes'],
+                        ['id' => 'loan', 'icon' => '📄', 'name' => 'Loan Documents'],
+                        ['id' => 'member', 'icon' => '👤', 'name' => 'Member Files'],
+                        ['id' => 'financial', 'icon' => '💰', 'name' => 'Financial Reports'],
+                        ['id' => 'policy', 'icon' => '📋', 'name' => 'Policies'],
+                        ['id' => 'other', 'icon' => '📎', 'name' => 'Other']
+                    ] as $category)
+                    <button class="p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition text-center category-btn"
+                        onclick="selectCategory('{{ $category['id'] }}')" id="cat-{{ $category['id'] }}">
+                        <div class="text-2xl mb-2">{{ $category['icon'] }}</div>
+                        <p class="text-sm font-medium">{{ $category['name'] }}</p>
                     </button>
-                    <button class="p-3 border border-gray-200 rounded-lg hover:border-gray-900 transition text-center doc-category"
-                            onclick="selectCategory('loan')">
-                        <div class="text-2xl mb-2">📄</div>
-                        <p class="text-sm font-medium">Loan Documents</p>
-                    </button>
-                    <button class="p-3 border border-gray-200 rounded-lg hover:border-gray-900 transition text-center doc-category"
-                            onclick="selectCategory('member')">
-                        <div class="text-2xl mb-2">👤</div>
-                        <p class="text-sm font-medium">Member Files</p>
-                    </button>
-                    <button class="p-3 border border-gray-200 rounded-lg hover:border-gray-900 transition text-center doc-category"
-                            onclick="selectCategory('financial')">
-                        <div class="text-2xl mb-2">💰</div>
-                        <p class="text-sm font-medium">Financial Reports</p>
-                    </button>
-                    <button class="p-3 border border-gray-200 rounded-lg hover:border-gray-900 transition text-center doc-category"
-                            onclick="selectCategory('policy')">
-                        <div class="text-2xl mb-2">📋</div>
-                        <p class="text-sm font-medium">Policies</p>
-                    </button>
-                    <button class="p-3 border border-gray-200 rounded-lg hover:border-gray-900 transition text-center doc-category"
-                            onclick="selectCategory('other')">
-                        <div class="text-2xl mb-2">📎</div>
-                        <p class="text-sm font-medium">Other</p>
-                    </button>
+                    @endforeach
                 </div>
             </div>
 
-            <!-- File Upload -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Select File *</label>
                 <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition cursor-pointer"
@@ -437,50 +488,20 @@
                 <div class="mt-3" id="selectedFileInfo"></div>
             </div>
 
-            <!-- Description -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
                 <textarea id="docDescription" rows="3"
-                          class="w-full px-4 py-3 border border-gray-300 rounded-lg"
-                          placeholder="Optional description of the document..."></textarea>
+                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors resize-none"
+                    placeholder="Optional description..."></textarea>
             </div>
 
-            <!-- Access Control -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Access Permissions</label>
-                <div class="space-y-3">
-                    <div class="flex items-center">
-                        <input type="radio" name="access" checked class="mr-3">
-                        <div>
-                            <p class="font-medium text-gray-900">Committee Members Only</p>
-                            <p class="text-sm text-gray-500">Chairman, Treasurer, Secretary</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center">
-                        <input type="radio" name="access" class="mr-3">
-                        <div>
-                            <p class="font-medium text-gray-900">All Members</p>
-                            <p class="text-sm text-gray-500">Visible to all SACCO members</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center">
-                        <input type="radio" name="access" class="mr-3">
-                        <div>
-                            <p class="font-medium text-gray-900">Restricted</p>
-                            <p class="text-sm text-gray-500">Specific members only</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="flex justify-end space-x-3 pt-6 border-t">
+            <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
                 <button onclick="closeUploadModal()"
-                        class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition">
+                    class="px-6 py-3 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition">
                     Cancel
                 </button>
                 <button onclick="uploadDocument()"
-                        class="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition flex items-center">
+                    class="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition flex items-center">
                     <span class="mr-2">📤</span>
                     Upload Document
                 </button>
@@ -490,14 +511,31 @@
 </div>
 
 <script>
-    // Quick Upload Functions
+    // Tab switching
+    function switchTab(tabName) {
+        // Hide all content
+        ['all', 'minutes', 'loans', 'members', 'categories'].forEach(tab => {
+            document.getElementById(tab + 'Content').classList.add('hidden');
+            document.getElementById(tab + 'Tab').classList.remove('border-b-2', 'border-blue-600', 'text-blue-700');
+            document.getElementById(tab + 'Tab').classList.add('text-gray-500');
+        });
+
+        // Show selected content
+        document.getElementById(tabName + 'Content').classList.remove('hidden');
+
+        // Activate selected tab
+        document.getElementById(tabName + 'Tab').classList.add('border-b-2', 'border-blue-600', 'text-blue-700');
+        document.getElementById(tabName + 'Tab').classList.remove('text-gray-500');
+    }
+
+    // Quick Upload
     let uploadQueue = [];
 
     function handleFileUpload(event) {
         const files = Array.from(event.target.files);
         
         files.forEach(file => {
-            if (file.size > 10 * 1024 * 1024) { // 10MB limit
+            if (file.size > 10 * 1024 * 1024) {
                 alert(`File "${file.name}" exceeds 10MB limit`);
                 return;
             }
@@ -506,21 +544,20 @@
             addToUploadQueue(file);
         });
         
-        // Clear file input
         event.target.value = '';
     }
 
     function addToUploadQueue(file) {
         const queue = document.getElementById('uploadQueue');
         const item = document.createElement('div');
-        item.className = 'flex items-center justify-between p-3 border border-gray-200 rounded-lg';
+        item.className = 'flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white';
         item.innerHTML = `
             <div class="flex items-center">
                 <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center mr-3">
                     📎
                 </div>
                 <div>
-                    <p class="font-medium text-gray-900">${file.name}</p>
+                    <p class="font-medium text-gray-900 text-sm">${file.name}</p>
                     <p class="text-xs text-gray-500">${formatFileSize(file.size)}</p>
                 </div>
             </div>
@@ -534,7 +571,6 @@
     function removeFromQueue(fileName) {
         uploadQueue = uploadQueue.filter(file => file.name !== fileName);
         
-        // Remove from UI
         const items = document.querySelectorAll('#uploadQueue div');
         items.forEach(item => {
             if (item.querySelector('.font-medium').textContent === fileName) {
@@ -559,7 +595,6 @@
         
         alert(`Uploading ${uploadQueue.length} file(s)...`);
         
-        // Simulate upload
         setTimeout(() => {
             alert('Files uploaded successfully!');
             uploadQueue = [];
@@ -567,16 +602,18 @@
         }, 2000);
     }
 
-    // Upload Modal Functions
+    // Modal Functions
     let selectedCategory = '';
 
     function openUploadModal() {
         document.getElementById('uploadModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
         resetUploadModal();
     }
 
     function closeUploadModal() {
         document.getElementById('uploadModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
         resetUploadModal();
     }
 
@@ -586,8 +623,7 @@
         document.getElementById('docDescription').value = '';
         document.getElementById('selectedFileInfo').innerHTML = '';
         
-        // Reset category selection
-        document.querySelectorAll('.doc-category').forEach(el => {
+        document.querySelectorAll('.category-btn').forEach(el => {
             el.classList.remove('border-gray-900', 'bg-gray-50');
         });
     }
@@ -595,12 +631,11 @@
     function selectCategory(category) {
         selectedCategory = category;
         
-        // Update selection
-        document.querySelectorAll('.doc-category').forEach(el => {
+        document.querySelectorAll('.category-btn').forEach(el => {
             el.classList.remove('border-gray-900', 'bg-gray-50');
         });
         
-        event.target.closest('.doc-category').classList.add('border-gray-900', 'bg-gray-50');
+        event.target.closest('.category-btn').classList.add('border-gray-900', 'bg-gray-50');
     }
 
     function handleModalFileSelect(event) {
@@ -652,77 +687,70 @@
             return;
         }
         
-        // Show success message
         alert('Document uploaded successfully!');
         closeUploadModal();
     }
 
-    // Other functions
-    function viewAllDocuments() {
-        alert('Viewing all documents...');
+    // Action Functions
+    function downloadDocument(name) {
+        alert(`Downloading: ${name}`);
     }
 
-    function addMinutes() {
-        alert('Adding meeting minutes...');
+    function previewDocument(name) {
+        alert(`Previewing: ${name}`);
+    }
+
+    function addMeetingMinutes() {
         openUploadModal();
+        selectCategory('minutes');
     }
 
-    function viewLoanDocs() {
-        alert('Viewing loan documents...');
+    function viewMeeting(title) {
+        alert(`Viewing: ${title}`);
     }
 
-    function checkMemberFiles() {
-        alert('Checking member files...');
-    }
-
-    function viewRecentDocs() {
-        alert('Viewing recent documents...');
-    }
-
-    function manageCategories() {
-        alert('Managing categories...');
+    function editMeeting(title) {
+        alert(`Editing: ${title}`);
     }
 
     function viewCategory(name) {
         alert(`Viewing category: ${name}`);
     }
 
-    function addMeetingMinutes() {
-        alert('Adding meeting minutes...');
-        openUploadModal();
+    function editCategory(name) {
+        alert(`Editing category: ${name}`);
+    }
+
+    function manageCategories() {
+        alert('Managing categories...');
+    }
+
+    function generateReport(type) {
+        alert(`Generating ${type} report...`);
+    }
+
+    function exportDocumentList() {
+        if (confirm('Export document list to Excel?')) {
+            alert('Exporting document list...');
+        }
     }
 
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
-        // Close modal when clicking outside
+        switchTab('all');
+        
         window.onclick = function(event) {
             const modal = document.getElementById('uploadModal');
-            if (event.target == modal) {
+            if (event.target === modal) {
                 closeUploadModal();
             }
         }
+        
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeUploadModal();
+            }
+        });
     });
 </script>
-
-<style>
-    .doc-category.border-gray-900 {
-        border-color: #111827;
-        background-color: #f9fafb;
-    }
-    
-    .file-upload:hover {
-        border-color: #6b7280;
-    }
-    
-    .storage-bar {
-        height: 8px;
-        border-radius: 4px;
-        overflow: hidden;
-    }
-    
-    .storage-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #3b82f6, #10b981);
-    }
-</style>
 @endsection

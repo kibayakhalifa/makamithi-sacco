@@ -3,440 +3,465 @@
 @section('title', 'Communications')
 
 @section('content')
-<div class="space-y-6 md:space-y-8">
+<div class="space-y-6">
 
     <!-- Header -->
-    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
+    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-                <h1 class="text-2xl md:text-3xl font-semibold text-gray-900 tracking-tight">Communications Center</h1>
-                <p class="text-gray-500 mt-1 text-sm md:text-base">
-                    Manage SACCO communications, notifications, and member correspondence
-                </p>
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <span class="text-blue-700 font-bold">📨</span>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-semibold text-gray-900">Communications Center</h1>
+                        <p class="text-gray-500 text-sm md:text-base">Manage SACCO communications, notifications, and member correspondence</p>
+                    </div>
+                </div>
             </div>
-            <div class="flex space-x-3">
+            <div class="flex gap-3">
                 <button onclick="openNewCommunication()"
-                        class="px-5 md:px-6 py-2.5 md:py-3 rounded-xl bg-gray-900 text-white font-medium hover:bg-gray-800 transition-all duration-200 flex items-center shadow-sm hover:shadow">
-                    <span class="mr-2">✉️</span>
-                    New Communication
+                    class="px-6 py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition flex items-center gap-2">
+                    <span>✉️</span> New Communication
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Communications Dashboard -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        <!-- SMS Communications -->
-        <div class="bg-white rounded-3xl p-5 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 group">
-            <div class="flex justify-between items-start">
+    <!-- Communications Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between">
                 <div>
-                    <div class="flex items-center mb-3">
-                        <div class="w-10 h-10 rounded-2xl bg-gray-100 flex items-center justify-center mr-3 group-hover:bg-gray-200 transition-colors">
-                            <span class="text-gray-700 text-xl">📱</span>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">SMS Sent</p>
-                            <p class="text-2xl font-semibold mt-1 text-gray-900">248</p>
-                        </div>
-                    </div>
-                    <p class="text-xs text-gray-400">This month: 42 messages</p>
+                    <h3 class="text-gray-500 text-xs uppercase tracking-wider font-medium">SMS Sent</h3>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">248</p>
+                    <p class="text-gray-500 text-sm mt-1">This month: 42</p>
                 </div>
-                <div class="text-right">
-                    <div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                        98% delivered
-                    </div>
+                <div class="bg-green-50 p-3 rounded-lg">
+                    <span class="text-green-600 text-xl">📱</span>
                 </div>
             </div>
             <div class="mt-4 pt-4 border-t border-gray-100">
-                <div class="flex justify-between text-xs text-gray-500">
-                    <span class="flex items-center">
-                        <span class="w-2 h-2 bg-gray-400 rounded-full mr-1.5"></span>
-                        Remaining: 752
-                    </span>
-                    <button onclick="sendSMS()" class="text-gray-900 hover:text-gray-700 font-medium transition-colors">
-                        Send SMS →
-                    </button>
-                </div>
+                <span class="text-green-600 text-xs font-medium">98% delivered</span>
             </div>
         </div>
 
-        <!-- Email Communications -->
-        <div class="bg-white rounded-3xl p-5 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 group">
-            <div class="flex justify-between items-start">
+        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between">
                 <div>
-                    <div class="flex items-center mb-3">
-                        <div class="w-10 h-10 rounded-2xl bg-gray-100 flex items-center justify-center mr-3 group-hover:bg-gray-200 transition-colors">
-                            <span class="text-gray-700 text-xl">✉️</span>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">Emails Sent</p>
-                            <p class="text-2xl font-semibold mt-1 text-gray-900">156</p>
-                        </div>
-                    </div>
-                    <p class="text-xs text-gray-400">This month: 28 emails</p>
+                    <h3 class="text-gray-500 text-xs uppercase tracking-wider font-medium">Emails Sent</h3>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">156</p>
+                    <p class="text-gray-500 text-sm mt-1">This month: 28</p>
                 </div>
-                <div class="text-right">
-                    <div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                        92% opened
-                    </div>
+                <div class="bg-blue-50 p-3 rounded-lg">
+                    <span class="text-blue-600 text-xl">✉️</span>
                 </div>
             </div>
             <div class="mt-4 pt-4 border-t border-gray-100">
-                <div class="flex justify-between text-xs text-gray-500">
-                    <span class="flex items-center">
-                        <span class="w-2 h-2 bg-gray-400 rounded-full mr-1.5"></span>
-                        Unlimited
-                    </span>
-                    <button onclick="sendEmail()" class="text-gray-900 hover:text-gray-700 font-medium transition-colors">
-                        Send Email →
-                    </button>
-                </div>
+                <span class="text-blue-600 text-xs font-medium">92% opened</span>
             </div>
         </div>
 
-        <!-- Pending Responses -->
-        <div class="bg-white rounded-3xl p-5 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 group">
-            <div class="flex justify-between items-start">
+        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between">
                 <div>
-                    <div class="flex items-center mb-3">
-                        <div class="w-10 h-10 rounded-2xl bg-gray-100 flex items-center justify-center mr-3 group-hover:bg-gray-200 transition-colors">
-                            <span class="text-gray-700 text-xl">⏳</span>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">Pending Responses</p>
-                            <p class="text-2xl font-semibold mt-1 text-gray-900">12</p>
-                        </div>
-                    </div>
-                    <p class="text-xs text-gray-400">Awaiting member replies</p>
+                    <h3 class="text-gray-500 text-xs uppercase tracking-wider font-medium">Pending Responses</h3>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">12</p>
+                    <p class="text-gray-500 text-sm mt-1">Awaiting replies</p>
                 </div>
-                <div class="text-right">
-                    <div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                        3 urgent
-                    </div>
+                <div class="bg-orange-50 p-3 rounded-lg">
+                    <span class="text-orange-600 text-xl">⏳</span>
                 </div>
             </div>
             <div class="mt-4 pt-4 border-t border-gray-100">
-                <div class="flex justify-between text-xs text-gray-500">
-                    <span class="flex items-center">
-                        <span class="w-2 h-2 bg-gray-400 rounded-full mr-1.5"></span>
-                        Avg: 2 days
-                    </span>
-                    <button onclick="viewPending()" class="text-gray-900 hover:text-gray-700 font-medium transition-colors">
-                        View All →
-                    </button>
-                </div>
+                <span class="text-orange-600 text-xs font-medium">3 urgent</span>
             </div>
         </div>
 
-        <!-- Communication Templates -->
-        <div class="bg-white rounded-3xl p-5 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 group">
-            <div class="flex justify-between items-start">
+        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between">
                 <div>
-                    <div class="flex items-center mb-3">
-                        <div class="w-10 h-10 rounded-2xl bg-gray-100 flex items-center justify-center mr-3 group-hover:bg-gray-200 transition-colors">
-                            <span class="text-gray-700 text-xl">📄</span>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">Templates</p>
-                            <p class="text-2xl font-semibold mt-1 text-gray-900">24</p>
-                        </div>
-                    </div>
-                    <p class="text-xs text-gray-400">Pre-defined messages</p>
+                    <h3 class="text-gray-500 text-xs uppercase tracking-wider font-medium">Templates</h3>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">24</p>
+                    <p class="text-gray-500 text-sm mt-1">Pre-defined messages</p>
                 </div>
-                <div class="text-right">
-                    <div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                        8 active
-                    </div>
+                <div class="bg-purple-50 p-3 rounded-lg">
+                    <span class="text-purple-600 text-xl">📄</span>
                 </div>
             </div>
             <div class="mt-4 pt-4 border-t border-gray-100">
-                <div class="flex justify-between text-xs text-gray-500">
-                    <span class="flex items-center">
-                        <span class="w-2 h-2 bg-gray-400 rounded-full mr-1.5"></span>
-                        4 categories
-                    </span>
-                    <button onclick="manageTemplates()" class="text-gray-900 hover:text-gray-700 font-medium transition-colors">
-                        Manage →
-                    </button>
+                <span class="text-purple-600 text-xs font-medium">8 active</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="border-b border-gray-200">
+            <nav class="flex overflow-x-auto">
+                <button onclick="switchTab('sms')" id="smsTab"
+                    class="px-6 py-4 font-medium border-b-2 border-blue-600 text-blue-700 whitespace-nowrap">
+                    📱 SMS Messages
+                </button>
+                <button onclick="switchTab('email')" id="emailTab"
+                    class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
+                    ✉️ Emails
+                </button>
+                <button onclick="switchTab('templates')" id="templatesTab"
+                    class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
+                    📄 Templates
+                </button>
+                <button onclick="switchTab('settings')" id="settingsTab"
+                    class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
+                    ⚙️ Settings
+                </button>
+            </nav>
+        </div>
+
+        <!-- SMS Messages Tab -->
+        <div id="smsContent" class="p-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">SMS Messages</h3>
+                    <p class="text-gray-500 text-sm">Recent SMS communications</p>
+                </div>
+                <button onclick="sendSMS()"
+                    class="px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition flex items-center gap-2">
+                    <span>📱</span> Send SMS
+                </button>
+            </div>
+
+            @php
+                $smsMessages = [
+                    ['to' => 'All Members', 'message' => 'Meeting reminder: SACCO meeting tomorrow 2PM', 'time' => '2 hours ago', 'status' => 'delivered'],
+                    ['to' => 'Loan Applicants', 'message' => 'Your loan application is under review', 'time' => '1 day ago', 'status' => 'delivered'],
+                    ['to' => 'John Doe', 'message' => 'Your loan approved. Visit office for cheque', 'time' => '2 days ago', 'status' => 'read'],
+                    ['to' => 'Pending Approvals', 'message' => 'Document verification required', 'time' => '3 days ago', 'status' => 'delivered'],
+                ];
+            @endphp
+
+            <div class="overflow-x-auto border border-gray-300 rounded-lg">
+                <table class="min-w-full divide-y divide-gray-200 border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                #
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Recipients
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Message
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Time Sent
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Status
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach($smsMessages as $index => $sms)
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium border border-gray-300">
+                                {{ $index + 1 }}
+                            </td>
+                            <td class="px-4 py-3 border border-gray-300">
+                                <p class="font-medium text-gray-900 text-sm">{{ $sms['to'] }}</p>
+                            </td>
+                            <td class="px-4 py-3 border border-gray-300">
+                                <p class="text-gray-700 text-sm">{{ $sms['message'] }}</p>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 border border-gray-300">
+                                {{ $sms['time'] }}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap border border-gray-300">
+                                <span class="px-2 py-1 text-xs rounded-full {{ $sms['status'] == 'delivered' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-blue-100 text-blue-800 border border-blue-200' }}">
+                                    {{ ucfirst($sms['status']) }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap border border-gray-300">
+                                <div class="flex gap-2">
+                                    <button onclick="resendSMS({{ $index }})"
+                                        class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1.5 rounded text-xs font-medium">
+                                        Resend
+                                    </button>
+                                    <button onclick="viewSMSDetails({{ $index }})"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium">
+                                        View
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Emails Tab -->
+        <div id="emailContent" class="p-6 hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Email Communications</h3>
+                    <p class="text-gray-500 text-sm">Recent email communications</p>
+                </div>
+                <button onclick="sendEmail()"
+                    class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition flex items-center gap-2">
+                    <span>✉️</span> Send Email
+                </button>
+            </div>
+
+            @php
+                $emails = [
+                    ['subject' => 'Quarterly SACCO Report', 'to' => 'All Members', 'time' => '1 day ago', 'status' => 'opened'],
+                    ['subject' => 'Loan Application Update', 'to' => 'Jane Smith', 'time' => '2 days ago', 'status' => 'delivered'],
+                    ['subject' => 'Meeting Minutes - April', 'to' => 'Committee Members', 'time' => '3 days ago', 'status' => 'opened'],
+                    ['subject' => 'Savings Statement', 'to' => 'John Doe', 'time' => '5 days ago', 'status' => 'read'],
+                ];
+            @endphp
+
+            <div class="overflow-x-auto border border-gray-300 rounded-lg">
+                <table class="min-w-full divide-y divide-gray-200 border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                #
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Subject
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Recipients
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Time Sent
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Status
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach($emails as $index => $email)
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium border border-gray-300">
+                                {{ $index + 1 }}
+                            </td>
+                            <td class="px-4 py-3 border border-gray-300">
+                                <p class="font-medium text-gray-900 text-sm">{{ $email['subject'] }}</p>
+                            </td>
+                            <td class="px-4 py-3 border border-gray-300">
+                                <p class="text-gray-700 text-sm">{{ $email['to'] }}</p>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 border border-gray-300">
+                                {{ $email['time'] }}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap border border-gray-300">
+                                <span class="px-2 py-1 text-xs rounded-full {{ $email['status'] == 'opened' ? 'bg-green-100 text-green-800 border border-green-200' : ($email['status'] == 'read' ? 'bg-blue-100 text-blue-800 border border-blue-200' : 'bg-gray-100 text-gray-800 border border-gray-200') }}">
+                                    {{ ucfirst($email['status']) }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap border border-gray-300">
+                                <div class="flex gap-2">
+                                    <button onclick="viewEmail({{ $index }})"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium">
+                                        View
+                                    </button>
+                                    <button onclick="resendEmail({{ $index }})"
+                                        class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1.5 rounded text-xs font-medium">
+                                        Resend
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Templates Tab -->
+        <div id="templatesContent" class="p-6 hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Message Templates</h3>
+                    <p class="text-gray-500 text-sm">Pre-defined communication templates</p>
+                </div>
+                <button onclick="addTemplate()"
+                    class="px-4 py-2 rounded-lg bg-purple-600 text-white text-sm font-medium hover:bg-purple-700 transition flex items-center gap-2">
+                    <span>+</span> Add Template
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @php
+                    $templates = [
+                        ['name' => 'Meeting Announcement', 'type' => 'sms', 'category' => 'meetings', 'uses' => '24'],
+                        ['name' => 'Loan Approval Notice', 'type' => 'sms', 'category' => 'loans', 'uses' => '18'],
+                        ['name' => 'Payment Reminder', 'type' => 'email', 'category' => 'payments', 'uses' => '32'],
+                        ['name' => 'Savings Update', 'type' => 'email', 'category' => 'savings', 'uses' => '15'],
+                        ['name' => 'Welcome New Member', 'type' => 'email', 'category' => 'members', 'uses' => '12'],
+                        ['name' => 'Document Request', 'type' => 'sms', 'category' => 'documents', 'uses' => '8'],
+                    ];
+                @endphp
+
+                @foreach($templates as $template)
+                <div class="border border-gray-200 rounded-lg p-4 hover:border-gray-300 hover:shadow-md transition bg-white">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 {{ $template['type'] == 'sms' ? 'bg-green-50' : 'bg-blue-50' }} rounded-lg flex items-center justify-center">
+                                <span class="{{ $template['type'] == 'sms' ? 'text-green-600' : 'text-blue-600' }} text-sm">
+                                    {{ $template['type'] == 'sms' ? '📱' : '✉️' }}
+                                </span>
+                            </div>
+                            <span class="font-medium text-gray-900">{{ $template['name'] }}</span>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded-full">
+                            {{ $template['category'] }}
+                        </span>
+                    </div>
+                    <div class="text-xs text-gray-500 mb-3">Used {{ $template['uses'] }} times</div>
+                    <div class="flex gap-2">
+                        <button onclick="useTemplate('{{ $template['name'] }}')"
+                            class="flex-1 bg-gray-900 hover:bg-gray-800 text-white py-2 rounded text-xs font-medium">
+                            Use Template
+                        </button>
+                        <button onclick="editTemplate('{{ $template['name'] }}')"
+                            class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-2 rounded text-xs font-medium">
+                            Edit
+                        </button>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settingsContent" class="p-6 hidden">
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-900">Communication Settings</h3>
+                <p class="text-gray-500 text-sm">Configure notification preferences</p>
+            </div>
+
+            <div class="space-y-4 max-w-2xl">
+                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition bg-white">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                            <span class="text-gray-700">📱</span>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900">SMS Notifications</p>
+                            <p class="text-sm text-gray-500">Send SMS alerts to members</p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-600 transition-colors"></div>
+                        <div class="absolute left-0.5 top-0.5 bg-white border border-gray-300 rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5"></div>
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition bg-white">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                            <span class="text-gray-700">✉️</span>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900">Email Notifications</p>
+                            <p class="text-sm text-gray-500">Send email updates to members</p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-600 transition-colors"></div>
+                        <div class="absolute left-0.5 top-0.5 bg-white border border-gray-300 rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5"></div>
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition bg-white">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                            <span class="text-gray-700">⏰</span>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900">Auto Reminders</p>
+                            <p class="text-sm text-gray-500">Schedule automatic payment reminders</p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-600 transition-colors"></div>
+                        <div class="absolute left-0.5 top-0.5 bg-white border border-gray-300 rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5"></div>
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition bg-white">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                            <span class="text-gray-700">📊</span>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900">Reports</p>
+                            <p class="text-sm text-gray-500">Send monthly reports automatically</p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-600 transition-colors"></div>
+                        <div class="absolute left-0.5 top-0.5 bg-white border border-gray-300 rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5"></div>
+                    </label>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Two Column Layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-        <!-- Left Column -->
-        <div class="space-y-6">
-            <!-- Recent SMS Messages -->
-            <div class="bg-white rounded-3xl p-5 md:p-6 shadow-sm border border-gray-100">
-                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900">Recent SMS Messages</h3>
-                        <p class="text-sm text-gray-500">Last 7 days</p>
-                    </div>
-                    <button onclick="viewSMSHistory()" class="text-sm text-gray-900 font-medium hover:text-gray-700 transition-colors">
-                        View all →
-                    </button>
-                </div>
-
-                <div class="space-y-4">
-                    @php
-                        $smsMessages = [
-                            ['to' => 'All Members', 'message' => 'Meeting reminder: SACCO meeting tomorrow 2PM', 'time' => '2 hours ago', 'status' => 'delivered'],
-                            ['to' => 'Loan Applicants', 'message' => 'Your loan application is under review', 'time' => '1 day ago', 'status' => 'delivered'],
-                            ['to' => 'John Doe', 'message' => 'Your loan approved. Visit office for cheque', 'time' => '2 days ago', 'status' => 'read'],
-                            ['to' => 'Pending Approvals', 'message' => 'Document verification required', 'time' => '3 days ago', 'status' => 'delivered'],
-                        ];
-                    @endphp
-
-                    @foreach($smsMessages as $sms)
-                    <div class="p-4 border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all duration-200 group">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3">
-                            <div class="flex items-center">
-                                <div class="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center mr-3 group-hover:bg-gray-200 transition-colors">
-                                    <span class="text-gray-700 text-sm">📱</span>
-                                </div>
-                                <div>
-                                    <span class="font-medium text-gray-900 block">{{ $sms['to'] }}</span>
-                                    <span class="text-xs text-gray-500 sm:hidden">{{ $sms['time'] }}</span>
-                                </div>
-                            </div>
-                            <span class="text-xs text-gray-500 hidden sm:block">{{ $sms['time'] }}</span>
-                        </div>
-                        <p class="text-gray-700 text-sm mb-4 leading-relaxed">{{ $sms['message'] }}</p>
-                        <div class="flex justify-between items-center">
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium 
-                                {{ $sms['status'] == 'delivered' ? 'bg-gray-100 text-gray-700' : 
-                                   ($sms['status'] == 'read' ? 'bg-gray-100 text-gray-700' : 'bg-gray-100 text-gray-800') }}">
-                                {{ ucfirst($sms['status']) }}
-                            </span>
-                            <button class="text-xs text-gray-900 hover:text-gray-700 font-medium transition-colors">
-                                Resend
-                            </button>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
+    <!-- Quick Compose -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">Quick Compose</h3>
+                <p class="text-gray-500 text-sm">Send a quick message to members</p>
             </div>
-
-            <!-- Quick Templates -->
-            <div class="bg-white rounded-3xl p-5 md:p-6 shadow-sm border border-gray-100">
-                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900">Quick Templates</h3>
-                        <p class="text-sm text-gray-500">Frequently used messages</p>
-                    </div>
-                    <button onclick="addTemplate()" class="text-sm text-gray-900 font-medium hover:text-gray-700 transition-colors">
-                        + Add Template
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    @php
-                        $templates = [
-                            ['name' => 'Meeting Announcement', 'type' => 'sms', 'category' => 'meetings'],
-                            ['name' => 'Loan Approval Notice', 'type' => 'sms', 'category' => 'loans'],
-                            ['name' => 'Payment Reminder', 'type' => 'email', 'category' => 'payments'],
-                            ['name' => 'Savings Update', 'type' => 'email', 'category' => 'savings'],
-                            ['name' => 'Welcome New Member', 'type' => 'email', 'category' => 'members'],
-                            ['name' => 'Document Request', 'type' => 'sms', 'category' => 'documents'],
-                        ];
-                    @endphp
-
-                    @foreach($templates as $template)
-                    <div class="p-4 border border-gray-100 rounded-2xl hover:border-gray-300 transition-all duration-200 cursor-pointer group"
-                         onclick="useTemplate('{{ $template['name'] }}')">
-                        <div class="flex justify-between items-start mb-3">
-                            <div class="flex items-center">
-                                <div class="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center mr-3 group-hover:bg-gray-200 transition-colors">
-                                    <span class="text-gray-700 text-sm">
-                                        {{ $template['type'] == 'sms' ? '📱' : '✉️' }}
-                                    </span>
-                                </div>
-                                <span class="font-medium text-gray-900">{{ $template['name'] }}</span>
-                            </div>
-                            <span class="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded-lg">
-                                {{ $template['category'] }}
-                            </span>
-                        </div>
-                        <p class="text-xs text-gray-500 mb-3">Click to use this template</p>
-                        <div class="flex space-x-3 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                            <button class="text-xs text-gray-900 hover:text-gray-700 font-medium">Edit</button>
-                            <button class="text-xs text-gray-900 hover:text-gray-700 font-medium">Preview</button>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
+            <div class="flex gap-2">
+                <button id="quickSMSBtn" onclick="selectQuickType('sms')"
+                    class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition flex items-center gap-2">
+                    📱 SMS
+                </button>
+                <button id="quickEmailBtn" onclick="selectQuickType('email')"
+                    class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition flex items-center gap-2">
+                    ✉️ Email
+                </button>
             </div>
         </div>
 
-        <!-- Right Column -->
-        <div class="space-y-6">
-            <!-- Recent Emails -->
-            <div class="bg-white rounded-3xl p-5 md:p-6 shadow-sm border border-gray-100">
-                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900">Recent Emails</h3>
-                        <p class="text-sm text-gray-500">Last 30 days</p>
-                    </div>
-                    <button onclick="viewEmailHistory()" class="text-sm text-gray-900 font-medium hover:text-gray-700 transition-colors">
-                        View all →
-                    </button>
-                </div>
+        <div class="space-y-4">
+            <select id="quickRecipients"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:border-gray-400 focus:ring-0 transition">
+                <option value="">Select recipients...</option>
+                <option value="all">All Members (156)</option>
+                <option value="pending">Pending Approvals (8)</option>
+                <option value="loans">Active Loan Holders (24)</option>
+                <option value="department">By Department</option>
+            </select>
 
-                <div class="space-y-4">
-                    @php
-                        $emails = [
-                            ['subject' => 'Quarterly SACCO Report', 'to' => 'All Members', 'time' => '1 day ago', 'status' => 'opened'],
-                            ['subject' => 'Loan Application Update', 'to' => 'Jane Smith', 'time' => '2 days ago', 'status' => 'delivered'],
-                            ['subject' => 'Meeting Minutes - April', 'to' => 'Committee Members', 'time' => '3 days ago', 'status' => 'opened'],
-                            ['subject' => 'Savings Statement', 'to' => 'John Doe', 'time' => '5 days ago', 'status' => 'read'],
-                        ];
-                    @endphp
+            <textarea id="quickMessage" rows="3"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:border-gray-400 focus:ring-0 transition resize-none"
+                placeholder="Type your message here..."></textarea>
 
-                    @foreach($emails as $email)
-                    <div class="p-4 border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all duration-200 group">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3">
-                            <div class="flex-1">
-                                <p class="font-medium text-gray-900 mb-1">{{ $email['subject'] }}</p>
-                                <p class="text-sm text-gray-500">To: {{ $email['to'] }}</p>
-                            </div>
-                            <span class="text-xs text-gray-500">{{ $email['time'] }}</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium 
-                                {{ $email['status'] == 'opened' ? 'bg-gray-100 text-gray-700' : 
-                                   ($email['status'] == 'read' ? 'bg-gray-100 text-gray-700' : 'bg-gray-100 text-gray-800') }}">
-                                {{ ucfirst($email['status']) }}
-                            </span>
-                            <button class="text-xs text-gray-900 hover:text-gray-700 font-medium transition-colors">
-                                View Details →
-                            </button>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-
-            <!-- Quick Compose -->
-            <div class="bg-white rounded-3xl p-5 md:p-6 shadow-sm border border-gray-100">
-                <div class="mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900">Quick Compose</h3>
-                    <p class="text-sm text-gray-500">Send a quick message</p>
-                </div>
-
-                <div class="space-y-5">
-                    <!-- Communication Type -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-3">Type</label>
-                        <div class="flex space-x-3">
-                            <button id="smsBtn" 
-                                    class="flex-1 py-3 border border-gray-200 rounded-xl hover:border-gray-300 transition-all duration-200 flex items-center justify-center group"
-                                    onclick="selectType('sms')">
-                                <span class="mr-2 text-lg">📱</span>
-                                <span class="font-medium text-gray-900">SMS</span>
-                            </button>
-                            <button id="emailBtn" 
-                                    class="flex-1 py-3 border border-gray-200 rounded-xl hover:border-gray-300 transition-all duration-200 flex items-center justify-center group"
-                                    onclick="selectType('email')">
-                                <span class="mr-2 text-lg">✉️</span>
-                                <span class="font-medium text-gray-900">Email</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Recipients -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-3">Recipients</label>
-                        <select class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-900 focus:border-gray-400 focus:ring-0 transition-colors">
-                            <option value="">Select recipients...</option>
-                            <option value="all">All Members (156)</option>
-                            <option value="pending">Pending Approvals (8)</option>
-                            <option value="loans">Active Loan Holders (24)</option>
-                            <option value="department">By Department</option>
-                            <option value="individual">Individual Member</option>
-                        </select>
-                    </div>
-
-                    <!-- Message -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-3">Message</label>
-                        <textarea id="quickMessage" rows="4"
-                                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 focus:border-gray-400 focus:ring-0 transition-colors resize-none"
-                                  placeholder="Type your message here..."></textarea>
-                        <p class="text-xs text-gray-400 mt-2" id="quickCharCount">0/160 characters</p>
-                    </div>
-
-                    <!-- Send Button -->
-                    <div class="flex justify-end">
-                        <button onclick="sendQuickMessage()"
-                                class="px-6 py-3 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-all duration-200 flex items-center shadow-sm hover:shadow">
-                            <span class="mr-2">📤</span>
-                            Send Message
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Communication Settings -->
-            <div class="bg-white rounded-3xl p-5 md:p-6 shadow-sm border border-gray-100">
-                <div class="mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900">Communication Settings</h3>
-                    <p class="text-sm text-gray-500">Configure notification preferences</p>
-                </div>
-
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between p-4 border border-gray-100 rounded-2xl hover:bg-gray-50 transition-colors">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 rounded-2xl bg-gray-100 flex items-center justify-center mr-4">
-                                <span class="text-gray-700">📱</span>
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-900">SMS Notifications</p>
-                                <p class="text-sm text-gray-500">Send SMS alerts</p>
-                            </div>
-                        </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" class="sr-only peer" checked>
-                            <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-gray-900 transition-colors"></div>
-                            <div class="absolute left-0.5 top-0.5 bg-white border border-gray-300 rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5"></div>
-                        </label>
-                    </div>
-
-                    <div class="flex items-center justify-between p-4 border border-gray-100 rounded-2xl hover:bg-gray-50 transition-colors">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 rounded-2xl bg-gray-100 flex items-center justify-center mr-4">
-                                <span class="text-gray-700">✉️</span>
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-900">Email Notifications</p>
-                                <p class="text-sm text-gray-500">Send email updates</p>
-                            </div>
-                        </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" class="sr-only peer" checked>
-                            <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-gray-900 transition-colors"></div>
-                            <div class="absolute left-0.5 top-0.5 bg-white border border-gray-300 rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5"></div>
-                        </label>
-                    </div>
-
-                    <div class="flex items-center justify-between p-4 border border-gray-100 rounded-2xl hover:bg-gray-50 transition-colors">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 rounded-2xl bg-gray-100 flex items-center justify-center mr-4">
-                                <span class="text-gray-700">⏰</span>
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-900">Auto Reminders</p>
-                                <p class="text-sm text-gray-500">Schedule reminders</p>
-                            </div>
-                        </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-gray-900 transition-colors"></div>
-                            <div class="absolute left-0.5 top-0.5 bg-white border border-gray-300 rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5"></div>
-                        </label>
-                    </div>
-                </div>
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                <p class="text-xs text-gray-500" id="quickCharCount">0/160 characters</p>
+                <button onclick="sendQuickMessage()"
+                    class="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition flex items-center gap-2">
+                    <span>📤</span> Send Message
+                </button>
             </div>
         </div>
     </div>
@@ -445,242 +470,133 @@
 
 <!-- New Communication Modal -->
 <div id="newCommunicationModal" class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 hidden items-center justify-center p-4 transition-opacity duration-200">
-    <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
-        <div class="p-6 border-b border-gray-100">
+    <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="p-6 border-b border-gray-200">
             <div class="flex justify-between items-center">
                 <h3 class="text-xl font-semibold text-gray-900">New Communication</h3>
-                <button onclick="closeNewCommunication()" 
-                        class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors">
+                <button onclick="closeNewCommunication()"
+                    class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors">
                     <span class="text-gray-500 hover:text-gray-700">✕</span>
                 </button>
             </div>
             <p class="text-gray-500 text-sm mt-1">Send a message to SACCO members</p>
         </div>
 
-        <div class="p-6">
-            <!-- Step 1: Type & Recipients -->
-            <div id="step1" class="space-y-6">
-                <div class="flex items-center mb-6">
-                    <div class="w-8 h-8 rounded-2xl bg-gray-900 text-white flex items-center justify-center mr-4">
+        <div class="p-6 space-y-6">
+            <!-- Step Indicators -->
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center text-sm font-medium">
                         1
                     </div>
-                    <h4 class="text-lg font-medium text-gray-900">Select Type & Recipients</h4>
+                    <div class="h-1 w-12 bg-gray-900"></div>
+                    <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center text-sm font-medium">
+                        2
+                    </div>
+                    <div class="h-1 w-12 bg-gray-200"></div>
+                    <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center text-sm font-medium">
+                        3
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 1: Type & Recipients -->
+            <div id="step1" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button onclick="selectCommType('sms')" id="modalSMSBtn"
+                        class="p-4 border-2 border-gray-200 rounded-lg hover:border-gray-900 transition text-left">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+                                <span class="text-green-600 text-xl">📱</span>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">SMS Message</p>
+                                <p class="text-sm text-gray-500">Quick text notification</p>
+                            </div>
+                        </div>
+                    </button>
+                    
+                    <button onclick="selectCommType('email')" id="modalEmailBtn"
+                        class="p-4 border-2 border-gray-200 rounded-lg hover:border-gray-900 transition text-left">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                                <span class="text-blue-600 text-xl">✉️</span>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Email Message</p>
+                                <p class="text-sm text-gray-500">Detailed communication</p>
+                            </div>
+                        </div>
+                    </button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Communication Type -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-4">Communication Type</label>
-                        <div class="space-y-3">
-                            <div class="p-4 border-2 border-gray-200 rounded-2xl cursor-pointer hover:border-gray-900 transition-all duration-200 comm-type group"
-                                 onclick="selectCommType('sms')">
-                                <div class="flex items-center">
-                                    <div class="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center mr-4 group-hover:bg-gray-200 transition-colors">
-                                        <span class="text-gray-700 text-xl">📱</span>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-gray-900">SMS Message</p>
-                                        <p class="text-sm text-gray-500">Quick text notification</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="p-4 border-2 border-gray-200 rounded-2xl cursor-pointer hover:border-gray-900 transition-all duration-200 comm-type group"
-                                 onclick="selectCommType('email')">
-                                <div class="flex items-center">
-                                    <div class="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center mr-4 group-hover:bg-gray-200 transition-colors">
-                                        <span class="text-gray-700 text-xl">✉️</span>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-gray-900">Email Message</p>
-                                        <p class="text-sm text-gray-500">Detailed communication</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Recipients -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-4">Select Recipients</label>
-                        <div class="space-y-3">
-                            <div class="p-4 border border-gray-200 rounded-2xl hover:bg-gray-50 cursor-pointer transition-colors group recipient-option" onclick="selectRecipient(this)">
-                                <div class="flex items-center">
-                                    <div class="w-6 h-6 rounded-full border-2 border-gray-300 mr-4 flex items-center justify-center group-hover:border-gray-900 transition-colors radio-circle">
-                                        <div class="w-3 h-3 rounded-full bg-gray-900 opacity-0 transition-opacity"></div>
-                                    </div>
-                                    <input type="radio" name="recipients" class="sr-only" id="allMembers" value="all">
-                                    <div>
-                                        <p class="font-medium text-gray-900">All Members</p>
-                                        <p class="text-sm text-gray-500">156 members</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="p-4 border border-gray-200 rounded-2xl hover:bg-gray-50 cursor-pointer transition-colors group recipient-option" onclick="selectRecipient(this)">
-                                <div class="flex items-center">
-                                    <div class="w-6 h-6 rounded-full border-2 border-gray-300 mr-4 flex items-center justify-center group-hover:border-gray-900 transition-colors radio-circle">
-                                        <div class="w-3 h-3 rounded-full bg-gray-900 opacity-0 transition-opacity"></div>
-                                    </div>
-                                    <input type="radio" name="recipients" class="sr-only" id="pendingApprovals" value="pending">
-                                    <div>
-                                        <p class="font-medium text-gray-900">Pending Approvals</p>
-                                        <p class="text-sm text-gray-500">8 members</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="p-4 border border-gray-200 rounded-2xl hover:bg-gray-50 cursor-pointer transition-colors group recipient-option" onclick="selectRecipient(this)">
-                                <div class="flex items-center">
-                                    <div class="w-6 h-6 rounded-full border-2 border-gray-300 mr-4 flex items-center justify-center group-hover:border-gray-900 transition-colors radio-circle">
-                                        <div class="w-3 h-3 rounded-full bg-gray-900 opacity-0 transition-opacity"></div>
-                                    </div>
-                                    <input type="radio" name="recipients" class="sr-only" id="customGroup" value="custom">
-                                    <div>
-                                        <p class="font-medium text-gray-900">Custom Group</p>
-                                        <p class="text-sm text-gray-500">Select specific members</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Recipients</label>
+                    <select id="modalRecipients"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white text-gray-900 focus:border-gray-400 focus:ring-0 transition-colors">
+                        <option value="">Select recipients...</option>
+                        <option value="all">All Members (156)</option>
+                        <option value="pending">Pending Approvals (8)</option>
+                        <option value="loans">Active Loan Holders (24)</option>
+                        <option value="defaulted">Defaulted Loans (3)</option>
+                    </select>
                 </div>
 
                 <div class="flex justify-end">
                     <button onclick="nextStep()"
-                            class="px-6 py-3 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-all duration-200 shadow-sm hover:shadow">
-                        Next: Compose Message →
+                        class="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition">
+                        Next: Compose →
                     </button>
                 </div>
             </div>
 
-            <!-- Step 2: Compose Message -->
+            <!-- Step 2: Compose -->
             <div id="step2" class="space-y-6 hidden">
-                <div class="flex items-center mb-6">
-                    <div class="w-8 h-8 rounded-2xl bg-gray-900 text-white flex items-center justify-center mr-4">
-                        2
-                    </div>
-                    <h4 class="text-lg font-medium text-gray-900">Compose Message</h4>
-                </div>
-
-                <div id="emailFields" class="hidden">
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-3">Subject</label>
-                        <input type="text" id="emailSubject"
-                               class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-gray-400 focus:ring-0 transition-colors"
-                               placeholder="Enter email subject">
-                    </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Subject</label>
+                    <input type="text" id="modalSubject"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors"
+                        placeholder="Enter subject (for emails)">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-3">Message</label>
-                    <textarea id="messageContent" rows="6"
-                              class="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 focus:border-gray-400 focus:ring-0 transition-colors resize-none"
-                              placeholder="Type your message here..."></textarea>
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-3 gap-2">
-                        <p class="text-xs text-gray-400" id="charCount">0/160 characters</p>
-                        <div class="flex space-x-4">
-                            <button onclick="insertTemplate()" class="text-xs text-gray-900 hover:text-gray-700 font-medium transition-colors">
-                                Insert Template
-                            </button>
-                            <button onclick="previewMessage()" class="text-xs text-gray-900 hover:text-gray-700 font-medium transition-colors">
-                                Preview
-                            </button>
-                        </div>
-                    </div>
+                    <textarea id="modalMessage" rows="4"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-900 focus:border-gray-400 focus:ring-0 transition-colors resize-none"
+                        placeholder="Type your message here..."></textarea>
+                    <p class="text-xs text-gray-400 mt-2" id="modalCharCount">0/160 characters</p>
                 </div>
 
-                <!-- Template Suggestions -->
-                <div class="bg-gray-50 p-5 rounded-2xl">
-                    <p class="text-sm font-medium text-gray-700 mb-4">Suggested Templates:</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <button onclick="loadTemplate('meeting')" class="p-4 border border-gray-200 rounded-xl hover:bg-white transition-all duration-200 text-left group">
-                            <p class="font-medium text-gray-900">Meeting Announcement</p>
-                            <p class="text-xs text-gray-500 mt-1">Notify about upcoming meetings</p>
-                        </button>
-                        <button onclick="loadTemplate('loan')" class="p-4 border border-gray-200 rounded-xl hover:bg-white transition-all duration-200 text-left group">
-                            <p class="font-medium text-gray-900">Loan Update</p>
-                            <p class="text-xs text-gray-500 mt-1">Loan approval/rejection notices</p>
-                        </button>
-                        <button onclick="loadTemplate('payment')" class="p-4 border border-gray-200 rounded-xl hover:bg-white transition-all duration-200 text-left group">
-                            <p class="font-medium text-gray-900">Payment Reminder</p>
-                            <p class="text-xs text-gray-500 mt-1">Due payment notifications</p>
-                        </button>
-                        <button onclick="loadTemplate('savings')" class="p-4 border border-gray-200 rounded-xl hover:bg-white transition-all duration-200 text-left group">
-                            <p class="font-medium text-gray-900">Savings Update</p>
-                            <p class="text-xs text-gray-500 mt-1">Monthly savings statements</p>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="flex flex-col sm:flex-row justify-between gap-4 pt-6 border-t border-gray-100">
+                <div class="flex justify-between">
                     <button onclick="prevStep()"
-                            class="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200">
+                        class="px-6 py-3 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition">
                         ← Back
                     </button>
                     <button onclick="nextToPreview()"
-                            class="px-6 py-3 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-all duration-200 shadow-sm hover:shadow">
-                        Next: Preview & Send →
+                        class="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition">
+                        Next: Preview →
                     </button>
                 </div>
             </div>
 
-            <!-- Step 3: Preview & Send -->
+            <!-- Step 3: Preview -->
             <div id="step3" class="space-y-6 hidden">
-                <div class="flex items-center mb-6">
-                    <div class="w-8 h-8 rounded-2xl bg-gray-900 text-white flex items-center justify-center mr-4">
-                        3
-                    </div>
-                    <h4 class="text-lg font-medium text-gray-900">Preview & Send</h4>
-                </div>
-
-                <div class="bg-gray-50 p-6 rounded-2xl">
-                    <div class="mb-6">
-                        <p class="text-sm font-medium text-gray-700 mb-3">Preview:</p>
-                        <div class="bg-white p-5 rounded-2xl border border-gray-200">
-                            <p class="font-medium text-gray-900 mb-2" id="previewSubject"></p>
-                            <p class="text-gray-700 whitespace-pre-wrap leading-relaxed" id="previewContent"></p>
-                        </div>
-                    </div>
-
-                    <div class="space-y-5">
-                        <div>
-                            <p class="text-sm font-medium text-gray-700 mb-2">Recipients:</p>
-                            <p class="text-gray-700 font-medium" id="previewRecipients"></p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-700 mb-2">Estimated Cost:</p>
-                            <p class="text-gray-700 font-medium" id="previewCost"></p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-700 mb-3">Schedule:</p>
-                            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                                <label class="flex items-center schedule-option" onclick="selectSchedule(this)">
-                                    <div class="w-6 h-6 rounded-full border-2 border-gray-300 mr-3 flex items-center justify-center schedule-circle">
-                                        <div class="w-3 h-3 rounded-full bg-gray-900 opacity-0 transition-opacity"></div>
-                                    </div>
-                                    <input type="radio" name="schedule" value="now" checked class="sr-only">
-                                    <span class="text-gray-700">Send now</span>
-                                </label>
-                                <label class="flex items-center schedule-option" onclick="selectSchedule(this)">
-                                    <div class="w-6 h-6 rounded-full border-2 border-gray-300 mr-3 flex items-center justify-center schedule-circle">
-                                        <div class="w-3 h-3 rounded-full bg-gray-900 opacity-0 transition-opacity"></div>
-                                    </div>
-                                    <input type="radio" name="schedule" value="later" class="sr-only">
-                                    <span class="text-gray-700">Schedule for later</span>
-                                </label>
-                                <input type="datetime-local" class="px-4 py-2 border border-gray-300 rounded-xl bg-white focus:border-gray-400 focus:ring-0 transition-colors">
-                            </div>
-                        </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <p class="text-sm font-medium text-gray-700 mb-2">Preview:</p>
+                    <div class="bg-white p-4 rounded-lg border border-gray-200">
+                        <p class="font-medium text-gray-900 mb-1" id="previewSubject"></p>
+                        <p class="text-gray-700 whitespace-pre-wrap" id="previewContent"></p>
                     </div>
                 </div>
 
-                <div class="flex flex-col sm:flex-row justify-between gap-4 pt-6 border-t border-gray-100">
+                <div class="flex justify-between">
                     <button onclick="prevStep()"
-                            class="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200">
+                        class="px-6 py-3 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition">
                         ← Back
                     </button>
                     <button onclick="sendFinalCommunication()"
-                            class="px-6 py-3 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-all duration-200 shadow-sm hover:shadow flex items-center justify-center">
-                        <span class="mr-2">📤</span>
-                        Send Communication
+                        class="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition flex items-center gap-2">
+                        <span>📤</span> Send Now
                     </button>
                 </div>
             </div>
@@ -689,15 +605,31 @@
 </div>
 
 <script>
-    // Quick Compose Functions
-    let selectedType = 'sms';
+    // Tab switching
+    function switchTab(tabName) {
+        // Hide all content
+        ['sms', 'email', 'templates', 'settings'].forEach(tab => {
+            document.getElementById(tab + 'Content').classList.add('hidden');
+            document.getElementById(tab + 'Tab').classList.remove('border-b-2', 'border-blue-600', 'text-blue-700');
+            document.getElementById(tab + 'Tab').classList.add('text-gray-500');
+        });
 
-    function selectType(type) {
-        selectedType = type;
-        
-        // Update button styles
-        const smsBtn = document.getElementById('smsBtn');
-        const emailBtn = document.getElementById('emailBtn');
+        // Show selected content
+        document.getElementById(tabName + 'Content').classList.remove('hidden');
+
+        // Activate selected tab
+        document.getElementById(tabName + 'Tab').classList.add('border-b-2', 'border-blue-600', 'text-blue-700');
+        document.getElementById(tabName + 'Tab').classList.remove('text-gray-500');
+    }
+
+    // Quick Compose
+    let quickType = 'sms';
+    let modalType = 'sms';
+
+    function selectQuickType(type) {
+        quickType = type;
+        const smsBtn = document.getElementById('quickSMSBtn');
+        const emailBtn = document.getElementById('quickEmailBtn');
         
         smsBtn.classList.remove('border-gray-900', 'bg-gray-100');
         emailBtn.classList.remove('border-gray-900', 'bg-gray-100');
@@ -708,289 +640,210 @@
             emailBtn.classList.add('border-gray-900', 'bg-gray-100');
         }
         
-        // Update character counter
-        updateCharCount();
+        updateQuickCharCount();
     }
 
-    function updateCharCount() {
+    function updateQuickCharCount() {
         const message = document.getElementById('quickMessage');
         const count = message.value.length;
-        const max = selectedType === 'sms' ? 160 : 1000;
+        const max = quickType === 'sms' ? 160 : 1000;
         const charCount = document.getElementById('quickCharCount');
         
         charCount.textContent = `${count}/${max} characters`;
-        
-        if (count > max) {
-            charCount.classList.add('text-red-500');
-        } else {
-            charCount.classList.remove('text-red-500');
-        }
+        charCount.className = count > max ? 'text-xs text-red-500' : 'text-xs text-gray-500';
     }
 
     function sendQuickMessage() {
         const message = document.getElementById('quickMessage').value.trim();
+        const recipients = document.getElementById('quickRecipients').value;
         
         if (!message) {
             alert('Please enter a message');
             return;
         }
         
-        if (selectedType === 'sms' && message.length > 160) {
+        if (!recipients) {
+            alert('Please select recipients');
+            return;
+        }
+        
+        if (quickType === 'sms' && message.length > 160) {
             alert('SMS messages must be 160 characters or less');
             return;
         }
         
-        // Show success message
-        alert(`${selectedType.toUpperCase()} message sent successfully!`);
+        alert(`${quickType.toUpperCase()} sent to ${recipients} successfully!`);
         document.getElementById('quickMessage').value = '';
-        updateCharCount();
+        updateQuickCharCount();
     }
 
-    // New Communication Modal
-    let currentStep = 1;
-    let selectedCommType = '';
-
+    // Modal Functions
     function openNewCommunication() {
         document.getElementById('newCommunicationModal').classList.remove('hidden');
         document.body.style.overflow = 'hidden';
-        resetCommunication();
+        resetModal();
     }
 
     function closeNewCommunication() {
         document.getElementById('newCommunicationModal').classList.add('hidden');
         document.body.style.overflow = 'auto';
-        resetCommunication();
+        resetModal();
     }
 
-    function resetCommunication() {
-        currentStep = 1;
-        selectedCommType = '';
+    function resetModal() {
         document.getElementById('step1').classList.remove('hidden');
         document.getElementById('step2').classList.add('hidden');
         document.getElementById('step3').classList.add('hidden');
-        document.getElementById('emailFields').classList.add('hidden');
         
-        // Reset selection
-        document.querySelectorAll('.comm-type').forEach(el => {
-            el.classList.remove('border-gray-900', 'bg-gray-50');
-        });
-        
-        // Reset inputs
-        document.getElementById('emailSubject').value = '';
-        document.getElementById('messageContent').value = '';
+        modalType = 'sms';
+        document.getElementById('modalSMSBtn').classList.add('border-gray-900', 'bg-gray-50');
+        document.getElementById('modalEmailBtn').classList.remove('border-gray-900', 'bg-gray-50');
+        document.getElementById('modalSubject').value = '';
+        document.getElementById('modalMessage').value = '';
+        updateModalCharCount();
     }
 
     function selectCommType(type) {
-        selectedCommType = type;
+        modalType = type;
+        const smsBtn = document.getElementById('modalSMSBtn');
+        const emailBtn = document.getElementById('modalEmailBtn');
         
-        // Update selection
-        document.querySelectorAll('.comm-type').forEach(el => {
-            el.classList.remove('border-gray-900', 'bg-gray-50');
-        });
+        smsBtn.classList.remove('border-gray-900', 'bg-gray-50');
+        emailBtn.classList.remove('border-gray-900', 'bg-gray-50');
         
-        event.target.closest('.comm-type').classList.add('border-gray-900', 'bg-gray-50');
+        if (type === 'sms') {
+            smsBtn.classList.add('border-gray-900', 'bg-gray-50');
+        } else {
+            emailBtn.classList.add('border-gray-900', 'bg-gray-50');
+        }
     }
 
-    function selectRecipient(element) {
-        // Remove selection from all
-        document.querySelectorAll('.recipient-option').forEach(el => {
-            el.classList.remove('border-gray-900', 'bg-gray-50');
-            el.querySelector('.radio-circle > div').classList.remove('opacity-100');
-            el.querySelector('.radio-circle > div').classList.add('opacity-0');
-        });
+    function updateModalCharCount() {
+        const message = document.getElementById('modalMessage');
+        const count = message.value.length;
+        const max = modalType === 'sms' ? 160 : 1000;
+        const charCount = document.getElementById('modalCharCount');
         
-        // Add selection to clicked element
-        element.classList.add('border-gray-900', 'bg-gray-50');
-        element.querySelector('.radio-circle > div').classList.add('opacity-100');
-        element.querySelector('.radio-circle > div').classList.remove('opacity-0');
-        element.querySelector('input[type="radio"]').checked = true;
-    }
-
-    function selectSchedule(element) {
-        // Remove selection from all
-        document.querySelectorAll('.schedule-option').forEach(el => {
-            el.querySelector('.schedule-circle > div').classList.remove('opacity-100');
-            el.querySelector('.schedule-circle > div').classList.add('opacity-0');
-        });
-        
-        // Add selection to clicked element
-        element.querySelector('.schedule-circle > div').classList.add('opacity-100');
-        element.querySelector('.schedule-circle > div').classList.remove('opacity-0');
-        element.querySelector('input[type="radio"]').checked = true;
+        charCount.textContent = `${count}/${max} characters`;
+        charCount.className = count > max ? 'text-xs text-red-500 mt-2' : 'text-xs text-gray-400 mt-2';
     }
 
     function nextStep() {
-        if (!selectedCommType) {
-            alert('Please select a communication type');
+        if (!document.getElementById('modalRecipients').value) {
+            alert('Please select recipients');
             return;
         }
         
         document.getElementById('step1').classList.add('hidden');
         document.getElementById('step2').classList.remove('hidden');
-        currentStep = 2;
         
-        // Show/hide email fields
-        const emailFields = document.getElementById('emailFields');
-        if (selectedCommType === 'email') {
-            emailFields.classList.remove('hidden');
-        } else {
-            emailFields.classList.add('hidden');
+        if (modalType === 'sms') {
+            document.getElementById('modalSubject').placeholder = 'SMS Message';
         }
-        
-        // Initialize character counter
-        updateMessageCharCount();
     }
 
     function prevStep() {
-        if (currentStep === 2) {
-            document.getElementById('step2').classList.add('hidden');
-            document.getElementById('step1').classList.remove('hidden');
-            currentStep = 1;
-        } else if (currentStep === 3) {
+        if (document.getElementById('step2').classList.contains('hidden')) {
             document.getElementById('step3').classList.add('hidden');
             document.getElementById('step2').classList.remove('hidden');
-            currentStep = 2;
-        }
-    }
-
-    function updateMessageCharCount() {
-        const message = document.getElementById('messageContent');
-        const count = message.value.length;
-        const max = selectedCommType === 'sms' ? 300 : 1000;
-        const charCount = document.getElementById('charCount');
-        
-        charCount.textContent = `${count}/${max} characters`;
-        
-        if (count > max) {
-            charCount.classList.add('text-red-500');
         } else {
-            charCount.classList.remove('text-red-500');
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step1').classList.remove('hidden');
         }
-    }
-
-    function loadTemplate(type) {
-        const templates = {
-            'meeting': 'Dear member,\n\nPlease be reminded of our SACCO meeting on [Date] at [Time] in [Venue].\n\nAgenda:\n1. Review of previous minutes\n2. Loan applications\n3. Any other business\n\nYour attendance is important.\n\nSecretary,\nMakamithi SACCO',
-            'loan': 'Dear member,\n\nYour loan application has been [Status].\n\nApplication Details:\nAmount: KES [Amount]\nStatus: [Approved/Rejected]\n\n[If approved]: Please visit the office with your ID for cheque collection.\n[If rejected]: Contact the Secretary for more information.\n\nThank you,\nMakamithi SACCO',
-            'payment': 'Dear member,\n\nThis is a reminder that your loan payment of KES [Amount] is due on [Date].\n\nPlease ensure timely payment to maintain good standing with the SACCO.\n\nPayment Methods:\n1. Payroll deduction\n2. Direct bank deposit\n3. Mobile money\n\nThank you,\nMakamithi SACCO',
-            'savings': 'Dear member,\n\nYour savings statement for [Month] is now available.\n\nCurrent Balance: KES [Amount]\nMonthly Contribution: KES [Monthly]\n\nYou qualify for a loan of up to KES [Eligible] (1.5× your savings).\n\nThank you for your consistent contributions.\n\nSecretary,\nMakamithi SACCO'
-        };
-        
-        const messageContent = document.getElementById('messageContent');
-        messageContent.value = templates[type] || '';
-        updateMessageCharCount();
     }
 
     function nextToPreview() {
-        const message = document.getElementById('messageContent').value.trim();
+        const message = document.getElementById('modalMessage').value.trim();
         
         if (!message) {
             alert('Please enter a message');
             return;
         }
         
-        if (selectedCommType === 'sms' && message.length > 300) {
-            alert('SMS messages must be 300 characters or less');
+        if (modalType === 'sms' && message.length > 160) {
+            alert('SMS messages must be 160 characters or less');
             return;
         }
         
         document.getElementById('step2').classList.add('hidden');
         document.getElementById('step3').classList.remove('hidden');
-        currentStep = 3;
         
         // Update preview
-        const emailSubject = document.getElementById('emailSubject');
+        const subject = document.getElementById('modalSubject');
         const previewSubject = document.getElementById('previewSubject');
         const previewContent = document.getElementById('previewContent');
         
-        if (selectedCommType === 'email') {
-            previewSubject.textContent = emailSubject.value || '(No subject)';
-        } else {
-            previewSubject.textContent = 'SMS Message';
-        }
-        
+        previewSubject.textContent = subject.value || (modalType === 'sms' ? 'SMS Message' : 'No Subject');
         previewContent.textContent = message;
-        
-        // Update recipients
-        const selectedRecipient = document.querySelector('input[name="recipients"]:checked');
-        let recipientText = 'Not selected';
-        if (selectedRecipient) {
-            const recipientDiv = selectedRecipient.closest('div').querySelector('.font-medium');
-            recipientText = recipientDiv ? recipientDiv.textContent : 'Not selected';
-        }
-        document.getElementById('previewRecipients').textContent = recipientText;
-        
-        // Update cost
-        const cost = selectedCommType === 'sms' ? 'KES 1 per SMS' : 'Free';
-        document.getElementById('previewCost').textContent = cost;
     }
 
     function sendFinalCommunication() {
-        const message = document.getElementById('messageContent').value.trim();
+        const message = document.getElementById('modalMessage').value.trim();
         
         if (!message) {
             alert('Please enter a message');
             return;
         }
         
-        // Show success message
-        alert(`${selectedCommType.toUpperCase()} communication sent successfully!`);
+        alert(`${modalType.toUpperCase()} communication sent successfully!`);
         closeNewCommunication();
     }
 
-    // Other functions
+    // Action Functions
     function sendSMS() {
-        selectType('sms');
         openNewCommunication();
+        selectCommType('sms');
     }
 
     function sendEmail() {
-        selectType('email');
-    // Initialize
-    document.addEventListener('DOMContentLoaded', function() {
-        selectType('sms');
-        
-        const quickMessage = document.getElementById('quickMessage');
-        const messageContent = document.getElementById('messageContent');
-        
-        quickMessage.addEventListener('input', updateCharCount);
-        messageContent.addEventListener('input', updateMessageCharCount);
-        
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('newCommunicationModal');
-            if (event.target === modal) {
-                closeNewCommunication();
-            }
+        openNewCommunication();
+        selectCommType('email');
+    }
+
+    function resendSMS(index) {
+        if (confirm('Resend this SMS message?')) {
+            alert('SMS resent successfully!');
         }
-        
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeNewCommunication();
-            }
-        });
-        
-        // Select first recipient by default
-        const firstRecipient = document.querySelector('.recipient-option');
-        if (firstRecipient) {
-            selectRecipient(firstRecipient);
+    }
+
+    function viewSMSDetails(index) {
+        alert('Viewing SMS details...');
+    }
+
+    function viewEmail(index) {
+        alert('Viewing email details...');
+    }
+
+    function resendEmail(index) {
+        if (confirm('Resend this email?')) {
+            alert('Email resent successfully!');
         }
-    });
-        alert('Viewing email history...');
+    }
+
+    function useTemplate(name) {
+        alert(`Using template: ${name}\n\nThis would load the template into the composer.`);
+        openNewCommunication();
+    }
+
+    function editTemplate(name) {
+        alert(`Editing template: ${name}`);
+    }
+
+    function addTemplate() {
+        alert('Add new template form would open here.');
     }
 
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
-        selectType('sms');
+        switchTab('sms');
+        selectQuickType('sms');
+        selectCommType('sms');
         
-        const quickMessage = document.getElementById('quickMessage');
-        const messageContent = document.getElementById('messageContent');
+        // Add event listeners
+        document.getElementById('quickMessage').addEventListener('input', updateQuickCharCount);
+        document.getElementById('modalMessage').addEventListener('input', updateModalCharCount);
         
-        quickMessage.addEventListener('input', updateCharCount);
-        messageContent.addEventListener('input', updateMessageCharCount);
-        
-        // Close modal when clicking outside
+        // Close modal on outside click
         window.onclick = function(event) {
             const modal = document.getElementById('newCommunicationModal');
             if (event.target === modal) {
@@ -1006,35 +859,4 @@
         });
     });
 </script>
-
-<style>
-    /* Custom scrollbar */
-    #newCommunicationModal > div::-webkit-scrollbar {
-        width: 8px;
-    }
-    
-    #newCommunicationModal > div::-webkit-scrollbar-track {
-        background: #f9fafb;
-        border-radius: 0 24px 24px 0;
-    }
-    
-    #newCommunicationModal > div::-webkit-scrollbar-thumb {
-        background: #d1d5db;
-        border-radius: 4px;
-    }
-    
-    #newCommunicationModal > div::-webkit-scrollbar-thumb:hover {
-        background: #9ca3af;
-    }
-    
-    /* Radio button custom style */
-    input[type="radio"]:checked + div > div {
-        opacity: 1;
-    }
-    
-    /* Smooth transitions */
-    * {
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-</style>
 @endsection

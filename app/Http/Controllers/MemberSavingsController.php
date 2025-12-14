@@ -112,19 +112,46 @@ class MemberSavingsController extends Controller
      */
     public function withdrawalRequest(Request $request)
     {
+        // Debug: Log all incoming data
+        \Log::info('=== WITHDRAWAL REQUEST DEBUG ===');
+        \Log::info('User ID: ' . auth()->id());
+        \Log::info('All request data:', $request->all());
+        
         $user = Auth::user();
-        // Allow withdrawals for testing and accept any reason/payment method values.
-        $request->validate([
+        
+        // Validate with conditional rules
+        $validator = Validator::make($request->all(), [
             'amount' => ['required', 'numeric', 'min:1', 'max:1000000'],
-            'withdrawal_reason' => ['required', 'string'],
-            'payment_method' => ['required', 'string'],
-            'bank_account_name' => ['required_if:payment_method,bank_transfer', 'string', 'max:255'],
-            'bank_name' => ['required_if:payment_method,bank_transfer', 'string', 'max:100'],
-            'bank_account_number' => ['required_if:payment_method,bank_transfer', 'string', 'max:50'],
-            'bank_branch' => ['required_if:payment_method,bank_transfer', 'string', 'max:100'],
-            'mpesa_number' => ['required_if:payment_method,mpesa', 'string', 'max:20'],
+            'withdrawal_reason' => ['required', 'string', 'in:resignation,retirement,medical_emergency,other'],
+            'payment_method' => ['required', 'string', 'in:bank_transfer,mpesa,cheque'],
+            'bank_account_name' => ['nullable', 'string', 'max:255'],
+            'bank_name' => ['nullable', 'string', 'max:100'],
+            'bank_account_number' => ['nullable', 'string', 'max:50'],
+            'bank_branch' => ['nullable', 'string', 'max:100'],
+            'mpesa_number' => ['nullable', 'string', 'max:20'],
             'notes' => ['nullable', 'string', 'max:500'],
+        ], [
+            'mpesa_number.required_if' => 'M-Pesa number is required when selecting M-Pesa as payment method.',
+            'bank_account_name.required_if' => 'Bank account name is required for bank transfer.',
+            'bank_name.required_if' => 'Bank name is required for bank transfer.',
+            'bank_account_number.required_if' => 'Bank account number is required for bank transfer.',
         ]);
+        
+        // Add conditional required rules
+        $validator->sometimes('mpesa_number', 'required', function ($input) {
+            return $input->payment_method === 'mpesa';
+        });
+        
+        $validator->sometimes(['bank_account_name', 'bank_name', 'bank_account_number'], 'required', function ($input) {
+            return $input->payment_method === 'bank_transfer';
+        });
+        
+        if ($validator->fails()) {
+            \Log::error('Validation failed:', $validator->errors()->toArray());
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
         
         $savings = $user->savings;
         
@@ -132,14 +159,14 @@ class MemberSavingsController extends Controller
             return redirect()->back()->with('error', 'No savings account found.');
         }
         
-        // Check if requested amount is withdrawable
-        $withdrawableAmount = $user->withdrawal_amount;
+        // Check if requested amount is withdrawable (apply KES 2,000 retention)
+        $withdrawableAmount = max(0, $savings->available_savings - 2000);
         
         if ($request->amount > $withdrawableAmount) {
             return redirect()->back()->with('error', 
                 'Requested amount exceeds withdrawable balance. Maximum withdrawable: KES ' . 
-                number_format($withdrawableAmount, 2)
-            );
+                number_format($withdrawableAmount, 2) . ' (KES 2,000 retention required)'
+            )->withInput();
         }
         
         DB::beginTransaction();
@@ -150,6 +177,7 @@ class MemberSavingsController extends Controller
                 'user_id' => $user->id,
                 'saving_id' => $savings->id,
                 'amount' => $request->amount,
+                'available_savings' => $savings->available_savings,
                 'withdrawal_reason' => $request->withdrawal_reason,
                 'payment_method' => $request->payment_method,
                 'bank_account_name' => $request->bank_account_name,
@@ -158,32 +186,39 @@ class MemberSavingsController extends Controller
                 'bank_branch' => $request->bank_branch,
                 'mpesa_number' => $request->mpesa_number,
                 'status' => 'pending',
-                'requested_at' => now(),
-                'notes' => $request->notes,
+                'user_notes' => $request->notes,
             ]);
             
-            // Record pending transaction (store positive amount for consistency with treasurer processing)
+            // Record pending transaction
             $transaction = SavingsTransaction::create([
                 'user_id' => $user->id,
+                'saving_id' => $savings->id,
+                'withdrawal_request_id' => $withdrawal->id,
                 'transaction_ref' => 'WDR-' . str_pad($user->id, 5, '0', STR_PAD_LEFT) . '-' . time(),
                 'type' => 'withdrawal',
-                'amount' => $request->amount, // positive amount
+                'amount' => $request->amount, // positive amount for withdrawal request
                 'balance_before' => $savings->available_savings,
                 'balance_after' => $savings->available_savings - $request->amount,
                 'description' => 'Withdrawal request - ' . ucfirst(str_replace('_', ' ', $request->withdrawal_reason)),
-                'payment_method' => $request->payment_method ?? null,
+                'payment_method' => $request->payment_method,
                 'status' => 'pending',
-                'transaction_date' => now()->toDateString(),
+                'transaction_date' => now(),
+                'notes' => $request->notes,
             ]);
             
             DB::commit();
+            
+            \Log::info('Withdrawal request created successfully. ID: ' . $withdrawal->id);
             
             return redirect()->route('member.savings.index')
                 ->with('success', 'Withdrawal request submitted successfully! It will be processed within 3-5 working days.');
                 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Failed to submit withdrawal request: ' . $e->getMessage());
+            \Log::error('Withdrawal request failed: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Failed to submit withdrawal request: ' . $e->getMessage())
+                ->withInput();
         }
     }
 

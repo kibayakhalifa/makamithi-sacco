@@ -26,10 +26,12 @@ class WithdrawalRequest extends Model
         'processed_by',
         'notes',
         'rejection_reason',
+        'available_savings', // Make sure this is added
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'available_savings' => 'decimal:2', // Add this
         'requested_at' => 'datetime',
         'processed_at' => 'datetime',
     ];
@@ -40,9 +42,10 @@ class WithdrawalRequest extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function saving()
+    // CHANGE THIS METHOD NAME - from saving() to savingsAccount()
+    public function savingsAccount()
     {
-        return $this->belongsTo(Saving::class);
+        return $this->belongsTo(Saving::class, 'saving_id');
     }
 
     public function processor()
@@ -64,5 +67,21 @@ class WithdrawalRequest extends Model
     public function scopeCompleted($query)
     {
         return $query->where('status', 'completed');
+    }
+    
+    // Add this method for easier status checking
+    public function isPending()
+    {
+        return $this->status === 'pending';
+    }
+    
+    public function isApproved()
+    {
+        return $this->status === 'approved';
+    }
+    
+    public function isCompleted()
+    {
+        return $this->status === 'completed';
     }
 }

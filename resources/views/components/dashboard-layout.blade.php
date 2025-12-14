@@ -136,7 +136,7 @@
             </header>
 
             <!-- Page Body -->
-            <main class="flex-1 overflow-y-auto p-6">
+            <main class="flex-1 overflow-y-auto p-4 md:p-6">
 
                 @if(session('success'))
                     <x-alert.success>{{ session('success') }}</x-alert.success>

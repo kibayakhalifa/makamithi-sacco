@@ -519,12 +519,12 @@ class TreasurerController extends Controller
 
             // Reduce member's loan eligibility by the disbursed loan amount
             // Loan eligibility = savings * 1.5, so we reduce available savings
-            $member = $loan->user;
-            if ($member->savings) {
-                $reductionAmount = $loan->amount / 1.5; // Reverse the 1.5x calculation
-                $newAvailableSavings = max(0, $member->savings->available_savings - $reductionAmount);
-                $member->savings->update(['available_savings' => $newAvailableSavings]);
-            }
+            // $member = $loan->user;
+            // if ($member->savings) {
+            //     $reductionAmount = $loan->amount / 1.5; // Reverse the 1.5x calculation
+            //     $newAvailableSavings = max(0, $member->savings->available_savings - $reductionAmount);
+            //     $member->savings->update(['available_savings' => $newAvailableSavings]);
+            // }
 
             DB::commit();
 
@@ -588,12 +588,12 @@ class TreasurerController extends Controller
             ]);
 
             // Reduce member's loan eligibility (same logic as cheque issuance)
-            $member = $loan->user;
-            if ($member && $member->savings) {
-                $reductionAmount = $loan->amount / 1.5;
-                $newAvailableSavings = max(0, $member->savings->available_savings - $reductionAmount);
-                $member->savings->update(['available_savings' => $newAvailableSavings]);
-            }
+            // $member = $loan->user;
+            // if ($member && $member->savings) 
+            //     $reductionAmount = $loan->amount / 1.5;
+            //     $newAvailableSavings = max(0, $member->savings->available_savings - $reductionAmount);
+            //     $member->savings->update(['available_savings' => $newAvailableSavings]);
+            // }
 
             DB::commit();
 

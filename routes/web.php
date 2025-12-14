@@ -100,23 +100,25 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // ---------- CHAIRMAN ROUTES ----------
-    Route::middleware(['auth', 'role:chairman'])->group(function () {
+    Route::middleware(['auth', 'role:chairman'])->prefix('chairman')->name('chairman.')->group(function () {
 
         // Chairman Dashboard
-        Route::get('/chairman/dashboard', [ChairmanController::class, 'dashboard'])->name('chairman.dashboard');
+        Route::get('/dashboard', [ChairmanController::class, 'dashboard'])->name('dashboard');
 
-        // Chairman specific routes
-        Route::prefix('chairman')->name('chairman.')->group(function () {
-            // Loan Approvals
-            Route::get('/loan-approvals', [ChairmanController::class, 'loanApprovals'])->name('loan-approvals');
-            Route::get('/loans/{loan}/approve', [ChairmanController::class, 'viewLoanForApproval'])->name('loans.approve-view');
-            Route::post('/loans/{loan}/approve', [ChairmanController::class, 'approveLoanApplication'])->name('loans.approve');
-            Route::post('/loans/{loan}/reject', [ChairmanController::class, 'rejectLoanApplication'])->name('loans.reject');
+        // Members Management
+        Route::get('/members', [ChairmanController::class, 'members'])->name('members');
+        Route::get('/member/{member}/details', [ChairmanController::class, 'getMemberDetails'])->name('member.details');
+        Route::post('/member/{member}/approve', [ChairmanController::class, 'approveMember'])->name('member.approve');
+        
+        // Loan Approvals
+        Route::get('/loan-approvals', [ChairmanController::class, 'loanApprovals'])->name('loan-approvals');
+        Route::get('/loans/{loan}/approve', [ChairmanController::class, 'viewLoanForApproval'])->name('loans.approve-view');
+        Route::post('/loans/{loan}/approve', [ChairmanController::class, 'approveLoanApplication'])->name('loans.approve');
+        Route::post('/loans/{loan}/reject', [ChairmanController::class, 'rejectLoanApplication'])->name('loans.reject');
 
-            Route::get('/members', function () {
-                return view('chairman.members');
-            })->name('members');
-        });
+        // Reports and Statistics
+        Route::get('/dashboard-stats', [ChairmanController::class, 'getDashboardStats'])->name('dashboard.stats');
+        Route::get('/filtered-members', [ChairmanController::class, 'getFilteredMembers'])->name('members.filtered');
     });
 
     // ---------- SECRETARY ROUTES ----------
@@ -222,11 +224,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/withdrawal/{member}', [SecretaryController::class, 'processWithdrawalRequest'])->name('secretary.withdrawal.process');
     });
 
-    // Chairman Routes
-    Route::prefix('chairman')->middleware(['auth', 'role:chairman'])->group(function () {
-        Route::post('/members/{member}/approve', [ChairmanController::class, 'approveMember'])->name('chairman.members.approve');
-    });
-
+    // Treasurer Routes
     Route::middleware(['auth', 'role:treasurer'])->prefix('treasurer')->name('treasurer.')->group(function () {
 
         // Dashboard
@@ -238,9 +236,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/loans/{loan}/issue-cheque', [TreasurerController::class, 'issueCheque'])->name('loans.issue-cheque');
         Route::post('/loans/{loan}/disburse', [TreasurerController::class, 'disburseLoan'])->name('loans.disburse');
         // Add this route definition
-        Route::post('/loans/{loan}/payment', [TreasurerController::class, 'recordLoanPayment'])
-        ->name('treasurer.loans.record-payment')
-        ->name('treasurer.loans.payment'); // Multiple names
+        Route::post('/loans/{loan}/payment', [TreasurerController::class, 'recordLoanPayment'])->name('treasurer.loans.record-payment');
         Route::post('/payroll/process-deductions', [TreasurerController::class, 'processPayrollDeductions'])->name('payroll.process-deductions');
         Route::post('/withdrawals/{transaction}/process', [TreasurerController::class, 'processWithdrawal'])->name('withdrawals.process');
         Route::post('/withdrawals/{transaction}/reject', [TreasurerController::class, 'rejectWithdrawal'])->name('withdrawals.reject');
@@ -249,7 +245,6 @@ Route::middleware(['auth'])->group(function () {
         // 2. Loans Management
         Route::get('/loans', [TreasurerController::class, 'loans'])->name('loans');
         Route::get('/loans/{loan}/view', [TreasurerController::class, 'viewLoan'])->name('loans.view');
-        Route::post('/loans/{loan}/payment', [TreasurerController::class, 'recordLoanPayment'])->name('loans.record-payment');
         Route::post('/loans/send-reminders', [TreasurerController::class, 'sendPaymentReminders'])->name('loans.send-reminders');
         Route::post('/loans/update-rates', [TreasurerController::class, 'updateInterestRates'])->name('loans.update-rates');
         Route::get('/loans/export', [TreasurerController::class, 'exportLoans'])->name('loans.export');
@@ -353,7 +348,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/bulk-generate', [TreasurerController::class, 'bulkGenerateStatements'])->name('bulk');
         Route::get('/export/{member}', [TreasurerController::class, 'exportStatement'])->name('export');
     });
-    // Member Routes
+    
+    // Member Routes (additional)
     Route::middleware(['auth', 'role:member'])->group(function () {
         Route::post('/loans/apply', [LoanController::class, 'apply'])->name('member.loans.apply');
         Route::post('/savings/topup', [SavingsController::class, 'topup'])->name('member.savings.topup');
@@ -367,6 +363,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/settings/notifications', [SettingsController::class, 'updateNotifications'])->name('settings.update-notifications');
         Route::delete('/settings/delete-account', [SettingsController::class, 'deleteAccount'])->name('settings.delete-account');
     });
+    
     Route::post('/reports/generate', [\App\Http\Controllers\ReportController::class, 'generate'])
         ->name('reports.generate');
 
@@ -382,4 +379,5 @@ Route::middleware(['auth'])->group(function () {
                 ->exists(),
         ]);
     });
-});
+    
+}); // This closes the main auth middleware group
