@@ -70,6 +70,13 @@ Route::middleware(['auth'])->group(function () {
         return redirect('/');
     })->name('logout');
 
+    // ============ DOCUMENTS ROUTES (FOR ALL USERS) ============
+    Route::middleware(['auth'])->group(function () {
+        // Shared documents view (for all users)
+        Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
+        Route::get('/documents/{id}/download', [DocumentController::class, 'download'])->name('documents.download');
+    });
+
     // Member Routes (requires authentication and member role)
     Route::middleware(['auth', 'role:member'])->prefix('member')->name('member.')->group(function () {
         // Dashboard
@@ -109,7 +116,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/members', [ChairmanController::class, 'members'])->name('members');
         Route::get('/member/{member}/details', [ChairmanController::class, 'getMemberDetails'])->name('member.details');
         Route::post('/member/{member}/approve', [ChairmanController::class, 'approveMember'])->name('member.approve');
-        
+
         // Loan Approvals
         Route::get('/loan-approvals', [ChairmanController::class, 'loanApprovals'])->name('loan-approvals');
         Route::get('/loans/{loan}/approve', [ChairmanController::class, 'viewLoanForApproval'])->name('loans.approve-view');
@@ -155,27 +162,18 @@ Route::middleware(['auth'])->group(function () {
             // Loan History
             Route::get('/loan-history', [SecretaryController::class, 'loanHistory'])->name('secretary.loan-history');
 
-            // Note: real POST routes for member creation and assisted loans are defined
-            // further below and should be used. Removed dummy closures to allow the
-            // controller implementations to receive form submissions.
+            // Secretary Communications
+            Route::get('/communications', function () {
+                return view('secretary.communications');
+            })->name('secretary.communications');
+
+            // Secretary Documents Management
+            Route::middleware(['role:secretary'])->prefix('secretary')->group(function () {
+                Route::get('/documents', [DocumentController::class, 'secretaryIndex'])->name('secretary.documents');
+                Route::post('/documents', [DocumentController::class, 'store'])->name('secretary.documents.store');
+                Route::delete('/documents/{id}', [DocumentController::class, 'destroy'])->name('secretary.documents.destroy');
+            });
         });
-        // Secretary Communications
-        Route::get('/secretary/communications', function () {
-            if (auth()->user()->role !== 'secretary') {
-                abort(403, 'Unauthorized access.');
-            }
-
-            return view('secretary.communications');
-        })->name('secretary.communications');
-
-        // Secretary Documents
-        Route::get('/secretary/documents', function () {
-            if (auth()->user()->role !== 'secretary') {
-                abort(403, 'Unauthorized access.');
-            }
-
-            return view('secretary.documents');
-        })->name('secretary.documents');
     });
 
     // ---------- REPORTS ROUTES (Accessible to all authenticated users) ----------
@@ -207,17 +205,7 @@ Route::middleware(['auth'])->group(function () {
         })->name('reports.member-statements');
     });
 
-    Route::middleware(['auth'])->group(function () {
-        Route::get('/documents', function () {
-            return view('documents.index');
-        })->name('documents.index');
-
-        Route::get('/documents-test', function () {
-            return view('documents.test-simple');
-        })->name('documents.test');
-    });
-
-    // Secretary Routes
+    // Secretary POST Routes (for member creation, assisted loans, withdrawals)
     Route::prefix('secretary')->middleware(['auth', 'role:secretary'])->group(function () {
         Route::post('/members', [SecretaryController::class, 'storeMember'])->name('secretary.members.store');
         Route::post('/assisted-loans', [SecretaryController::class, 'storeAssistedLoan'])->name('secretary.loans.assisted');
@@ -315,9 +303,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/financial/{type}', [TreasurerController::class, 'financialReport'])->name('financial');
             Route::get('/financial/export', [TreasurerController::class, 'exportFinancialReports'])->name('financial.export');
         });
-
-        // Documents (shared with other roles)
-        Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
     });
 
     // ============ PAYROLL ROUTES (Treasurer Specific) ============
@@ -348,7 +333,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/bulk-generate', [TreasurerController::class, 'bulkGenerateStatements'])->name('bulk');
         Route::get('/export/{member}', [TreasurerController::class, 'exportStatement'])->name('export');
     });
-    
+
     // Member Routes (additional)
     Route::middleware(['auth', 'role:member'])->group(function () {
         Route::post('/loans/apply', [LoanController::class, 'apply'])->name('member.loans.apply');
@@ -363,21 +348,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/settings/notifications', [SettingsController::class, 'updateNotifications'])->name('settings.update-notifications');
         Route::delete('/settings/delete-account', [SettingsController::class, 'deleteAccount'])->name('settings.delete-account');
     });
-    
+
     Route::post('/reports/generate', [\App\Http\Controllers\ReportController::class, 'generate'])
         ->name('reports.generate');
 
-    Route::get('/check-session-now', function () {
-        session()->put('test_time', now()->toDateTimeString());
-
-        return response()->json([
-            'session_id' => session()->getId(),
-            'session_token' => session()->token(),
-            'test_value' => session()->get('test_time'),
-            'session_in_db' => \DB::table('sessions')
-                ->where('id', session()->getId())
-                ->exists(),
-        ]);
-    });
-    
-}); // This closes the main auth middleware group
+});

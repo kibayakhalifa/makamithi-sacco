@@ -445,71 +445,148 @@
                     <span class="text-gray-500 hover:text-gray-700">✕</span>
                 </button>
             </div>
-            <p class="text-gray-500 text-sm mt-1">Upload and categorize a new document</p>
+            <p class="text-gray-500 text-sm mt-1">Upload and set access permissions</p>
         </div>
 
-        <div class="p-6 space-y-6">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Document Title *</label>
-                <input type="text" id="docTitle"
-                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors"
-                    placeholder="e.g., SACCO Meeting Minutes - April 2024">
-            </div>
+        <form action="{{ route('secretary.documents.store') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
+            @csrf
+            
+            <div class="p-6 space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Document Title *</label>
+                    <input type="text" name="title" id="docTitle"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors"
+                        placeholder="e.g., SACCO Meeting Minutes - April 2024" required>
+                </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    @foreach([
-                        ['id' => 'minutes', 'icon' => '📝', 'name' => 'Meeting Minutes'],
-                        ['id' => 'loan', 'icon' => '📄', 'name' => 'Loan Documents'],
-                        ['id' => 'member', 'icon' => '👤', 'name' => 'Member Files'],
-                        ['id' => 'financial', 'icon' => '💰', 'name' => 'Financial Reports'],
-                        ['id' => 'policy', 'icon' => '📋', 'name' => 'Policies'],
-                        ['id' => 'other', 'icon' => '📎', 'name' => 'Other']
-                    ] as $category)
-                    <button class="p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition text-center category-btn"
-                        onclick="selectCategory('{{ $category['id'] }}')" id="cat-{{ $category['id'] }}">
-                        <div class="text-2xl mb-2">{{ $category['icon'] }}</div>
-                        <p class="text-sm font-medium">{{ $category['name'] }}</p>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        @foreach([
+                            ['id' => 'minutes', 'icon' => '📝', 'name' => 'Meeting Minutes'],
+                            ['id' => 'loans', 'icon' => '📄', 'name' => 'Loan Documents'],
+                            ['id' => 'members', 'icon' => '👤', 'name' => 'Member Files'],
+                            ['id' => 'financial', 'icon' => '💰', 'name' => 'Financial Reports'],
+                            ['id' => 'policy', 'icon' => '📋', 'name' => 'Policies'],
+                            ['id' => 'other', 'icon' => '📎', 'name' => 'Other']
+                        ] as $category)
+                        <label class="cursor-pointer">
+                            <input type="radio" name="category" value="{{ $category['id'] }}" 
+                                class="hidden peer" required>
+                            <div class="p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition text-center peer-checked:border-blue-500 peer-checked:bg-blue-50">
+                                <div class="text-2xl mb-2">{{ $category['icon'] }}</div>
+                                <p class="text-sm font-medium">{{ $category['name'] }}</p>
+                            </div>
+                        </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Access Control Section -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Access Control *</label>
+                    
+                    <!-- Access Type Selection -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                        @foreach([
+                            ['id' => 'committee', 'icon' => '👥', 'name' => 'Committee', 'desc' => 'Secretary, Chairman, Treasurer'],
+                            ['id' => 'members', 'icon' => '👤', 'name' => 'All Members', 'desc' => 'All SACCO members'],
+                            ['id' => 'specific_users', 'icon' => '🎯', 'name' => 'Specific Users', 'desc' => 'Select individual users'],
+                            ['id' => 'public', 'icon' => '🌐', 'name' => 'Public', 'desc' => 'Everyone with login'],
+                        ] as $access)
+                        <label class="cursor-pointer">
+                            <input type="radio" name="access_type" value="{{ $access['id'] }}" 
+                                class="hidden peer" required onclick="toggleAccessOptions('{{ $access['id'] }}')">
+                            <div class="p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition text-center peer-checked:border-green-500 peer-checked:bg-green-50 h-full">
+                                <div class="text-2xl mb-2">{{ $access['icon'] }}</div>
+                                <p class="text-sm font-medium">{{ $access['name'] }}</p>
+                                <p class="text-xs text-gray-500 mt-1">{{ $access['desc'] }}</p>
+                            </div>
+                        </label>
+                        @endforeach
+                    </div>
+
+                    <!-- Committee Roles Selection (hidden by default) -->
+                    <div id="committeeOptions" class="hidden space-y-3 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Committee Roles</label>
+                        <div class="space-y-2">
+                            @foreach(['secretary', 'chairman', 'treasurer'] as $role)
+                            <label class="flex items-center space-x-3">
+                                <input type="checkbox" name="allowed_roles[]" value="{{ $role }}"
+                                    class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+                                <span class="text-sm text-gray-700 capitalize">{{ $role }}</span>
+                            </label>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <!-- Members Option (hidden by default) -->
+                    <div id="membersOptions" class="hidden space-y-3 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                        <p class="text-sm text-gray-600">
+                            This document will be accessible to all members with the "member" role.
+                        </p>
+                        <input type="hidden" name="allowed_roles[]" value="member">
+                    </div>
+
+                    <!-- Specific Users Selection (hidden by default) -->
+                    <div id="specificUsersOptions" class="hidden space-y-3 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Users</label>
+                        <div class="max-h-48 overflow-y-auto space-y-2">
+                            @foreach($users as $user)
+                            <label class="flex items-center space-x-3 hover:bg-gray-100 p-2 rounded">
+                                <input type="checkbox" name="specific_users[]" value="{{ $user->id }}"
+                                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <div>
+                                    <span class="text-sm font-medium text-gray-900">{{ $user->name }}</span>
+                                    <span class="text-xs text-gray-500 capitalize">({{ $user->role }})</span>
+                                </div>
+                            </label>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <!-- Public Option (hidden by default) -->
+                    <div id="publicOptions" class="hidden space-y-3 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                        <p class="text-sm text-gray-600">
+                            This document will be accessible to all logged-in users.
+                        </p>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Select File *</label>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition cursor-pointer"
+                         onclick="document.getElementById('modalFileInput').click()">
+                        <div class="text-4xl mb-4">📎</div>
+                        <p class="font-medium text-gray-900 mb-2">Click to select file</p>
+                        <p class="text-sm text-gray-500">Max file size: 10MB</p>
+                        <input type="file" name="file" id="modalFileInput" class="hidden" onchange="handleModalFileSelect(event)" required>
+                    </div>
+                    <div class="mt-3" id="selectedFileInfo"></div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea name="description" id="docDescription" rows="3"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors resize-none"
+                        placeholder="Optional description..."></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                    <button type="button" onclick="closeUploadModal()"
+                        class="px-6 py-3 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition">
+                        Cancel
                     </button>
-                    @endforeach
+                    <button type="submit"
+                        class="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition flex items-center">
+                        <span class="mr-2">📤</span>
+                        Upload Document
+                    </button>
                 </div>
             </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Select File *</label>
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition cursor-pointer"
-                     onclick="document.getElementById('modalFileInput').click()">
-                    <div class="text-4xl mb-4">📎</div>
-                    <p class="font-medium text-gray-900 mb-2">Click to select file</p>
-                    <p class="text-sm text-gray-500">Max file size: 10MB</p>
-                    <input type="file" id="modalFileInput" class="hidden" onchange="handleModalFileSelect(event)">
-                </div>
-                <div class="mt-3" id="selectedFileInfo"></div>
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                <textarea id="docDescription" rows="3"
-                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors resize-none"
-                    placeholder="Optional description..."></textarea>
-            </div>
-
-            <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                <button onclick="closeUploadModal()"
-                    class="px-6 py-3 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition">
-                    Cancel
-                </button>
-                <button onclick="uploadDocument()"
-                    class="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition flex items-center">
-                    <span class="mr-2">📤</span>
-                    Upload Document
-                </button>
-            </div>
-        </div>
+        </form>
     </div>
 </div>
-
 <script>
     // Tab switching
     function switchTab(tabName) {
@@ -528,7 +605,39 @@
         document.getElementById(tabName + 'Tab').classList.remove('text-gray-500');
     }
 
-    // Quick Upload
+    // Access control toggling
+    function toggleAccessOptions(type) {
+        // Hide all options
+        ['committeeOptions', 'membersOptions', 'specificUsersOptions', 'publicOptions'].forEach(id => {
+            document.getElementById(id).classList.add('hidden');
+        });
+
+        // Clear all checkboxes when switching access types
+        if (type !== 'committee') {
+            document.querySelectorAll('input[name="allowed_roles[]"]').forEach(cb => {
+                cb.checked = false;
+            });
+        }
+        
+        if (type !== 'specific_users') {
+            document.querySelectorAll('input[name="specific_users[]"]').forEach(cb => {
+                cb.checked = false;
+            });
+        }
+
+        // Show selected option
+        if (type === 'committee') {
+            document.getElementById('committeeOptions').classList.remove('hidden');
+        } else if (type === 'members') {
+            document.getElementById('membersOptions').classList.remove('hidden');
+        } else if (type === 'specific_users') {
+            document.getElementById('specificUsersOptions').classList.remove('hidden');
+        } else if (type === 'public') {
+            document.getElementById('publicOptions').classList.remove('hidden');
+        }
+    }
+
+    // Quick Upload (for the old quick upload section - optional)
     let uploadQueue = [];
 
     function handleFileUpload(event) {
@@ -619,12 +728,27 @@
 
     function resetUploadModal() {
         selectedCategory = '';
-        document.getElementById('docTitle').value = '';
-        document.getElementById('docDescription').value = '';
+        document.getElementById('uploadForm').reset();
         document.getElementById('selectedFileInfo').innerHTML = '';
         
+        // Reset access controls
         document.querySelectorAll('.category-btn').forEach(el => {
             el.classList.remove('border-gray-900', 'bg-gray-50');
+        });
+        
+        // Hide all access options
+        ['committeeOptions', 'membersOptions', 'specificUsersOptions', 'publicOptions'].forEach(id => {
+            document.getElementById(id).classList.add('hidden');
+        });
+        
+        // Uncheck all radio buttons
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.checked = false;
+        });
+        
+        // Uncheck all checkboxes
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.checked = false;
         });
     }
 
@@ -641,8 +765,11 @@
     function handleModalFileSelect(event) {
         const file = event.target.files[0];
         
+        if (!file) return;
+        
         if (file.size > 10 * 1024 * 1024) {
             alert('File exceeds 10MB limit');
+            event.target.value = '';
             return;
         }
         
@@ -654,10 +781,10 @@
                     </div>
                     <div>
                         <p class="font-medium text-gray-900">${file.name}</p>
-                        <p class="text-xs text-gray-500">${formatFileSize(file.size)}</p>
+                        <p class="text-xs text-gray-500">${formatFileSize(file.size)} • ${file.type}</p>
                     </div>
                 </div>
-                <button onclick="clearSelectedFile()" class="text-gray-500 hover:text-gray-700">
+                <button type="button" onclick="clearSelectedFile()" class="text-gray-500 hover:text-gray-700">
                     ✕
                 </button>
             </div>
@@ -669,29 +796,73 @@
         document.getElementById('selectedFileInfo').innerHTML = '';
     }
 
-    function uploadDocument() {
-        const title = document.getElementById('docTitle').value;
+    // Form validation and submission
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadForm = document.getElementById('uploadForm');
         
-        if (!title.trim()) {
-            alert('Please enter a document title');
-            return;
+        if (uploadForm) {
+            uploadForm.addEventListener('submit', function(e) {
+                const fileInput = document.getElementById('modalFileInput');
+                const accessType = document.querySelector('input[name="access_type"]:checked');
+                const title = document.getElementById('docTitle').value.trim();
+                const category = document.querySelector('input[name="category"]:checked');
+                
+                // Validate title
+                if (!title) {
+                    e.preventDefault();
+                    alert('Please enter a document title');
+                    return;
+                }
+                
+                // Validate category
+                if (!category) {
+                    e.preventDefault();
+                    alert('Please select a category');
+                    return;
+                }
+                
+                // Validate file
+                if (!fileInput.files[0]) {
+                    e.preventDefault();
+                    alert('Please select a file');
+                    return;
+                }
+                
+                // Validate access type
+                if (!accessType) {
+                    e.preventDefault();
+                    alert('Please select an access type');
+                    return;
+                }
+                
+                // Validate based on access type
+                if (accessType.value === 'committee') {
+                    const committeeRoles = document.querySelectorAll('input[name="allowed_roles[]"]:checked');
+                    if (committeeRoles.length === 0) {
+                        e.preventDefault();
+                        alert('Please select at least one committee role');
+                        return;
+                    }
+                }
+                
+                if (accessType.value === 'specific_users') {
+                    const specificUsers = document.querySelectorAll('input[name="specific_users[]"]:checked');
+                    if (specificUsers.length === 0) {
+                        e.preventDefault();
+                        alert('Please select at least one user');
+                        return;
+                    }
+                }
+                
+                // If all validations pass, show loading state
+                const submitBtn = uploadForm.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<span class="mr-2">⏳</span> Uploading...';
+                submitBtn.disabled = true;
+            });
         }
-        
-        if (!selectedCategory) {
-            alert('Please select a category');
-            return;
-        }
-        
-        if (!document.getElementById('modalFileInput').files[0]) {
-            alert('Please select a file');
-            return;
-        }
-        
-        alert('Document uploaded successfully!');
-        closeUploadModal();
-    }
+    });
 
-    // Action Functions
+    // Action Functions for existing demo buttons
     function downloadDocument(name) {
         alert(`Downloading: ${name}`);
     }
@@ -702,7 +873,19 @@
 
     function addMeetingMinutes() {
         openUploadModal();
-        selectCategory('minutes');
+        // Auto-select minutes category
+        const minutesRadio = document.querySelector('input[name="category"][value="minutes"]');
+        if (minutesRadio) {
+            minutesRadio.checked = true;
+            // Trigger category selection styling if needed
+            document.querySelectorAll('.category-btn').forEach(el => {
+                el.classList.remove('border-gray-900', 'bg-gray-50');
+            });
+            const minutesLabel = minutesRadio.closest('label');
+            if (minutesLabel) {
+                minutesLabel.querySelector('div').classList.add('border-gray-900', 'bg-gray-50');
+            }
+        }
     }
 
     function viewMeeting(title) {
@@ -735,10 +918,51 @@
         }
     }
 
-    // Initialize
+    // Search and filter functionality for documents table
+    function initDocumentSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const categoryFilter = document.getElementById('categoryFilter');
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('tbody tr');
+                
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        }
+        
+        if (categoryFilter) {
+            categoryFilter.addEventListener('change', function(e) {
+                const category = e.target.value;
+                const rows = document.querySelectorAll('tbody tr');
+                
+                rows.forEach(row => {
+                    if (!category) {
+                        row.style.display = '';
+                        return;
+                    }
+                    
+                    const categoryCell = row.querySelector('td:nth-child(2) span');
+                    if (categoryCell && categoryCell.textContent.toLowerCase().includes(category)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
+    }
+
+    // Initialize everything
     document.addEventListener('DOMContentLoaded', function() {
         switchTab('all');
+        initDocumentSearch();
         
+        // Modal click outside to close
         window.onclick = function(event) {
             const modal = document.getElementById('uploadModal');
             if (event.target === modal) {
@@ -746,11 +970,25 @@
             }
         }
         
+        // Escape key to close modal
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeUploadModal();
             }
         });
+        
+        // Initialize access type selection for demo
+        const defaultAccessType = document.querySelector('input[name="access_type"][value="committee"]');
+        if (defaultAccessType) {
+            defaultAccessType.checked = true;
+            toggleAccessOptions('committee');
+            
+            // Check secretary by default since they're uploading
+            const secretaryCheckbox = document.querySelector('input[name="allowed_roles[]"][value="secretary"]');
+            if (secretaryCheckbox) {
+                secretaryCheckbox.checked = true;
+            }
+        }
     });
 </script>
 @endsection

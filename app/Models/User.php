@@ -51,7 +51,7 @@ class User extends Authenticatable
     ];
 
     // ========== RELATIONSHIPS ==========
-    
+
     public function savings()
     {
         return $this->hasOne(Saving::class);
@@ -118,7 +118,7 @@ class User extends Authenticatable
     }
 
     // ========== SCOPES ==========
-    
+
     public function scopeMembers($query)
     {
         return $query->where('role', 'member');
@@ -140,16 +140,16 @@ class User extends Authenticatable
     }
 
     // ========== HELPER METHODS ==========
-    
+
     /**
      * Calculate loan eligibility (1.5× savings rule)
      */
     public function getLoanEligibilityAttribute()
     {
-        if (!$this->savings) {
+        if (! $this->savings) {
             return 0;
         }
-        
+
         return $this->savings->available_savings * 1.5;
     }
 
@@ -159,11 +159,11 @@ class User extends Authenticatable
     public function isEligibleForTopUp()
     {
         $activeLoan = $this->activeLoan;
-        
-        if (!$activeLoan) {
+
+        if (! $activeLoan) {
             return false;
         }
-        
+
         return $activeLoan->percentage_paid >= 50;
     }
 
@@ -181,7 +181,7 @@ class User extends Authenticatable
      */
     public function canWithdrawSavings()
     {
-        return $this->sacco_status === 'inactive' && 
+        return $this->sacco_status === 'inactive' &&
                $this->sacco_exit_date !== null &&
                $this->exit_reason !== null;
     }
@@ -191,15 +191,16 @@ class User extends Authenticatable
      */
     public function getWithdrawalAmountAttribute()
     {
-        if (!$this->canWithdrawSavings() || !$this->savings) {
+        if (! $this->canWithdrawSavings() || ! $this->savings) {
             return 0;
         }
-        
+
         $withdrawable = $this->savings->available_savings - 2000;
+
         return max(0, $withdrawable);
     }
 
-     public function treasurer()
+    public function treasurer()
     {
         return $this->hasOne(Treasurer::class);
     }
@@ -213,7 +214,7 @@ class User extends Authenticatable
     // Get treasurer permissions
     public function getTreasurerPermissionsAttribute()
     {
-        if (!$this->isTreasurer() || !$this->treasurer) {
+        if (! $this->isTreasurer() || ! $this->treasurer) {
             return null;
         }
 
@@ -224,5 +225,30 @@ class User extends Authenticatable
             'signatory_limit' => $this->treasurer->signatory_limit,
             'bank_signatory' => $this->treasurer->bank_signatory,
         ];
+    }
+
+    public function canAccessDocument($document)
+    {
+        // Public documents
+        if ($document->is_public) {
+            return true;
+        }
+
+        // Committee access
+        if ($document->access_type === 'committee' && in_array($this->role, $document->allowed_roles)) {
+            return true;
+        }
+
+        // All members access
+        if ($document->access_type === 'members' && in_array('member', $document->allowed_roles) && $this->role === 'member') {
+            return true;
+        }
+
+        // Specific users access
+        if ($document->access_type === 'specific_users' && in_array($this->id, $document->specific_users)) {
+            return true;
+        }
+
+        return false;
     }
 }
