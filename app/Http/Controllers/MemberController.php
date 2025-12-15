@@ -98,7 +98,7 @@ class MemberController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'phone' => ['required', 'string', 'max:20'],
             'national_id' => ['required', 'string', 'max:20'],
-            'date_of_birth' => ['required', 'date'],
+            'date_of_birth' => ['required', 'date', 'before:-18 years'],
             'address' => ['required', 'string', 'max:500'],
             'department' => ['nullable', 'string', 'max:100'],
             'position' => ['nullable', 'string', 'max:100'],
@@ -127,9 +127,9 @@ class MemberController extends Controller
         // Update next of kin if provided
         if ($request->has('update_nok')) {
             $nextOfKinData = $request->validate([
-                'next_of_kin_name' => ['required', 'string', 'max:255'],
-                'next_of_kin_relationship' => ['required', 'string', 'max:50'],
-                'next_of_kin_phone' => ['required', 'string', 'max:20'],
+                'next_of_kin_name' => ['nullable', 'string', 'max:255'],
+                'next_of_kin_relationship' => ['nullable', 'string', 'max:50'],
+                'next_of_kin_phone' => ['nullable', 'string', 'max:20'],
                 'next_of_kin_id_number' => ['nullable', 'string', 'max:20'],
                 'next_of_kin_address' => ['nullable', 'string', 'max:500'],
             ]);
@@ -142,6 +142,11 @@ class MemberController extends Controller
                 'national_id' => $nextOfKinData['next_of_kin_id_number'],
                 'address' => $nextOfKinData['next_of_kin_address'],
             ];
+
+            if (! $request->filled(['next_of_kin_name', 'next_of_kin_phone'])) {
+                return redirect()->route('member.profile')
+                    ->with('success', 'Profile updated successfully!');
+            }
 
             if ($user->nextOfKin) {
                 $user->nextOfKin->update($nokUpdateData);

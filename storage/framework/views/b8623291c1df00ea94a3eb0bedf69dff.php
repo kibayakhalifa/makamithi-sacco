@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Apply for Loan'); ?>
 
 <?php $__env->startSection('content'); ?>
