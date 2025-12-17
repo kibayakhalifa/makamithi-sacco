@@ -14,6 +14,7 @@ use App\Http\Controllers\MemberReportController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\CommunicationController;
 use App\Http\Controllers\MemberPaymentController;
+use App\Http\Controllers\MemberProfileController;
 use App\Http\Controllers\MemberSavingsController;
 
 // Home page - Show different content based on auth status
@@ -348,6 +349,9 @@ Route::middleware(['auth'])->group(function () {
         ->name('member.payments.store')->middleware(['auth', 'role:member']);
      Route::post('/member/loans/{loan}/early-repayment', [MemberLoanController::class, 'processEarlyRepayment'])
         ->name('member.loans.early-repayment');
+    Route::get('/member/profile/edit', [MemberProfileController::class, 'edit'])->name('member.profile.edit');
+    Route::post('/member/profile/update', [MemberProfileController::class, 'update'])->name('member.profile.update');
+
 
     // ============ SETTINGS ROUTES ============
     Route::middleware(['auth'])->group(function () {

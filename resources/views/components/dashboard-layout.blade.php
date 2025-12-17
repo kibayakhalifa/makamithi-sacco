@@ -58,6 +58,7 @@
                         <x-nav.link route="documents.index" current="{{ $current }}">📄 Documents</x-nav.link>
                         <x-nav.link route="member.reports.index" current="{{ $current }}">📈 Reports</x-nav.link>
                         <x-nav.link route="communications.index" current="{{ $current }}">📧 Communications</x-nav.link>
+                        
 
 
                         {{-- CHAIRMAN --}}

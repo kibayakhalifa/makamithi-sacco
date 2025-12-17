@@ -41,6 +41,9 @@ class Loan extends Model
         'support_document',
         // NEW FIELDS:
         'parent_loan_id', // For second loans, points to the first loan
+        'phone',
+        'profile_photo_path',
+        'national_id_image'
     ];
 
     protected $casts = [

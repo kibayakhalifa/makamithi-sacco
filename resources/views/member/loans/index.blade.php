@@ -148,114 +148,111 @@
             @if ($loans->count() > 0)
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm border-collapse">
-                        <thead>
-                            <tr class="bg-gray-50">
-                                <th class="px-3 py-2 text-left text-gray-600 font-semibold border border-gray-200 text-xs">#</th>
-                                <th class="px-3 py-2 text-left text-gray-600 font-semibold border border-gray-200 text-xs">Loan Details</th>
-                                <th class="px-3 py-2 text-left text-gray-600 font-semibold border border-gray-200 text-xs">Amount (KES)</th>
-                                <th class="px-3 py-2 text-left text-gray-600 font-semibold border border-gray-200 text-xs">App Date</th>
-                                <th class="px-3 py-2 text-left text-gray-600 font-semibold border border-gray-200 text-xs">Period</th>
-                                <th class="px-3 py-2 text-left text-gray-600 font-semibold border border-gray-200 text-xs">Status</th>
-                                <th class="px-3 py-2 text-left text-gray-600 font-semibold border border-gray-200 text-xs">Progress</th>
-                                <th class="px-3 py-2 text-left text-gray-600 font-semibold border border-gray-200 text-xs">Action</th>
+                        <thead class="bg-gray-50">
+                            <tr class="border border-gray-300">
+                                <th class="px-4 py-3 text-center border border-gray-300 text-xs font-medium text-gray-600 uppercase tracking-wider">#</th>
+                                <th class="px-4 py-3 text-left border border-gray-300 text-xs font-medium text-gray-600 uppercase tracking-wider">Loan ID</th>
+                                <th class="px-4 py-3 text-left border border-gray-300 text-xs font-medium text-gray-600 uppercase tracking-wider">Loan Applied (KES)</th>
+                                <th class="px-4 py-3 text-left border border-gray-300 text-xs font-medium text-gray-600 uppercase tracking-wider">Application Date</th>
+                                <th class="px-4 py-3 text-left border border-gray-300 text-xs font-medium text-gray-600 uppercase tracking-wider">Period (Months)</th>
+                                <th class="px-4 py-3 text-left border border-gray-300 text-xs font-medium text-gray-600 uppercase tracking-wider">Interest Rate</th>
+                                <th class="px-4 py-3 text-left border border-gray-300 text-xs font-medium text-gray-600 uppercase tracking-wider">Repayable Amount (KES)</th>
+                                <th class="px-4 py-3 text-left border border-gray-300 text-xs font-medium text-gray-600 uppercase tracking-wider">Monthly Payment (KES)</th>
+                                <th class="px-4 py-3 text-left border border-gray-300 text-xs font-medium text-gray-600 uppercase tracking-wider">Expected Date</th>
+                                <th class="px-4 py-3 text-left border border-gray-300 text-xs font-medium text-gray-600 uppercase tracking-wider">Status</th>
+                                <th class="px-4 py-3 text-center border border-gray-300 text-xs font-medium text-gray-600 uppercase tracking-wider">Action</th>
                             </tr>
                         </thead>
 
                         <tbody>
                             @foreach ($loans as $loan)
-                                @php
-                                    $isFirstLoan = $loan->loan_type === 'first_loan';
-                                    $isSecondLoan = $loan->loan_type === 'second_loan';
-                                @endphp
-                                <tr class="hover:bg-gray-50 transition">
+                                <tr class="border border-gray-300 hover:bg-gray-50">
                                     <!-- Row Number -->
-                                    <td class="px-3 py-2 border border-gray-200 text-gray-500 text-center">
-                                        {{ $loans->firstItem() + $loop->index }}
+                                    <td class="px-4 py-3 text-center border border-gray-300 text-gray-500">
+                                        {{ $loop->iteration }}
                                     </td>
 
-                                    <!-- Loan Details -->
-                                    <td class="px-3 py-2 border border-gray-200">
-                                        <div class="font-medium text-gray-900 text-sm">{{ $loan->loan_number }}</div>
-                                        <div class="flex items-center gap-1 mt-1">
-                                            @if($isFirstLoan)
-                                                <span class="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">1st Loan</span>
-                                            @elseif($isSecondLoan)
-                                                <span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full">2nd Loan</span>
-                                            @endif
-                                            @if($loan->parentLoan)
-                                                <span class="text-xs text-gray-500">← {{ $loan->parentLoan->loan_number }}</span>
-                                            @endif
+                                    <!-- Loan ID -->
+                                    <td class="px-4 py-3 border border-gray-300">
+                                        <div class="font-medium text-gray-900">{{ $loan->loan_number }}</div>
+                                    </td>
+
+                                    <!-- Loan Applied (KES) -->
+                                    <td class="px-4 py-3 border border-gray-300">
+                                        <div class="text-gray-900 font-medium">
+                                            {{ number_format($loan->amount, 0) }}
                                         </div>
-                                    </td>
-
-                                    <!-- Amount -->
-                                    <td class="px-3 py-2 border border-gray-200">
-                                        <div class="font-semibold text-gray-900">{{ number_format($loan->amount, 0) }}</div>
-                                        <div class="text-xs text-gray-500">KES {{ number_format($loan->total_repayable, 0) }} total</div>
                                     </td>
 
                                     <!-- Application Date -->
-                                    <td class="px-3 py-2 border border-gray-200">
-                                        <div class="text-gray-900 text-sm">{{ $loan->applied_date->format('d/m/Y') }}</div>
+                                    <td class="px-4 py-3 border border-gray-300">
+                                        <div class="text-gray-900">{{ $loan->applied_date->format('d/m/Y') }}</div>
                                     </td>
 
-                                    <!-- Period -->
-                                    <td class="px-3 py-2 border border-gray-200 text-center">
-                                        <div class="font-medium text-gray-900">{{ $loan->period_months }}</div>
-                                        <div class="text-xs text-gray-500">months</div>
+                                    <!-- Period (Months) -->
+                                    <td class="px-4 py-3 border border-gray-300">
+                                        <div class="text-gray-900">{{ $loan->period_months }}</div>
+                                    </td>
+
+                                    <!-- Interest Rate -->
+                                    <td class="px-4 py-3 border border-gray-300">
+                                        <div class="text-gray-900">{{ number_format($loan->interest_rate, 1) }}%</div>
+                                    </td>
+
+                                    <!-- Repayable Amount (KES) -->
+                                    <td class="px-4 py-3 border border-gray-300">
+                                        <div class="text-gray-900 font-medium">
+                                            {{ number_format($loan->total_repayable, 0) }}
+                                        </div>
+                                    </td>
+
+                                    <!-- Monthly Payment (KES) -->
+                                    <td class="px-4 py-3 border border-gray-300">
+                                        <div class="text-gray-900 font-medium">
+                                            {{ number_format($loan->monthly_payment, 0) }}
+                                        </div>
+                                    </td>
+
+                                    <!-- Expected Date -->
+                                    <td class="px-4 py-3 border border-gray-300">
+                                        <div class="text-gray-900">{{ $loan->expected_completion_date?->format('d/m/Y') ?? 'N/A' }}</div>
                                     </td>
 
                                     <!-- Status -->
-                                    <td class="px-3 py-2 border border-gray-200">
+                                    <td class="px-4 py-3 border border-gray-300">
                                         @if ($loan->status === 'pending')
-                                            <span class="px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-700 rounded-full block text-center">Pending</span>
+                                            <span class="inline-block px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-300 rounded">
+                                                Pending
+                                            </span>
                                         @elseif ($loan->status === 'approved')
-                                            <span class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full block text-center">Approved</span>
+                                            <span class="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 border border-blue-300 rounded">
+                                                Approved
+                                            </span>
                                         @elseif ($loan->status === 'rejected')
-                                            <span class="px-2 py-1 text-xs font-semibold bg-red-100 text-red-700 rounded-full block text-center">Rejected</span>
-                                        @elseif ($loan->status === 'disbursed')
-                                            <span class="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-700 rounded-full block text-center">Active</span>
-                                        @elseif ($loan->status === 'active')
-                                            <span class="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-700 rounded-full block text-center">Active</span>
+                                            <span class="inline-block px-2 py-1 text-xs font-medium bg-red-100 text-red-800 border border-red-300 rounded">
+                                                Rejected
+                                            </span>
+                                        @elseif ($loan->status === 'disbursed' || $loan->status === 'active')
+                                            <span class="inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-800 border border-green-300 rounded">
+                                                Active
+                                            </span>
                                         @elseif ($loan->status === 'completed')
-                                            <span class="px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-700 rounded-full block text-center">Completed</span>
+                                            <span class="inline-block px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 border border-gray-300 rounded">
+                                                Completed
+                                            </span>
                                         @else
-                                            <span class="px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-700 rounded-full block text-center">{{ ucfirst($loan->status) }}</span>
+                                            <span class="inline-block px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 border border-gray-300 rounded">
+                                                {{ ucfirst($loan->status) }}
+                                            </span>
                                         @endif
                                     </td>
 
-                                    <!-- Progress -->
-                                    <td class="px-3 py-2 border border-gray-200">
-                                        <div class="flex items-center gap-2">
-                                            <div class="flex-1">
-                                                <div class="w-full bg-gray-200 rounded-full h-1.5">
-                                                    <div class="{{ $loan->percentage_paid >= 100 ? 'bg-green-600' : ($isFirstLoan ? 'bg-blue-600' : 'bg-green-600') }} h-1.5 rounded-full" 
-                                                          style="width: {{ min($loan->percentage_paid, 100) }}%"></div>
-                                                </div>
-                                            </div>
-                                            <div class="text-xs font-medium {{ $loan->percentage_paid >= 100 ? 'text-green-600' : 'text-gray-600' }}">
-                                                {{ number_format($loan->percentage_paid, 0) }}%
-                                            </div>
-                                        </div>
-                                        <div class="text-xs text-gray-500 mt-1 text-center">
-                                            {{ $loan->months_paid }}/{{ $loan->period_months }} months
-                                        </div>
-                                    </td>
-
                                     <!-- Action -->
-                                    <td class="px-3 py-2 border border-gray-200">
-                                        <div class="flex flex-col gap-1">
-                                            <a href="{{ route('member.loans.show', $loan->id) }}" 
-                                               class="text-blue-600 hover:text-blue-800 font-medium text-xs transition text-center">
-                                                View Details
-                                            </a>
-                                            @if($loan->status === 'active' || $loan->status === 'disbursed')
-<a href="{{ route('member.loans.show', $loan->id) }}"
-   class="text-green-600 hover:text-green-800 font-medium text-xs transition text-center">
-    View & Pay
-</a>
-@endif
-                                        </div>
+                                    <td class="px-4 py-3 text-center border border-gray-300">
+                                        <a href="{{ route('member.loans.show', $loan->id) }}" 
+                                           class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 border border-blue-300 rounded hover:bg-blue-100 transition">
+                                            View
+                                        </a>
                                     </td>
                                 </tr>
                             @endforeach
@@ -264,8 +261,15 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="px-6 py-3 border-t border-gray-200">
-                    {{ $loans->links() }}
+                <div class="px-6 py-4 border-t border-gray-300 bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-700">
+                            Showing {{ $loans->firstItem() }} to {{ $loans->lastItem() }} of {{ $loans->total() }} results
+                        </div>
+                        <div>
+                            {{ $loans->links() }}
+                        </div>
+                    </div>
                 </div>
             @else
                 <div class="text-center py-16">
