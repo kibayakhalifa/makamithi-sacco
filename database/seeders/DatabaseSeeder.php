@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
         UsersTableSeeder::class,
         TreasurerSeeder::class,
         MemberSeeder::class,
+        LoanTestSeeder::class,
     ]);
     }
 }

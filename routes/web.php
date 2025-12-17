@@ -1,19 +1,20 @@
 <?php
 
-use App\Http\Controllers\ChairmanController;
-use App\Http\Controllers\CommunicationController;
-use App\Http\Controllers\DocumentController;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\SavingsController;
+use App\Http\Controllers\ChairmanController;
+use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SecretaryController;
+use App\Http\Controllers\TreasurerController;
 use App\Http\Controllers\MemberLoanController;
 use App\Http\Controllers\MemberReportController;
-use App\Http\Controllers\MemberSavingsController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\SavingsController;
-use App\Http\Controllers\SecretaryController;
-use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\TreasurerController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CommunicationController;
+use App\Http\Controllers\MemberPaymentController;
+use App\Http\Controllers\MemberSavingsController;
 
 // Home page - Show different content based on auth status
 Route::get('/', function () {
@@ -341,6 +342,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/loans/apply', [LoanController::class, 'apply'])->name('member.loans.apply');
         Route::post('/savings/topup', [SavingsController::class, 'topup'])->name('member.savings.topup');
     });
+    Route::get('/member/payments/{loan}/create', [MemberPaymentController::class, 'create'])
+        ->name('member.payments.create')->middleware(['auth', 'role:member']);
+    Route::post('/member/payments/{loan}', [MemberPaymentController::class, 'store'])
+        ->name('member.payments.store')->middleware(['auth', 'role:member']);
+     Route::post('/member/loans/{loan}/early-repayment', [MemberLoanController::class, 'processEarlyRepayment'])
+        ->name('member.loans.early-repayment');
 
     // ============ SETTINGS ROUTES ============
     Route::middleware(['auth'])->group(function () {
@@ -363,7 +370,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/notifications/{notification}',
         [NotificationController::class, 'open']
     )->name('notifications.open');
-    
+
     Route::get('/communications/{communication}', [CommunicationController::class, 'show'])->name('communications.show');
     Route::delete('/communications/{communication}', [CommunicationController::class, 'destroy'])->name('communications.destroy');
     Route::get('/communications/{communication}/edit', [CommunicationController::class, 'edit'])->name('communications.edit');

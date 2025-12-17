@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Member Dashboard'); ?>
 
 <?php $__env->startSection('content'); ?>
