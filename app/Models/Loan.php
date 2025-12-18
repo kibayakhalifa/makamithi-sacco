@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Loan extends Model
 {
@@ -12,7 +13,7 @@ class Loan extends Model
     protected $fillable = [
         'user_id',
         'loan_number',
-        'loan_type', // Now: 'first_loan' or 'second_loan'
+        'loan_type',
         'amount',
         'interest_rate',
         'interest_amount',
@@ -24,56 +25,51 @@ class Loan extends Model
         'months_paid',
         'months_remaining',
         'percentage_paid',
-        'eligible_for_topup',
         'purpose',
         'application_type',
-        'assisted_by',
         'status',
-        'approved_by',
-        'disbursed_by',
         'applied_date',
         'approved_date',
+        'approved_by',
         'disbursed_date',
-        'expected_completion_date',
-        'actual_completion_date',
+        'disbursed_by',
         'next_payment_date',
+        'expected_completion_date',
+        'completed_date',
+        'rejected_date',
+        'rejected_by',
         'rejection_reason',
         'support_document',
-        // NEW FIELDS:
-        'parent_loan_id', // For second loans, points to the first loan
-        'phone',
-        'profile_photo_path',
-        'national_id_image'
+        'parent_loan_id',
+        'eligible_for_topup',
     ];
 
     protected $casts = [
+        'applied_date' => 'date',
+        'approved_date' => 'date',
+        'disbursed_date' => 'date',
+        'next_payment_date' => 'date',
+        'expected_completion_date' => 'date',
+        'completed_date' => 'date',
+        'rejected_date' => 'date',
         'amount' => 'decimal:2',
-        'interest_rate' => 'decimal:2',
         'interest_amount' => 'decimal:2',
         'total_repayable' => 'decimal:2',
         'monthly_payment' => 'decimal:2',
         'amount_paid' => 'decimal:2',
         'remaining_balance' => 'decimal:2',
         'percentage_paid' => 'decimal:2',
-        'eligible_for_topup' => 'boolean',
-        'applied_date' => 'date',
-        'approved_date' => 'date',
-        'disbursed_date' => 'date',
-        'expected_completion_date' => 'date',
-        'actual_completion_date' => 'date',
-        'next_payment_date' => 'date',
     ];
 
-    // ========== RELATIONSHIPS ==========
-    
+    // ==================== RELATIONSHIPS ====================
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function assistant()
+    public function payments()
     {
-        return $this->belongsTo(User::class, 'assisted_by');
+        return $this->hasMany(Payment::class)->orderBy('payment_date', 'asc');
     }
 
     public function approver()
@@ -86,29 +82,22 @@ class Loan extends Model
         return $this->belongsTo(User::class, 'disbursed_by');
     }
 
-    public function payments()
+    public function rejectedBy()
     {
-        return $this->hasMany(Payment::class, 'loan_id');
+        return $this->belongsTo(User::class, 'rejected_by');
     }
 
-    public function chequeRecord()
-    {
-        return $this->hasOne(ChequeRecord::class);
-    }
-
-    // NEW RELATIONSHIPS FOR SECOND LOAN SUPPORT
     public function parentLoan()
     {
         return $this->belongsTo(Loan::class, 'parent_loan_id');
     }
 
-    public function secondLoan()
+    public function childLoans()
     {
-        return $this->hasOne(Loan::class, 'parent_loan_id')->where('loan_type', 'second_loan');
+        return $this->hasMany(Loan::class, 'parent_loan_id');
     }
 
-    // ========== SCOPES ==========
-    
+    // ==================== SCOPES ====================
     public function scopePending($query)
     {
         return $query->where('status', 'pending');
@@ -119,9 +108,14 @@ class Loan extends Model
         return $query->where('status', 'approved');
     }
 
+    public function scopeDisbursed($query)
+    {
+        return $query->where('status', 'disbursed');
+    }
+
     public function scopeActive($query)
     {
-        return $query->whereIn('status', ['active', 'disbursed']);
+        return $query->whereIn('status', ['disbursed', 'active']);
     }
 
     public function scopeCompleted($query)
@@ -134,95 +128,13 @@ class Loan extends Model
         return $query->where('status', 'defaulted');
     }
 
-    public function scopeByType($query, $type)
+    public function scopeRejected($query)
     {
-        return $query->where('loan_type', $type);
+        return $query->where('status', 'rejected');
     }
 
-    // NEW SCOPES FOR LOAN TYPES
-    public function scopeFirstLoans($query)
-    {
-        return $query->where('loan_type', 'first_loan');
-    }
-
-    public function scopeSecondLoans($query)
-    {
-        return $query->where('loan_type', 'second_loan');
-    }
-
-    public function scopeWithParentLoan($query)
-    {
-        return $query->whereNotNull('parent_loan_id');
-    }
-
-    public function scopeWithoutParentLoan($query)
-    {
-        return $query->whereNull('parent_loan_id');
-    }
-
-    public function scopeEligibleForSecondLoan($query)
-    {
-        return $query->where('percentage_paid', '>=', 50)
-                    ->where('loan_type', 'first_loan')
-                    ->whereIn('status', ['active', 'disbursed']);
-    }
-
-    // ========== BUSINESS LOGIC METHODS ==========
+    // ==================== METHODS ====================
     
-    /**
-     * Calculate loan details based on amount and period
-     */
-    public static function calculateLoanDetails($amount, $periodMonths)
-    {
-        $interestRate = 5.00; // Fixed 5%
-        $interestAmount = $amount * ($interestRate / 100);
-        $totalRepayable = $amount + $interestAmount;
-        $monthlyPayment = $periodMonths > 0 ? $totalRepayable / $periodMonths : 0;
-        
-        return [
-            'interest_rate' => $interestRate,
-            'interest_amount' => $interestAmount,
-            'total_repayable' => $totalRepayable,
-            'monthly_payment' => $monthlyPayment,
-        ];
-    }
-
-    /**
-     * Check if this loan qualifies for second loan (50% paid)
-     */
-    public function qualifiesForSecondLoan()
-    {
-        return $this->loan_type === 'first_loan' && 
-               $this->percentage_paid >= 50 &&
-               in_array($this->status, ['active', 'disbursed', 'approved']);
-    }
-
-    /**
-     * Check if user has an active second loan
-     */
-    public function hasActiveSecondLoan()
-    {
-        return $this->secondLoan()->whereIn('status', ['active', 'disbursed', 'approved'])->exists();
-    }
-
-    /**
-     * Calculate available amount for second loan
-     */
-    public function availableForSecondLoan($userEligibility)
-    {
-        if (!$this->qualifiesForSecondLoan()) {
-            return 0;
-        }
-
-        $totalActiveLoans = $this->user->loans()
-            ->whereIn('status', ['active', 'disbursed', 'approved'])
-            ->whereIn('loan_type', ['first_loan', 'second_loan'])
-            ->sum('remaining_balance');
-
-        $available = max(0, $userEligibility - $totalActiveLoans);
-        return max(5000, $available); // Minimum 5,000
-    }
-
     /**
      * Check if this is a first loan
      */
@@ -240,142 +152,317 @@ class Loan extends Model
     }
 
     /**
-     * Get the associated first loan (for second loans)
-     */
-    public function getFirstLoanAttribute()
-    {
-        if ($this->isSecondLoan() && $this->parentLoan) {
-            return $this->parentLoan;
-        }
-        return null;
-    }
-
-    /**
-     * Calculate early payment recalculation
-     */
-    public function recalculateForEarlyPayment($earlyPaymentAmount)
-    {
-        $newBalance = $this->remaining_balance - $earlyPaymentAmount;
-        $newMonthlyPayment = $this->months_remaining > 0 ? $newBalance / $this->months_remaining : 0;
-        
-        return [
-            'new_balance' => $newBalance,
-            'new_monthly_payment' => $newMonthlyPayment,
-            'months_affected' => $this->months_remaining,
-        ];
-    }
-
-    /**
-     * Generate next loan number
-     */
-    public static function generateLoanNumber()
-    {
-        $date = date('Ymd');
-        $lastLoan = self::where('loan_number', 'like', "LN-{$date}-%")
-                        ->orderBy('loan_number', 'desc')
-                        ->first();
-        
-        $sequence = $lastLoan ? (int)substr($lastLoan->loan_number, -4) + 1 : 1;
-        
-        return "LN-{$date}-" . str_pad($sequence, 4, '0', STR_PAD_LEFT);
-    }
-
-    /**
-     * Update loan status based on payments
-     */
-    public function updateStatus()
-    {
-        if ($this->remaining_balance <= 0) {
-            $this->status = 'completed';
-            $this->actual_completion_date = now();
-        } elseif ($this->next_payment_date && now()->gt($this->next_payment_date->addDays(30))) {
-            $this->status = 'defaulted';
-        }
-        
-        $this->save();
-    }
-
-    /**
-     * Update loan progress after payment
-     */
-    public function updateProgress()
-    {
-        $this->percentage_paid = $this->total_repayable > 0 
-            ? ($this->amount_paid / $this->total_repayable) * 100 
-            : 0;
-        
-        // Update months paid based on payments
-        $this->months_paid = ceil($this->amount_paid / max($this->monthly_payment, 1));
-        $this->months_remaining = max(0, $this->period_months - $this->months_paid);
-        
-        $this->save();
-    }
-
-    /**
-     * Generate payment schedule for this loan
-     */
-    public function generatePaymentSchedule()
-    {
-        $schedule = [];
-        $startDate = $this->disbursed_date ?? $this->approved_date ?? $this->applied_date;
-        
-        for ($i = 1; $i <= $this->period_months; $i++) {
-            $dueDate = $startDate->copy()->addMonths($i);
-            
-            // Check if payment exists for this installment
-            $payment = $this->payments()->where('installment_number', $i)->first();
-            
-            $schedule[] = [
-                'installment' => $i,
-                'due_date' => $dueDate,
-                'amount_due' => $this->monthly_payment,
-                'status' => $payment ? 'paid' : 'pending',
-                'paid_date' => $payment ? $payment->payment_date : null,
-                'amount_paid' => $payment ? $payment->amount : 0,
-                'is_overdue' => !$payment && $dueDate < now(),
-                'is_next' => false, // Will be set dynamically
-            ];
-        }
-        
-        return $schedule;
-    }
-
-    /**
-     * Get next payment due
-     */
-    public function getNextPaymentAttribute()
-    {
-        $schedule = $this->generatePaymentSchedule();
-        
-        foreach ($schedule as $key => $installment) {
-            if ($installment['status'] === 'pending') {
-                // Mark this as the next payment
-                $schedule[$key]['is_next'] = true;
-                return $schedule[$key];
-            }
-        }
-        
-        return null;
-    }
-
-    /**
-     * Check if loan is fully paid
-     */
-    public function getIsFullyPaidAttribute()
-    {
-        return $this->remaining_balance <= 0 || $this->percentage_paid >= 100;
-    }
-
-    /**
-     * Get formatted loan type name
+     * Get loan type name
      */
     public function getLoanTypeNameAttribute()
     {
         $types = [
             'first_loan' => 'First Loan',
             'second_loan' => 'Second Loan',
+            'topup_loan' => 'Top-up Loan',
         ];
         
         return $types[$this->loan_type] ?? ucfirst(str_replace('_', ' ', $this->loan_type));
+    }
+
+    /**
+     * Calculate due date for a specific installment
+     */
+    public function getDueDateForInstallment($installmentNumber = 1)
+    {
+        if (!$this->disbursed_date) {
+            // If not disbursed yet, calculate from today
+            return now()->addMonths($installmentNumber);
+        }
+        
+        try {
+            $disbursementDate = Carbon::parse($this->disbursed_date);
+            return $disbursementDate->copy()->addMonths($installmentNumber);
+        } catch (\Exception $e) {
+            return now()->addMonths($installmentNumber);
+        }
+    }
+
+    /**
+     * Get next payment due date
+     */
+    public function getNextPaymentDueDate()
+    {
+        if (!$this->disbursed_date) {
+            return null;
+        }
+
+        $disbursementDate = Carbon::parse($this->disbursed_date);
+        $paymentsCount = $this->payments()->where('type', '!=', 'disbursement')->count();
+        
+        return $disbursementDate->copy()->addMonths($paymentsCount + 1);
+    }
+
+    /**
+     * Check if loan is overdue
+     */
+    public function isOverdue()
+    {
+        if (!$this->next_payment_date || $this->status !== 'disbursed') {
+            return false;
+        }
+
+        return Carbon::parse($this->next_payment_date)->isPast();
+    }
+
+    /**
+     * Get days overdue
+     */
+    public function getDaysOverdue()
+    {
+        if (!$this->isOverdue()) {
+            return 0;
+        }
+
+        return Carbon::parse($this->next_payment_date)->diffInDays(now());
+    }
+
+    /**
+     * Update loan status based on payment progress
+     */
+    public function updateStatus()
+    {
+        if ($this->remaining_balance <= 0) {
+            $this->update([
+                'status' => 'completed',
+                'completed_date' => now(),
+            ]);
+            return;
+        }
+
+        if ($this->isOverdue() && $this->getDaysOverdue() > 30) {
+            $this->update(['status' => 'defaulted']);
+            return;
+        }
+
+        // Keep current status if disbursed
+        if ($this->status === 'disbursed') {
+            return;
+        }
+    }
+
+    /**
+     * Recalculate loan after early payment
+     */
+    public function recalculateForEarlyPayment($extraPayment)
+    {
+        $newRemainingBalance = $this->remaining_balance - $extraPayment;
+        $monthsRemaining = $this->months_remaining - 1; // Reduce by one month
+        
+        if ($monthsRemaining <= 0) {
+            return [
+                'new_monthly_payment' => 0,
+                'months_remaining' => 0,
+            ];
+        }
+
+        $newMonthlyPayment = $newRemainingBalance / $monthsRemaining;
+
+        return [
+            'new_monthly_payment' => $newMonthlyPayment,
+            'months_remaining' => $monthsRemaining,
+        ];
+    }
+
+    /**
+     * Check if loan qualifies for top-up
+     */
+    public function qualifiesForTopUp()
+    {
+        // Loan must be at least 50% paid
+        if ($this->percentage_paid < 50) {
+            return false;
+        }
+
+        // Loan must be active
+        if (!in_array($this->status, ['disbursed', 'active'])) {
+            return false;
+        }
+
+        // No defaults
+        if ($this->status === 'defaulted') {
+            return false;
+        }
+
+        // Not already have a top-up loan
+        if ($this->childLoans()->whereIn('status', ['pending', 'approved', 'disbursed'])->exists()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Calculate total interest paid
+     */
+    public function getTotalInterestPaid()
+    {
+        return $this->payments()->sum('interest');
+    }
+
+    /**
+     * Calculate total principal paid
+     */
+    public function getTotalPrincipalPaid()
+    {
+        return $this->payments()->sum('principal');
+    }
+
+    /**
+     * Generate loan number
+     */
+    public static function generateLoanNumber()
+    {
+        $prefix = 'LN';
+        $year = date('Y');
+        $month = date('m');
+        $sequence = self::whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->count() + 1;
+
+        return $prefix . '-' . $year . $month . '-' . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Get loan progress percentage
+     */
+    public function getProgressPercentage()
+    {
+        if ($this->total_repayable <= 0) {
+            return 0;
+        }
+
+        $paid = $this->total_repayable - $this->remaining_balance;
+        return ($paid / $this->total_repayable) * 100;
+    }
+
+    /**
+     * Get formatted status with badge color
+     */
+    public function getStatusBadge()
+    {
+        $statusColors = [
+            'pending' => 'bg-yellow-100 text-yellow-800',
+            'approved' => 'bg-blue-100 text-blue-800',
+            'disbursed' => 'bg-green-100 text-green-800',
+            'active' => 'bg-green-100 text-green-800',
+            'completed' => 'bg-gray-100 text-gray-800',
+            'defaulted' => 'bg-red-100 text-red-800',
+            'rejected' => 'bg-red-100 text-red-800',
+        ];
+
+        $color = $statusColors[$this->status] ?? 'bg-gray-100 text-gray-800';
+        
+        return '<span class="px-2 py-1 rounded-full text-xs font-medium ' . $color . '">' . 
+               ucfirst($this->status) . '</span>';
+    }
+
+    /**
+     * Calculate remaining months accurately
+     */
+    public function calculateRemainingMonths()
+    {
+        if ($this->remaining_balance <= 0) {
+            return 0;
+        }
+
+        if ($this->monthly_payment <= 0) {
+            return $this->period_months - $this->months_paid;
+        }
+
+        return ceil($this->remaining_balance / $this->monthly_payment);
+    }
+
+    /**
+     * Get payment schedule
+     */
+    public function getPaymentSchedule()
+    {
+        $schedule = [];
+        $balance = $this->total_repayable;
+        $monthlyPayment = $this->monthly_payment;
+        $disbursementDate = $this->disbursed_date ? Carbon::parse($this->disbursed_date) : now();
+
+        for ($i = 1; $i <= $this->period_months; $i++) {
+            $dueDate = $disbursementDate->copy()->addMonths($i);
+            $balance = max(0, $balance - $monthlyPayment);
+
+            $schedule[] = [
+                'installment' => $i,
+                'due_date' => $dueDate,
+                'amount' => $monthlyPayment,
+                'remaining_balance' => $balance,
+            ];
+        }
+
+        return $schedule;
+    }
+
+    /**
+     * Boot method for model events
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($loan) {
+            if (empty($loan->loan_number)) {
+                $loan->loan_number = self::generateLoanNumber();
+            }
+        });
+
+        static::created(function ($loan) {
+            // Set initial values
+            $loan->update([
+                'remaining_balance' => $loan->total_repayable,
+                'months_remaining' => $loan->period_months,
+                'percentage_paid' => 0,
+            ]);
+        });
+    }
+
+    /**
+     * Accessor for formatted amount
+     */
+    public function getFormattedAmountAttribute()
+    {
+        return 'KES ' . number_format($this->amount, 2);
+    }
+
+    /**
+     * Accessor for formatted total repayable
+     */
+    public function getFormattedTotalRepayableAttribute()
+    {
+        return 'KES ' . number_format($this->total_repayable, 2);
+    }
+
+    /**
+     * Accessor for formatted monthly payment
+     */
+    public function getFormattedMonthlyPaymentAttribute()
+    {
+        return 'KES ' . number_format($this->monthly_payment, 2);
+    }
+
+    /**
+     * Accessor for formatted remaining balance
+     */
+    public function getFormattedRemainingBalanceAttribute()
+    {
+        return 'KES ' . number_format($this->remaining_balance, 2);
+    }
+
+    /**
+     * Accessor for formatted amount paid
+     */
+    public function getFormattedAmountPaidAttribute()
+    {
+        return 'KES ' . number_format($this->amount_paid, 2);
     }
 }

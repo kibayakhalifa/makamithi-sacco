@@ -4,7 +4,6 @@
 
 @section('content')
 <div class="space-y-6">
-
     <!-- Header -->
     <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -153,17 +152,10 @@
                                     </td>
                                     <td class="px-4 py-3 whitespace-nowrap border border-gray-300">
                                         <div class="flex gap-2">
-                                            <form method="POST" action="{{ route('treasurer.loans.disburse', $loan->id) }}" style="display: inline;">
-                                                @csrf
-                                                <input type="hidden" name="payment_method" value="cash">
-                                                <input type="hidden" name="reference_number" value="DISB-{{ date('YmdHis') }}">
-                                                <input type="hidden" name="notes" value="Loan disbursement">
-                                                <button type="submit"
-                                                    onclick="return confirm('Disburse loan {{ $loan->loan_number }} for KES {{ number_format($loan->amount, 2) }}?')"
-                                                    class="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded text-xs font-medium">
-                                                    Disburse
-                                                </button>
-                                            </form>
+                                            <button onclick="openDisbursementModal('{{ $loan->id }}', '{{ $loan->amount }}', '{{ $loan->loan_number }}')"
+                                                class="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded text-xs font-medium">
+                                                Disburse
+                                            </button>
                                             <a href="{{ route('member.loans.show', $loan->id) }}"
                                                 class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1.5 rounded text-xs font-medium">
                                                 View
@@ -427,41 +419,247 @@
             </div>
         </div>
     </div>
-
 </div>
 
-<!-- JavaScript -->
+<!-- Disbursement Modal -->
+<div id="disbursementModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900">Disburse Loan</h3>
+        </div>
+        
+        <form id="disbursementForm" method="POST" action="">
+            @csrf
+            <div class="px-6 py-4 space-y-4">
+                <!-- Payment Method Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method *</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="payment_method" value="cheque" class="mr-3" required>
+                            <div>
+                                <p class="font-medium">Cheque</p>
+                                <p class="text-xs text-gray-500">Issue a cheque</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="payment_method" value="bank_transfer" class="mr-3">
+                            <div>
+                                <p class="font-medium">Bank Transfer</p>
+                                <p class="text-xs text-gray-500">Direct bank transfer</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="payment_method" value="rtgs" class="mr-3">
+                            <div>
+                                <p class="font-medium">RTGS</p>
+                                <p class="text-xs text-gray-500">Real Time Gross Settlement</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="payment_method" value="cash" class="mr-3">
+                            <div>
+                                <p class="font-medium">Cash</p>
+                                <p class="text-xs text-gray-500">Physical cash payment</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Disbursement Date -->
+                <div>
+                    <label for="disbursement_date" class="block text-sm font-medium text-gray-700">Disbursement Date *</label>
+                    <input type="date" name="disbursement_date" id="disbursement_date" 
+                           value="{{ date('Y-m-d') }}" 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm" required>
+                </div>
+
+                <!-- Cheque Details (Conditional) -->
+                <div id="chequeDetails" class="hidden space-y-3">
+                    <div>
+                        <label for="cheque_number" class="block text-sm font-medium text-gray-700">Cheque Number *</label>
+                        <input type="text" name="cheque_number" id="cheque_number" 
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="bank_name" class="block text-sm font-medium text-gray-700">Bank Name</label>
+                        <input type="text" name="bank_name" id="bank_name" 
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <!-- Bank Transfer Details (Conditional) -->
+                <div id="bankTransferDetails" class="hidden space-y-3">
+                    <div>
+                        <label for="reference_number" class="block text-sm font-medium text-gray-700">Transaction Reference</label>
+                        <input type="text" name="reference_number" id="reference_number" 
+                               placeholder="TRF-{{ date('Ymd') }}-XXXX"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="bank_name_transfer" class="block text-sm font-medium text-gray-700">Bank Name</label>
+                        <input type="text" name="bank_name" id="bank_name_transfer" 
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="account_number" class="block text-sm font-medium text-gray-700">Account Number</label>
+                        <input type="text" name="account_number" id="account_number" 
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <!-- RTGS Details (Conditional) -->
+                <div id="rtgsDetails" class="hidden space-y-3">
+                    <div>
+                        <label for="rtgs_reference" class="block text-sm font-medium text-gray-700">RTGS Reference</label>
+                        <input type="text" name="reference_number" id="rtgs_reference" 
+                               placeholder="RTGS-{{ date('Ymd') }}-XXXX"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="swift_code" class="block text-sm font-medium text-gray-700">SWIFT Code</label>
+                        <input type="text" name="swift_code" id="swift_code" 
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <!-- Branch/Bank Details (Common for cheque and transfer) -->
+                <div id="commonBankDetails" class="hidden space-y-3">
+                    <div>
+                        <label for="branch_code" class="block text-sm font-medium text-gray-700">Branch Code</label>
+                        <input type="text" name="branch_code" id="branch_code" 
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div>
+                    <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
+                    <textarea name="notes" id="notes" rows="2" 
+                              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                              placeholder="Any additional notes..."></textarea>
+                </div>
+            </div>
+            
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-xl flex justify-end gap-3">
+                <button type="button" onclick="closeDisbursementModal()"
+                        class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="px-4 py-2 bg-orange-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                    Confirm Disbursement
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
-    // Tab switching
+    // Tab Management
     function switchTab(tabName) {
         // Hide all content
-        document.getElementById('disbursementsContent').classList.add('hidden');
-        document.getElementById('withdrawalsContent').classList.add('hidden');
-        document.getElementById('expensesContent').classList.add('hidden');
-        document.getElementById('completedContent').classList.add('hidden');
+        ['disbursements', 'withdrawals', 'expenses', 'completed'].forEach(tab => {
+            document.getElementById(tab + 'Content').classList.add('hidden');
+            document.getElementById(tab + 'Tab').classList.remove('border-b-2', 'border-orange-600', 'text-orange-700');
+            document.getElementById(tab + 'Tab').classList.add('text-gray-500');
+        });
 
-        // Remove active from all tabs
-        document.getElementById('disbursementsTab').classList.remove('border-b-2', 'border-orange-600', 'text-orange-700');
-        document.getElementById('disbursementsTab').classList.add('text-gray-500');
-        document.getElementById('withdrawalsTab').classList.remove('border-b-2', 'border-orange-600', 'text-orange-700');
-        document.getElementById('withdrawalsTab').classList.add('text-gray-500');
-        document.getElementById('expensesTab').classList.remove('border-b-2', 'border-orange-600', 'text-orange-700');
-        document.getElementById('expensesTab').classList.add('text-gray-500');
-        document.getElementById('completedTab').classList.remove('border-b-2', 'border-orange-600', 'text-orange-700');
-        document.getElementById('completedTab').classList.add('text-gray-500');
-
-        // Show selected content
+        // Show selected content and activate tab
         document.getElementById(tabName + 'Content').classList.remove('hidden');
-
-        // Activate selected tab
         document.getElementById(tabName + 'Tab').classList.add('border-b-2', 'border-orange-600', 'text-orange-700');
         document.getElementById(tabName + 'Tab').classList.remove('text-gray-500');
     }
 
-    // Payment processing functions
+    // Disbursement Modal Functions
+    let currentLoanId = null;
+    let currentLoanAmount = null;
+    let currentLoanNumber = null;
+
+    function openDisbursementModal(loanId, loanAmount, loanNumber) {
+        currentLoanId = loanId;
+        currentLoanAmount = parseFloat(loanAmount);
+        currentLoanNumber = loanNumber;
+        
+        // Set form action
+        const form = document.getElementById('disbursementForm');
+        form.action = `/treasurer/loans/${loanId}/disburse`;
+        
+        // Set modal title
+        document.querySelector('#disbursementModal h3').textContent = 
+            `Disburse Loan ${loanNumber} - KES ${formatMoney(currentLoanAmount)}`;
+        
+        // Show modal
+        document.getElementById('disbursementModal').classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+
+    function closeDisbursementModal() {
+        document.getElementById('disbursementModal').classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+        resetForm();
+    }
+
+    function resetForm() {
+        document.getElementById('disbursementForm').reset();
+        hideAllDetails();
+        currentLoanId = null;
+        currentLoanAmount = null;
+        currentLoanNumber = null;
+    }
+
+    function hideAllDetails() {
+        ['chequeDetails', 'bankTransferDetails', 'rtgsDetails', 'commonBankDetails'].forEach(id => {
+            document.getElementById(id).classList.add('hidden');
+        });
+        document.getElementById('cheque_number').required = false;
+    }
+
+    // Payment Method Selection Handler
+    document.addEventListener('DOMContentLoaded', function() {
+        const paymentMethodRadios = document.querySelectorAll('input[name="payment_method"]');
+        
+        paymentMethodRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                hideAllDetails();
+                
+                switch(this.value) {
+                    case 'cheque':
+                        document.getElementById('chequeDetails').classList.remove('hidden');
+                        document.getElementById('commonBankDetails').classList.remove('hidden');
+                        document.getElementById('cheque_number').required = true;
+                        break;
+                    case 'bank_transfer':
+                        document.getElementById('bankTransferDetails').classList.remove('hidden');
+                        document.getElementById('commonBankDetails').classList.remove('hidden');
+                        break;
+                    case 'rtgs':
+                        document.getElementById('rtgsDetails').classList.remove('hidden');
+                        document.getElementById('commonBankDetails').classList.remove('hidden');
+                        break;
+                }
+            });
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('disbursementModal').addEventListener('click', function(e) {
+            if (e.target.id === 'disbursementModal') {
+                closeDisbursementModal();
+            }
+        });
+    });
+
+    // Helper Functions
+    function formatMoney(amount) {
+        return new Intl.NumberFormat('en-KE', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(amount);
+    }
+
+    // Payment Processing Functions
     function processWithdrawal(transactionId) {
         if (confirm('Process this savings withdrawal?')) {
-            // AJAX call to process withdrawal
             fetch(`/treasurer/withdrawals/${transactionId}/process`, {
                 method: 'POST',
                 headers: {
@@ -469,22 +667,21 @@
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 }
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Withdrawal processed successfully!');
-                        location.reload();
-                    } else {
-                        alert('Error: ' + data.message);
-                    }
-                });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Withdrawal processed successfully!');
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
         }
     }
 
     function rejectWithdrawal(transactionId) {
         const reason = prompt('Reason for rejection:');
         if (reason) {
-            // AJAX call to reject withdrawal
             fetch(`/treasurer/withdrawals/${transactionId}/reject`, {
                 method: 'POST',
                 headers: {
@@ -493,20 +690,19 @@
                 },
                 body: JSON.stringify({ reason: reason })
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Withdrawal rejected.');
-                        location.reload();
-                    } else {
-                        alert('Error: ' + data.message);
-                    }
-                });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Withdrawal rejected.');
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
         }
     }
 
     function payExpense(expenseId) {
-        // Show payment modal
         const amount = prompt('Enter payment amount:');
         if (amount && !isNaN(amount)) {
             fetch(`/treasurer/expenses/${expenseId}/pay`, {
@@ -517,22 +713,22 @@
                 },
                 body: JSON.stringify({ amount: parseFloat(amount) })
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Expense paid successfully!');
-                        location.reload();
-                    } else {
-                        alert('Error: ' + data.message);
-                    }
-                });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Expense paid successfully!');
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
         }
     }
 
-    // Bulk processing
+    // Bulk Processing
     function processAllCheques() {
-        if (confirm(`Issue cheques for all {{ $pendingDisbursements->count() }} pending loans?`)) {
-            // Bulk processing logic
+        const count = {{ $pendingDisbursements->count() }};
+        if (confirm(`Issue cheques for all ${count} pending loans?`)) {
             alert('Processing all cheques...');
             // AJAX call here
         }

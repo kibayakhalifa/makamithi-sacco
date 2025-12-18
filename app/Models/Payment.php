@@ -212,37 +212,53 @@ class Payment extends Model
 
     // NEW: Check if payment is on time
     public function isOnTime()
-    {
-        if (!$this->loan) {
-            return true;
-        }
-
-        $dueDate = $this->loan->getDueDateForInstallment($this->installment_number);
-        
-        if (!$dueDate) {
-            return true;
-        }
-
-        return $this->payment_date <= $dueDate;
+{
+    if (!$this->loan) {
+        return true;
     }
 
-    // NEW: Calculate penalty if any
-    public function calculatePenalty()
-    {
-        if (!$this->loan || !$this->isOnTime()) {
-            $dueDate = $this->loan->getDueDateForInstallment($this->installment_number);
-            $daysLate = now()->diffInDays($dueDate);
-            
-            // Example penalty calculation: 1% per month or 0.033% per day
-            $dailyPenaltyRate = 0.00033; // ~1% per month
-            $penalty = $this->amount * $dailyPenaltyRate * $daysLate;
-            
-            return max(0, $penalty);
-        }
+    $dueDate = $this->loan->getDueDateForInstallment($this->installment_number);
+    
+    // If no due date, consider it on time
+    if (!$dueDate || !$this->payment_date) {
+        return true;
+    }
 
+    $paymentDate = \Carbon\Carbon::parse($this->payment_date);
+    return $paymentDate->lte($dueDate);
+}
+    // NEW: Calculate penalty if any
+    // In Payment.php, update the calculatePenalty() method:
+public function calculatePenalty()
+{
+    // Only calculate penalty for loan payments
+    if (!$this->loan || !$this->loan_id) {
         return 0;
     }
 
+    // Get due date from loan
+    $dueDate = $this->loan->getDueDateForInstallment($this->installment_number);
+    
+    // If no due date or payment date is not set, return 0
+    if (!$dueDate || !$this->payment_date) {
+        return 0;
+    }
+
+    // Check if payment is late
+    $paymentDate = \Carbon\Carbon::parse($this->payment_date);
+    
+    if ($paymentDate->greaterThan($dueDate)) {
+        $daysLate = $dueDate->diffInDays($paymentDate);
+        
+        // Example penalty calculation: 1% per month or ~0.033% per day
+        $dailyPenaltyRate = 0.00033; // ~1% per month
+        $penalty = $this->amount * $dailyPenaltyRate * $daysLate;
+        
+        return max(0, $penalty);
+    }
+
+    return 0;
+}
     // NEW: Get payment type (with early repayment detection)
     public function getTypeAttribute()
     {

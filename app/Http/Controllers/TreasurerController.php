@@ -549,68 +549,90 @@ class TreasurerController extends Controller
      * Disburse an approved loan directly
      */
     public function disburseLoan(Request $request, $loanId)
-    {
-        $request->validate([
-            'payment_method' => 'required|in:cash,bank_transfer,mobile_money,cheque',
-            'reference_number' => 'nullable|string|max:100',
-            'notes' => 'nullable|string|max:500',
-        ]);
+{
+    $request->validate([
+        'payment_method' => 'required|in:cheque,bank_transfer,rtgs,cash,mobile_money',
+        'disbursement_date' => 'required|date',
+        'cheque_number' => 'nullable|required_if:payment_method,cheque|string|max:50',
+        'bank_name' => 'nullable|string|max:100',
+        'account_number' => 'nullable|string|max:50',
+        'branch_code' => 'nullable|string|max:50',
+        'reference_number' => 'nullable|string|max:100',
+        'swift_code' => 'nullable|string|max:20',
+        'notes' => 'nullable|string|max:500',
+    ]);
 
-        $loan = Loan::with('user')->findOrFail($loanId);
+    $loan = Loan::with('user')->findOrFail($loanId);
 
-        if ($loan->status !== 'approved') {
-            return redirect()->back()
-                ->with('error', 'Loan must be approved before disbursement.');
-        }
-
-        DB::beginTransaction();
-        try {
-            // Update loan status to disbursed
-            $loan->update([
-                'status' => 'disbursed',
-                'disbursed_by' => auth()->id(),
-                'disbursed_date' => now(),
-                'next_payment_date' => now()->addMonth(),
-            ]);
-
-            // Create payment record for disbursement
-            \App\Models\Payment::create([
-                'loan_id' => $loan->id,
-                'user_id' => $loan->user_id,
-                'type' => 'disbursement',
-                'amount' => $loan->amount,
-                'payment_method' => $request->payment_method,
-                'reference_number' => $request->reference_number,
-                'status' => 'completed',
-                'processed_by' => auth()->id(),
-                'processed_date' => now(),
-                'notes' => $request->notes,
-            ]);
-
-            // Reduce member's loan eligibility (same logic as cheque issuance)
-            // $member = $loan->user;
-            // if ($member && $member->savings) 
-            //     $reductionAmount = $loan->amount / 1.5;
-            //     $newAvailableSavings = max(0, $member->savings->available_savings - $reductionAmount);
-            //     $member->savings->update(['available_savings' => $newAvailableSavings]);
-            // }
-
-            DB::commit();
-
-            // Send notification to member about disbursement
-            $loan->user->notify(new \App\Notifications\LoanDisbursed($loan));
-
-            return redirect()->route('treasurer.loans')
-                ->with('success', 'Loan '.$loan->loan_number.' has been disbursed successfully!');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return redirect()->back()
-                ->with('error', 'Loan disbursement failed: '.$e->getMessage());
-        }
+    if ($loan->status !== 'approved') {
+        return redirect()->back()
+            ->with('error', 'Loan must be approved before disbursement.');
     }
 
+    // Generate reference
+    if ($request->payment_method === 'cheque') {
+        $reference = $request->cheque_number;
+    } else {
+        $reference = $request->reference_number ?? strtoupper($request->payment_method) . '-' . date('YmdHis');
+    }
+
+    DB::beginTransaction();
+    try {
+        // Update loan
+        $loan->update([
+            'status' => 'disbursed',
+            'disbursed_by' => auth()->id(),
+            'disbursed_date' => $request->disbursement_date,
+            'next_payment_date' => \Carbon\Carbon::parse($request->disbursement_date)->addMonth(),
+        ]);
+
+        // Create payment WITHOUT triggering events
+        $payment = new Payment();
+        $payment->loan_id = $loan->id;
+        $payment->user_id = $loan->user_id;
+        $payment->payment_ref = $reference;
+        $payment->amount = $loan->amount;
+        $payment->payment_method = $request->payment_method;
+        $payment->reference_number = $reference;
+        $payment->status = 'completed';
+        $payment->payment_date = $request->disbursement_date;
+        $payment->posted_date = now();
+        $payment->posted_by = auth()->id();
+        $payment->notes = $request->notes ?? 'Loan disbursement';
+        
+        // Save without events
+        $payment->saveQuietly();
+
+        // Create cheque record if needed
+        if ($request->payment_method === 'cheque') {
+            ChequeRecord::create([
+                'loan_id' => $loan->id,
+                'user_id' => $loan->user_id,
+                'cheque_number' => $request->cheque_number,
+                'bank_name' => $request->bank_name,
+                'bank_branch' => $request->branch_code,
+                'account_number' => $request->account_number,
+                'amount' => $loan->amount,
+                'purpose' => 'loan_disbursement',
+                'status' => 'issued',
+                'issue_date' => $request->disbursement_date,
+                'issued_by' => auth()->id(),
+                'issue_notes' => $request->notes,
+            ]);
+        }
+
+        DB::commit();
+
+        return redirect()->route('treasurer.payments')
+            ->with('success', 'Loan ' . $loan->loan_number . ' disbursed successfully!');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        
+        return redirect()->back()
+            ->with('error', 'Loan disbursement failed: ' . $e->getMessage());
+    }
+}
     /**
      * Process payroll deductions
      * From requirements: "Savings are deducted from the payroll... deposited cumulatively"
