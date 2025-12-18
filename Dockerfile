@@ -27,12 +27,10 @@ RUN composer install --no-dev --optimize-autoloader
 RUN chmod -R 775 storage bootstrap/cache
 
 # Copy nginx config template
-COPY nginx.conf /etc/nginx/nginx.conf.template
+COPY nginx.conf /etc/nginx/nginx.conf
 
 # Expose Railway port
-EXPOSE 8080
+EXPOSE 80
 
 # Start services
-CMD envsubst '$PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf \
-    && php-fpm -D \
-    && nginx -g 'daemon off;'
+CMD php-fpm -D && nginx -g 'daemon off;'
