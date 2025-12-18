@@ -4,133 +4,184 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Makamithi Sacco | Employee Portal</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background-color: #f9fafb;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
         }
+
         .card-shadow {
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,.08),
+                        0 10px 20px -5px rgba(0,0,0,.04);
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+
+        .accent-gradient {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+        }
+
+        .accent-gradient:hover {
+            background: linear-gradient(135deg, #ea580c, #c2410c);
+        }
+
+        .glass {
+            background: rgba(255,255,255,.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,.2);
+        }
+
+        /* SHORT SCREEN OPTIMIZATION */
+        @media (max-height: 750px) {
+            .compact-y {
+                padding-top: 1rem !important;
+                padding-bottom: 1rem !important;
+            }
         }
     </style>
 </head>
 
 <body class="antialiased">
-    <div class="container mx-auto px-4 min-h-screen flex flex-col justify-center items-center py-10">
 
-        <!-- Main Card -->
-        <div class="w-full max-w-5xl bg-white rounded-2xl card-shadow overflow-hidden">
-            <div class="flex flex-col lg:flex-row">
+<div class="min-h-screen flex items-start lg:items-center justify-center px-4 py-4">
 
-                <!-- LEFT PANEL -->
-                <div class="lg:w-2/5 bg-gray-900 text-white p-10 flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center space-x-3 mb-8">
-                            <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
-                                <span class="text-gray-900 text-2xl font-bold">M</span>
-                            </div>
-                            <div>
-                                <h1 class="text-2xl font-bold tracking-tight">Makamithi</h1>
-                                <p class="text-gray-300 text-sm">SACCO</p>
-                            </div>
-                        </div>
+    <!-- MAIN CARD -->
+    <div class="w-full max-w-6xl bg-white rounded-2xl card-shadow overflow-hidden
+                max-h-[100vh] lg:max-h-[92vh]">
 
-                        <h2 class="text-3xl font-light mb-6 leading-tight">
-                            Employee Savings & Credit Cooperative Society
-                        </h2>
+        <div class="flex flex-col lg:flex-row h-full">
 
-                        <div class="space-y-4 mt-8">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">👥</div>
-                                <span class="text-gray-300">Employees Only</span>
-                            </div>
-                            <div class="flex items-center space-x-3">
-                                <div class="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">💰</div>
-                                <span class="text-gray-300">Mandatory Membership</span>
-                            </div>
-                            <div class="flex items-center space-x-3">
-                                <div class="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">🏛️</div>
-                                <span class="text-gray-300">Makamithi Enterprises</span>
-                            </div>
-                        </div>
+            <!-- LEFT PANEL -->
+            <div class="lg:w-2/5 gradient-bg text-white px-6 py-6 sm:px-8 sm:py-8 compact-y flex-shrink-0">
+
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                        <span class="text-emerald-700 text-xl font-bold">M</span>
                     </div>
-
-                    <div class="mt-10 pt-6 border-t border-gray-800">
-                        <p class="text-gray-400 text-sm">
-                            © {{ date('Y') }} Makamithi Sacco. All rights reserved.<br>
-                            For authorized employees only.
-                        </p>
+                    <div>
+                        <h1 class="text-2xl font-bold">Makamithi</h1>
+                        <p class="text-emerald-100 text-xs">SACCO</p>
                     </div>
                 </div>
 
-                <!-- RIGHT PANEL -->
-                <div class="lg:w-3/5 p-10 flex flex-col justify-center overflow-auto">
+                <h2 class="text-[1.6rem] sm:text-3xl lg:text-[2.1rem] font-light leading-snug mb-6">
+                    Empowering Employees Through
+                    <span class="font-semibold">Financial Solutions</span>
+                </h2>
 
-                    @auth
-                        <!-- Logged-in View -->
-                        <div class="text-center mb-8">
-                            <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-4">
-                                <span class="text-2xl text-gray-700">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
-                            </div>
-                            <h3 class="text-2xl font-medium text-gray-800 mb-2">Welcome back</h3>
-                            <p class="text-gray-600">{{ auth()->user()->name }}</p>
-                            <p class="text-sm text-gray-500 mt-1">{{ ucfirst(auth()->user()->role) }} Account</p>
+                <div class="space-y-3">
+                    <div class="flex items-center space-x-3 p-3 rounded-xl glass">
+                        <i class="fas fa-users"></i>
+                        <div>
+                            <p class="font-medium">Employee Access</p>
+                            <p class="text-xs text-emerald-100">Staff-only portal</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3 p-3 rounded-xl glass">
+                        <i class="fas fa-piggy-bank"></i>
+                        <div>
+                            <p class="font-medium">Savings & Loans</p>
+                            <p class="text-xs text-emerald-100">Flexible terms</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3 p-3 rounded-xl glass">
+                        <i class="fas fa-shield-alt"></i>
+                        <div>
+                            <p class="font-medium">Secure Platform</p>
+                            <p class="text-xs text-emerald-100">Regulated & safe</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="mt-6 text-xs text-emerald-100">
+                    © {{ date('Y') }} Makamithi SACCO
+                </p>
+            </div>
+
+            <!-- RIGHT PANEL -->
+            <div class="lg:w-3/5 px-6 py-6 sm:px-8 sm:py-8 compact-y
+                        flex items-center justify-center overflow-y-auto">
+
+                @auth
+                    <!-- AUTH VIEW -->
+                    <div class="w-full max-w-md text-center space-y-6">
+
+                        <div class="w-20 h-20 mx-auto rounded-full bg-emerald-600 text-white
+                                    flex items-center justify-center text-2xl font-bold">
+                            {{ strtoupper(substr(auth()->user()->name,0,1)) }}
                         </div>
 
-                        <div class="space-y-4">
-                            <a href="{{ route('dashboard') }}"
-                               class="block w-full bg-gray-900 hover:bg-gray-800 text-white text-center py-4 rounded-lg font-medium transition">
-                                Continue to Dashboard →
-                            </a>
-
-                            <form method="POST" action="{{ route('logout') }}" class="text-center">
-                                @csrf
-                                <button type="submit"
-                                        class="text-gray-500 hover:text-gray-700 text-sm transition">
-                                    Not you? Switch account
-                                </button>
-                            </form>
-                        </div>
-
-                    @else
-                        <!-- Login View -->
-                        <div class="mb-10">
-                            <h3 class="text-3xl font-light text-gray-800 mb-2">Employee Portal</h3>
-                            <p class="text-gray-600">
-                                Access your SACCO account using your company credentials.
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-800">
+                                Welcome back,
+                            </h3>
+                            <p class="text-emerald-600 text-lg font-medium">
+                                {{ auth()->user()->name }}
                             </p>
                         </div>
 
-                        <div class="space-y-6">
-                            <a href="{{ route('login') }}"
-                               class="block w-full bg-gray-900 hover:bg-gray-800 text-white text-center py-4 rounded-lg font-medium transition text-lg">
-                                Login
+                        <a href="{{ route('dashboard') }}"
+                           class="block w-full accent-gradient text-white py-3 rounded-xl font-semibold">
+                            Continue to Dashboard
+                        </a>
+
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button class="text-sm text-gray-500 hover:text-orange-600">
+                                Switch account
+                            </button>
+                        </form>
+                    </div>
+
+                @else
+                    <!-- LOGIN VIEW -->
+                    <div class="w-full max-w-md space-y-6">
+
+                        <div>
+                            <h3 class="text-2xl font-semibold text-gray-800 mb-2">
+                                Welcome to Makamithi SACCO
+                            </h3>
+                            <p class="text-gray-600 text-sm">
+                                Login using your employee credentials.
+                            </p>
+                        </div>
+
+                        <a href="{{ route('login') }}"
+                           class="block w-full accent-gradient text-white py-3 rounded-xl
+                                  font-semibold text-center">
+                            Login to Your Account
+                        </a>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <a href="#" class="border rounded-lg py-2 text-sm text-center">
+                                Help Center
+                            </a>
+                            <a href="#" class="border rounded-lg py-2 text-sm text-center">
+                                User Guide
                             </a>
                         </div>
-
-                        <div class="mt-12 pt-8 border-t border-gray-100">
-                            <div class="bg-gray-50 rounded-lg p-4">
-                                <p class="text-sm text-gray-600 text-center">
-                                    <span class="font-medium">Need access?</span><br>
-                                    Contact HR at Makamithi Enterprises.
-                                </p>
-                            </div>
-                        </div>
-                    @endauth
-
-                </div>
+                    </div>
+                @endauth
             </div>
-        </div>
 
-        <!-- Bottom Notice -->
-        <div class="mt-6 text-center px-4">
-            <p class="text-gray-400 text-sm">
-                This portal is restricted to Makamithi Enterprises employees only.<br>
-                Unauthorized access is strictly prohibited.
-            </p>
         </div>
     </div>
+</div>
+
+<footer class="hidden sm:block text-center text-xs text-gray-400 py-3">
+    Regulated by SASRA • Secured Platform
+</footer>
+
 </body>
 </html>

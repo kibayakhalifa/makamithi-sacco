@@ -42,7 +42,7 @@ Route::get('/', function () {
 });
 
 // Include Breeze authentication routes
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
 
 Route::middleware(['auth'])->group(function () {
 
@@ -136,18 +136,34 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['auth', 'role:secretary'])->group(function () {
 
         // Secretary Dashboard
-        Route::get('/secretary/dashboard', function () {
-            return view('secretary.dashboard');
-        })->name('secretary.dashboard');
+        // Secretary Dashboard
+        Route::get('/secretary/dashboard', [SecretaryController::class, 'dashboard'])->name('secretary.dashboard');
 
         // Secretary specific routes
         Route::prefix('secretary')->group(function () {
-            // Member Management
-            Route::get('/members', function () {
-                return view('secretary.members');
-            })->name('secretary.members');
+            // ============ MEMBER MANAGEMENT ============
+            // Member List
+            Route::get('/members', [SecretaryController::class, 'members'])->name('secretary.members');
 
-            // Pending Approvals
+            // Create Member
+            Route::get('/members/create', [SecretaryController::class, 'createMember'])->name('secretary.members.create');
+            Route::post('/members', [SecretaryController::class, 'storeMember'])->name('secretary.members.store');
+
+            // View/Edit/Delete Member
+            Route::get('/members/{user}', [SecretaryController::class, 'showMember'])->name('secretary.members.show');
+            Route::get('/members/{user}/edit', [SecretaryController::class, 'editMember'])->name('secretary.members.edit');
+            Route::put('/members/{user}', [SecretaryController::class, 'updateMember'])->name('secretary.members.update');
+            Route::delete('/members/{user}', [SecretaryController::class, 'destroyMember'])->name('secretary.members.destroy');
+
+            // Member Approval Actions
+            Route::post('/members/{user}/approve', [SecretaryController::class, 'approveMember'])->name('secretary.members.approve');
+            Route::post('/members/{user}/reject', [SecretaryController::class, 'rejectMember'])->name('secretary.members.reject');
+
+            // Member Exports
+            Route::post('/members/export', [SecretaryController::class, 'exportMembers'])->name('secretary.members.export');
+
+            // ============ LOAN MANAGEMENT ============
+            // Pending Approvals View
             Route::get('/pending-approvals', function () {
                 return view('secretary.pending-approvals');
             })->name('secretary.pending-approvals');
@@ -155,7 +171,16 @@ Route::middleware(['auth'])->group(function () {
             // Loan Assistance
             Route::get('/loan-assist', function () {
                 return view('secretary.loan-assist');
-            })->name('secretary.loan-assist');
+            })->name('loan-assist');
+            Route::get('/secretary/loan-assist', function () {
+                $members = \App\Models\User::where('role', 'member')
+                    ->where('sacco_status', 'active')
+                    ->orderBy('name')
+                    ->get();
+
+                return view('secretary.loan-assist', compact('members'));
+            })->name('secretary.loan-assist')->middleware(['auth', 'role:secretary']);
+            Route::post('/assisted-loans', [SecretaryController::class, 'storeAssistedLoan'])->name('secretary.loans.assisted');
 
             // Loan Approvals
             Route::get('/loan-approvals', [SecretaryController::class, 'loanApprovals'])->name('secretary.loan-approvals');
@@ -166,20 +191,30 @@ Route::middleware(['auth'])->group(function () {
             // Loan History
             Route::get('/loan-history', [SecretaryController::class, 'loanHistory'])->name('secretary.loan-history');
 
-            // Secretary Communications
+            // Withdrawal Processing
+            Route::post('/withdrawal/{member}', [SecretaryController::class, 'processWithdrawalRequest'])->name('secretary.withdrawal.process');
+
+            // ============ COMMUNICATIONS ============
             Route::get('/communications', function () {
                 return view('secretary.communications');
             })->name('secretary.communications');
 
-            // Secretary Documents Management
-            Route::middleware(['role:secretary'])->prefix('secretary')->group(function () {
-                Route::get('/documents', [DocumentController::class, 'secretaryIndex'])->name('secretary.documents');
-                Route::post('/documents', [DocumentController::class, 'store'])->name('secretary.documents.store');
-                Route::delete('/documents/{id}', [DocumentController::class, 'destroy'])->name('secretary.documents.destroy');
-            });
+            // ============ DOCUMENTS MANAGEMENT ============
+            Route::get('/documents', [DocumentController::class, 'secretaryIndex'])->name('secretary.documents');
+            Route::post('/documents', [DocumentController::class, 'store'])->name('secretary.documents.store');
+            Route::delete('/documents/{id}', [DocumentController::class, 'destroy'])->name('secretary.documents.destroy');
+
+            // ============ REPORTS ============
+            Route::get('/reports/members/new', [SecretaryController::class, 'newMembersReport'])->name('secretary.reports.members.new');
+            Route::get('/reports/savings', [SecretaryController::class, 'savingsReport'])->name('secretary.reports.savings');
+            Route::get('/reports/departments', [SecretaryController::class, 'departmentReport'])->name('secretary.reports.departments');
+
+            // ============ SETTINGS & PROFILE ============
+            Route::get('/profile', function () {
+                return view('secretary.profile');
+            })->name('secretary.profile');
         });
     });
-
     // ---------- REPORTS ROUTES (Accessible to all authenticated users) ----------
     Route::prefix('reports')->group(function () {
         Route::get('/', function () {
@@ -209,9 +244,8 @@ Route::middleware(['auth'])->group(function () {
         })->name('reports.member-statements');
     });
 
-    // Secretary POST Routes (for member creation, assisted loans, withdrawals)
+    // Secretary POST Routes (for assisted loans, withdrawals) - DUPLICATE ROUTES REMOVED
     Route::prefix('secretary')->middleware(['auth', 'role:secretary'])->group(function () {
-        Route::post('/members', [SecretaryController::class, 'storeMember'])->name('secretary.members.store');
         Route::post('/assisted-loans', [SecretaryController::class, 'storeAssistedLoan'])->name('secretary.loans.assisted');
         Route::post('/withdrawal/{member}', [SecretaryController::class, 'processWithdrawalRequest'])->name('secretary.withdrawal.process');
     });
@@ -347,7 +381,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('member.payments.create')->middleware(['auth', 'role:member']);
     Route::post('/member/payments/{loan}', [MemberPaymentController::class, 'store'])
         ->name('member.payments.store')->middleware(['auth', 'role:member']);
-     Route::post('/member/loans/{loan}/early-repayment', [MemberLoanController::class, 'processEarlyRepayment'])
+    Route::post('/member/loans/{loan}/early-repayment', [MemberLoanController::class, 'processEarlyRepayment'])
         ->name('member.loans.early-repayment');
     Route::get('/member/profile/edit', [MemberProfileController::class, 'edit'])->name('member.profile.edit');
     Route::post('/member/profile/update', [MemberProfileController::class, 'update'])->name('member.profile.update');
@@ -371,7 +405,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/communications', [CommunicationController::class, 'store'])->middleware('role:chairman,secretary,treasurer')->name('communications.store');
         Route::get('/communications/{communication}', [CommunicationController::class, 'show'])->name('communications.show');
     });
-    Route::get('/notifications/{notification}',
+    Route::get(
+        '/notifications/{notification}',
         [NotificationController::class, 'open']
     )->name('notifications.open');
 

@@ -71,6 +71,7 @@ class Loan extends Model
     {
         return $this->hasMany(Payment::class)->orderBy('payment_date', 'asc');
     }
+    
 
     public function approver()
     {

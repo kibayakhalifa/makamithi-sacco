@@ -22,7 +22,7 @@
             <div class="text-center md:text-right">
                 <div class="bg-gray-50 rounded-xl px-4 py-3 border border-gray-200">
                     <p class="text-gray-600 text-sm font-medium">Total Members</p>
-                    <p class="text-3xl font-bold text-gray-900">156</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ $stats['total_members'] ?? 0 }}</p>
                     <p class="text-gray-500 text-xs mt-1">All registered members</p>
                 </div>
             </div>
@@ -35,7 +35,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-gray-500 text-xs uppercase tracking-wider font-medium">Total Members</h3>
-                    <p class="text-2xl font-bold text-gray-900 mt-2">156</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">{{ $stats['total_members'] ?? 0 }}</p>
                     <p class="text-gray-500 text-sm mt-1">All registered</p>
                 </div>
                 <div class="bg-blue-50 p-3 rounded-lg">
@@ -48,7 +48,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-gray-500 text-xs uppercase tracking-wider font-medium">Active Members</h3>
-                    <p class="text-2xl font-bold text-gray-900 mt-2">148</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">{{ $stats['active_members'] ?? 0 }}</p>
                     <p class="text-gray-500 text-sm mt-1">Approved and active</p>
                 </div>
                 <div class="bg-green-50 p-3 rounded-lg">
@@ -61,8 +61,8 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-gray-500 text-xs uppercase tracking-wider font-medium">Pending Approval</h3>
-                    <p class="text-2xl font-bold text-gray-900 mt-2">8</p>
-                    <p class="text-gray-500 text-sm mt-1">Awaiting chairman</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">{{ $stats['pending_members'] ?? 0 }}</p>
+                    <p class="text-gray-500 text-sm mt-1">Awaiting approval</p>
                 </div>
                 <div class="bg-orange-50 p-3 rounded-lg">
                     <span class="text-orange-600 text-xl">⏳</span>
@@ -74,8 +74,8 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-gray-500 text-xs uppercase tracking-wider font-medium">New This Month</h3>
-                    <p class="text-2xl font-bold text-gray-900 mt-2">12</p>
-                    <p class="text-gray-500 text-sm mt-1">March registrations</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">{{ $stats['new_this_month'] ?? 0 }}</p>
+                    <p class="text-gray-500 text-sm mt-1">{{ now()->format('F') }} registrations</p>
                 </div>
                 <div class="bg-purple-50 p-3 rounded-lg">
                     <span class="text-purple-600 text-xl">📈</span>
@@ -90,23 +90,19 @@
             <nav class="flex overflow-x-auto">
                 <button onclick="switchTab('all')" id="allTab"
                     class="px-6 py-4 font-medium border-b-2 border-blue-600 text-blue-700 whitespace-nowrap">
-                    👥 All Members (156)
+                    👥 All Members ({{ $stats['total_members'] ?? 0 }})
                 </button>
-                <button onclick="switchTab('approved')" id="approvedTab"
+                <button onclick="switchTab('active')" id="activeTab"
                     class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
-                    ✅ Approved (148)
+                    ✅ Active ({{ $stats['active_members'] ?? 0 }})
                 </button>
                 <button onclick="switchTab('pending')" id="pendingTab"
                     class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
-                    ⏳ Pending (8)
+                    ⏳ Pending ({{ $stats['pending_members'] ?? 0 }})
                 </button>
                 <button onclick="switchTab('rejected')" id="rejectedTab"
                     class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
-                    ❌ Rejected (0)
-                </button>
-                <button onclick="switchTab('new')" id="newTab"
-                    class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
-                    🆕 New This Month (12)
+                    ❌ Rejected ({{ $stats['rejected_members'] ?? 0 }})
                 </button>
             </nav>
         </div>
@@ -123,89 +119,172 @@
                         class="px-4 py-2 border border-gray-300 rounded-lg text-sm" id="searchInput">
                     <select class="px-4 py-2 border border-gray-300 rounded-lg text-sm" id="departmentFilter">
                         <option value="">All Departments</option>
-                        <option value="Finance">Finance</option>
-                        <option value="Operations">Operations</option>
-                        <option value="HR">Human Resources</option>
-                        <option value="IT">Information Technology</option>
-                        <option value="Sales">Sales</option>
-                        <option value="Marketing">Marketing</option>
+                        @php
+                            $departments = \App\Models\User::where('role', 'member')
+                                ->select('department')
+                                ->distinct()
+                                ->pluck('department');
+                        @endphp
+                        @foreach($departments as $dept)
+                            <option value="{{ $dept }}">{{ $dept }}</option>
+                        @endforeach
                     </select>
-                    <button onclick="openAddMemberModal()"
+                    <a href="{{ route('secretary.members.create') }}"
                         class="px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition flex items-center gap-2">
                         <span>+</span> Add Member
-                    </button>
+                    </a>
                 </div>
             </div>
 
+            <!-- Members Table -->
             <div class="overflow-x-auto border border-gray-300 rounded-lg">
                 <table class="min-w-full divide-y divide-gray-200 border-collapse">
                     <thead>
                         <tr class="bg-gray-50">
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                #
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                Member Details
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                Employee #
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                Department
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                Position
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                Phone
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                Status
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                Actions
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200" id="membersTableBody">
-                        <!-- Dummy data will be populated by JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Approved Members -->
-        <div id="approvedContent" class="p-6 hidden">
-            <!-- Similar table structure for approved members -->
-            <div class="overflow-x-auto border border-gray-300 rounded-lg">
-                <table class="min-w-full divide-y divide-gray-200 border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50">
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                #
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                Member Details
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                Employee #
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                Department
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                Position
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                Savings Balance
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                Status
-                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">#</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Member Details</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Employee #</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Department</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Position</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Phone</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Status</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        <!-- Approved members data -->
+                        @forelse($members as $index => $member)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium border border-gray-300">
+                                    {{ ($members->currentPage() - 1) * $members->perPage() + $index + 1 }}
+                                </td>
+                                <td class="px-4 py-3 border border-gray-300">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+                                            <span class="text-gray-700 text-sm font-medium">
+                                                {{ strtoupper(substr($member->name, 0, 1)) }}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900 text-sm">{{ $member->name }}</p>
+                                            <p class="text-gray-500 text-xs">{{ $member->email }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border border-gray-300">
+                                    {{ $member->employee_number }}
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700 border border-gray-300">
+                                    {{ $member->department }}
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700 border border-gray-300">
+                                    {{ $member->position }}
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700 border border-gray-300">
+                                    {{ $member->phone }}
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap border border-gray-300">
+                                    @if($member->sacco_status === 'active')
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full border border-green-200 font-medium">✅ Active</span>
+                                    @elseif($member->sacco_status === 'pending')
+                                        <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full border border-orange-200 font-medium">⏳ Pending</span>
+                                    @elseif($member->sacco_status === 'rejected')
+                                        <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full border border-red-200 font-medium">❌ Rejected</span>
+                                    @else
+                                        <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full border border-gray-200 font-medium">Unknown</span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap border border-gray-300">
+                                    <div class="flex gap-2">
+                                        <a href="{{ route('secretary.members.show', $member->id) }}"
+                                            class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1.5 rounded text-xs font-medium">
+                                            View
+                                        </a>
+                                        <a href="{{ route('secretary.members.edit', $member->id) }}"
+                                            class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium">
+                                            Edit
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="px-4 py-8 text-center text-gray-500">
+                                    No members found. <a href="{{ route('secretary.members.create') }}" class="text-blue-600 hover:text-blue-800">Add your first member!</a>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            @if($members->hasPages())
+                <div class="mt-6">
+                    {{ $members->links() }}
+                </div>
+            @endif
+        </div>
+
+        <!-- Active Members -->
+        <div id="activeContent" class="p-6 hidden">
+            <div class="overflow-x-auto border border-gray-300 rounded-lg">
+                <table class="min-w-full divide-y divide-gray-200 border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">#</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Member Details</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Employee #</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Department</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Savings Balance</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @php
+                            $activeMembers = $members->where('sacco_status', 'active');
+                        @endphp
+                        @forelse($activeMembers as $index => $member)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium border border-gray-300">
+                                    {{ $index + 1 }}
+                                </td>
+                                <td class="px-4 py-3 border border-gray-300">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+                                            <span class="text-gray-700 text-sm font-medium">
+                                                {{ strtoupper(substr($member->name, 0, 1)) }}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900 text-sm">{{ $member->name }}</p>
+                                            <p class="text-gray-500 text-xs">{{ $member->email }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border border-gray-300">
+                                    {{ $member->employee_number }}
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700 border border-gray-300">
+                                    {{ $member->department }}
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700 border border-gray-300">
+                                    @if($member->savings)
+                                        KES {{ number_format($member->savings->available_savings, 2) }}
+                                    @else
+                                        <span class="text-gray-400">No savings</span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap border border-gray-300">
+                                    <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full border border-green-200 font-medium">✅ Active</span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                                    No active members found.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -213,59 +292,156 @@
 
         <!-- Pending Members -->
         <div id="pendingContent" class="p-6 hidden">
-            <!-- Similar table structure for pending members -->
             <div class="overflow-x-auto border border-gray-300 rounded-lg">
                 <table class="min-w-full divide-y divide-gray-200 border-collapse">
                     <thead>
                         <tr class="bg-gray-50">
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                #
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                Member Details
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                Employee #
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                Applied Date
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                Days Waiting
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
-                                Actions
-                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">#</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Member Details</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Employee #</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Applied Date</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        <!-- Pending members data -->
+                        @php
+                            $pendingMembers = $members->where('sacco_status', 'pending');
+                        @endphp
+                        @forelse($pendingMembers as $index => $member)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium border border-gray-300">
+                                    {{ $index + 1 }}
+                                </td>
+                                <td class="px-4 py-3 border border-gray-300">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+                                            <span class="text-gray-700 text-sm font-medium">
+                                                {{ strtoupper(substr($member->name, 0, 1)) }}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900 text-sm">{{ $member->name }}</p>
+                                            <p class="text-gray-500 text-xs">{{ $member->email }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border border-gray-300">
+                                    {{ $member->employee_number }}
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700 border border-gray-300">
+                                    {{ $member->created_at->format('d M Y') }}
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap border border-gray-300">
+                                    <div class="flex gap-2">
+                                        <a href="{{ route('secretary.members.show', $member->id) }}"
+                                            class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1.5 rounded text-xs font-medium">
+                                            View
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                                    No pending members.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Rejected Members -->
+        <div id="rejectedContent" class="p-6 hidden">
+            <div class="overflow-x-auto border border-gray-300 rounded-lg">
+                <table class="min-w-full divide-y divide-gray-200 border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">#</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Member Details</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Employee #</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Rejection Date</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @php
+                            $rejectedMembers = $members->where('sacco_status', 'rejected');
+                        @endphp
+                        @forelse($rejectedMembers as $index => $member)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium border border-gray-300">
+                                    {{ $index + 1 }}
+                                </td>
+                                <td class="px-4 py-3 border border-gray-300">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+                                            <span class="text-gray-700 text-sm font-medium">
+                                                {{ strtoupper(substr($member->name, 0, 1)) }}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900 text-sm">{{ $member->name }}</p>
+                                            <p class="text-gray-500 text-xs">{{ $member->email }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border border-gray-300">
+                                    {{ $member->employee_number }}
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700 border border-gray-300">
+                                    {{ $member->updated_at->format('d M Y') }}
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap border border-gray-300">
+                                    <div class="flex gap-2">
+                                        <form method="POST" action="{{ route('secretary.members.approve', $member->id) }}" class="inline">
+                                            @csrf
+                                            <button type="submit"
+                                                class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-xs font-medium">
+                                                Approve
+                                            </button>
+                                        </form>
+                                        <a href="{{ route('secretary.members.show', $member->id) }}"
+                                            class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1.5 rounded text-xs font-medium">
+                                            View
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                                    No rejected members.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Member Reports & Quick Actions -->
+    <!-- Quick Actions -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Member Reports</h3>
             <div class="space-y-3">
-                <button onclick="generateReport('new_members')"
+                <a href="{{ route('secretary.reports.members.new') }}"
                     class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm flex justify-between items-center border border-gray-200">
                     <span>📊 New Members Report</span>
                     <span class="text-gray-400">→</span>
-                </button>
-                <button onclick="generateReport('savings_summary')"
+                </a>
+                <a href="{{ route('secretary.reports.savings') }}"
                     class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm flex justify-between items-center border border-gray-200">
                     <span>💰 Savings Summary Report</span>
                     <span class="text-gray-400">→</span>
-                </button>
-                <button onclick="generateReport('department_analysis')"
+                </a>
+                <a href="{{ route('secretary.reports.departments') }}"
                     class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm flex justify-between items-center border border-gray-200">
                     <span>🏢 Department Analysis</span>
                     <span class="text-gray-400">→</span>
-                </button>
+                </a>
                 <button onclick="exportMemberData()"
                     class="w-full text-left px-4 py-3 bg-green-50 hover:bg-green-100 text-green-800 rounded-lg text-sm flex justify-between items-center border border-green-200">
                     <span>💾 Export Member Data (Excel)</span>
@@ -277,17 +453,17 @@
         <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
             <div class="space-y-3">
-                <button onclick="openAddMemberModal()"
+                <a href="{{ route('secretary.members.create') }}"
                     class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm">
                     <span>👤</span> Add New Member
-                </button>
-                <button onclick="sendWelcomeMessages()"
+                </a>
+                <a href="{{ route('secretary.loan-assist') }}"
                     class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm">
-                    <span>📧</span> Send Welcome Messages
-                </button>
-                <button onclick="updateMemberStatuses()"
+                    <span>📝</span> Assist with Loan Application
+                </a>
+                <button onclick="sendBulkMessages()"
                     class="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm">
-                    <span>🔄</span> Batch Update Status
+                    <span>📧</span> Send Bulk Messages
                 </button>
             </div>
         </div>
@@ -295,567 +471,158 @@
 
 </div>
 
-<!-- Add Member Modal -->
-<div id="addMemberModal" class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 hidden items-center justify-center p-4 transition-opacity duration-200">
-    <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-        <div class="p-6 border-b border-gray-200">
-            <div class="flex justify-between items-center">
-                <h3 class="text-xl font-semibold text-gray-900">Add New Member</h3>
-                <button onclick="closeAddMemberModal()"
-                    class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors">
-                    <span class="text-gray-500 hover:text-gray-700">✕</span>
-                </button>
-            </div>
-            <p class="text-gray-500 text-sm mt-1">Register a new Makamithi employee to the SACCO</p>
+<!-- Rejection Modal -->
+<div id="rejectionModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900">Reject Member</h3>
         </div>
-
-        <form action="{{ route('secretary.members.store') }}" method="POST" class="p-6 space-y-6">
+        
+        <form id="rejectionForm" method="POST" action="">
             @csrf
-            <!-- Personal Information -->
-            <div>
-                <h4 class="text-lg font-medium text-gray-900 mb-4">Personal Information</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Employee Number *</label>
-                        <input type="text" name="employee_number" required
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors"
-                            placeholder="EMP001">
-                        <p class="text-xs text-gray-400 mt-1">This will be their SACCO member number</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">National ID *</label>
-                        <input type="text" name="national_id" id="national_id"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors"
-                            placeholder="12345678">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
-                        <input type="text" name="name" id="full_name"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors"
-                            placeholder="John Doe">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
-                        <input type="email" name="email" id="email"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors"
-                            placeholder="john@makamithi.com">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
-                        <input type="tel" name="phone" id="phone"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors"
-                            placeholder="0712 345 678">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Date of Birth *</label>
-                        <input type="date" name="date_of_birth" id="date_of_birth"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors">
-                    </div>
+            <div class="px-6 py-4 space-y-4">
+                <div>
+                    <label for="rejection_reason" class="block text-sm font-medium text-gray-700 mb-2">Reason for Rejection *</label>
+                    <textarea name="rejection_reason" id="rejection_reason" rows="3" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                        placeholder="Enter reason for rejection..." required></textarea>
                 </div>
             </div>
-
-            <!-- Employment Details -->
-            <div class="border-t pt-6">
-                <h4 class="text-lg font-medium text-gray-900 mb-4">Employment Details</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Department *</label>
-                        <select name="department" id="department"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors">
-                            <option value="">Select Department</option>
-                            <option value="Finance">Finance</option>
-                            <option value="Operations">Operations</option>
-                            <option value="HR">Human Resources</option>
-                            <option value="IT">Information Technology</option>
-                            <option value="Sales">Sales</option>
-                            <option value="Marketing">Marketing</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Position *</label>
-                        <input type="text" name="position" id="position"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors"
-                            placeholder="e.g., Accountant">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Employment Date *</label>
-                        <input type="date" name="employment_date" id="employment_date"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Monthly Salary (KES) *</label>
-                        <input type="number" name="monthly_salary" id="monthly_salary" step="0.01"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors"
-                            placeholder="50000">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Next of Kin -->
-            <div class="border-t pt-6">
-                <h4 class="text-lg font-medium text-gray-900 mb-4">Next of Kin Information</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Next of Kin Name *</label>
-                        <input type="text" name="next_of_kin_name" id="next_of_kin_name"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors"
-                            placeholder="Jane Doe">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Relationship *</label>
-                        <select name="next_of_kin_relationship" id="next_of_kin_relationship"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors">
-                            <option value="">Select Relationship</option>
-                            <option value="Spouse">Spouse</option>
-                            <option value="Parent">Parent</option>
-                            <option value="Sibling">Sibling</option>
-                            <option value="Child">Child</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Next of Kin Phone *</label>
-                        <input type="tel" name="next_of_kin_phone" id="next_of_kin_phone"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors"
-                            placeholder="0712 345 679">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Next of Kin ID Number</label>
-                        <input type="text" name="next_of_kin_id" id="next_of_kin_id"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors"
-                            placeholder="Optional">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Initial Savings -->
-            <div class="border-t pt-6">
-                <h4 class="text-lg font-medium text-gray-900 mb-4">Initial Savings Setup</h4>
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <div class="flex items-center mb-3">
-                        <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center mr-3">
-                            💰
-                        </div>
-                        <div>
-                            <p class="font-medium text-gray-900">Default Savings Rate</p>
-                            <p class="text-sm text-gray-500">5% of monthly salary (auto-calculated)</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Monthly Savings (KES) *</label>
-                            <input type="number" name="monthly_savings" step="0.01" required
-                                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors"
-                                placeholder="2500">
-                            <p class="text-xs text-gray-400 mt-1">Will be deducted from payroll</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Initial Top-up
-                                (Optional)</label>
-                            <input type="number" name="initial_topup" step="0.01"
-                                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors"
-                                placeholder="0.00">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Form Actions -->
-            <div class="border-t pt-6 flex justify-end space-x-3">
-                <button type="button" onclick="closeAddMemberModal()"
-                    class="px-6 py-3 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition">
+            
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-xl flex justify-end gap-3">
+                <button type="button" onclick="closeRejectionModal()"
+                    class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
                     Cancel
                 </button>
                 <button type="submit"
-                    class="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition flex items-center">
-                    <span class="mr-2">📤</span>
-                    Submit for Approval
+                    class="px-4 py-2 bg-red-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    Confirm Rejection
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Success Toast -->
-<div id="successToast"
-    class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg hidden z-50">
-    Member added successfully! Waiting for Chairman approval.
-</div>
-
 <script>
-    // Dummy data for members
-    const dummyMembers = [
-        {
-            id: 1,
-            employee_number: 'EMP001',
-            name: 'John Doe',
-            email: 'john@makamithi.com',
-            department: 'Finance',
-            position: 'Senior Accountant',
-            phone: '0712 345 678',
-            status: 'approved',
-            savings: 150000,
-            date_joined: '2023-01-15'
-        },
-        {
-            id: 2,
-            employee_number: 'EMP002',
-            name: 'Jane Smith',
-            email: 'jane@makamithi.com',
-            department: 'Human Resources',
-            position: 'HR Manager',
-            phone: '0712 345 679',
-            status: 'approved',
-            savings: 120000,
-            date_joined: '2023-02-20'
-        },
-        {
-            id: 3,
-            employee_number: 'EMP003',
-            name: 'Robert Johnson',
-            email: 'robert@makamithi.com',
-            department: 'Operations',
-            position: 'Operations Manager',
-            phone: '0712 345 680',
-            status: 'pending',
-            savings: 200000,
-            date_joined: '2023-03-10'
-        },
-        {
-            id: 4,
-            employee_number: 'EMP004',
-            name: 'Mary Wambui',
-            email: 'mary@makamithi.com',
-            department: 'IT',
-            position: 'Software Developer',
-            phone: '0712 345 681',
-            status: 'approved',
-            savings: 180000,
-            date_joined: '2023-04-05'
-        },
-        {
-            id: 5,
-            employee_number: 'EMP005',
-            name: 'Peter Kamau',
-            email: 'peter@makamithi.com',
-            department: 'Sales',
-            position: 'Sales Executive',
-            phone: '0712 345 682',
-            status: 'approved',
-            savings: 95000,
-            date_joined: '2023-05-12'
-        },
-        {
-            id: 6,
-            employee_number: 'EMP006',
-            name: 'Sarah Mwangi',
-            email: 'sarah@makamithi.com',
-            department: 'Marketing',
-            position: 'Marketing Officer',
-            phone: '0712 345 683',
-            status: 'pending',
-            savings: 110000,
-            date_joined: '2023-06-18'
-        },
-        {
-            id: 7,
-            employee_number: 'EMP007',
-            name: 'David Ochieng',
-            email: 'david@makamithi.com',
-            department: 'Finance',
-            position: 'Accountant',
-            phone: '0712 345 684',
-            status: 'approved',
-            savings: 135000,
-            date_joined: '2023-07-22'
-        },
-        {
-            id: 8,
-            employee_number: 'EMP008',
-            name: 'Grace Akinyi',
-            email: 'grace@makamithi.com',
-            department: 'Operations',
-            position: 'Logistics Coordinator',
-            phone: '0712 345 685',
-            status: 'rejected',
-            savings: 80000,
-            date_joined: '2023-08-30'
-        },
-        {
-            id: 9,
-            employee_number: 'EMP009',
-            name: 'James Mutua',
-            email: 'james@makamithi.com',
-            department: 'IT',
-            position: 'System Administrator',
-            phone: '0712 345 686',
-            status: 'approved',
-            savings: 165000,
-            date_joined: '2023-09-14'
-        },
-        {
-            id: 10,
-            employee_number: 'EMP010',
-            name: 'Lucy Chebet',
-            email: 'lucy@makamithi.com',
-            department: 'Human Resources',
-            position: 'Recruitment Officer',
-            phone: '0712 345 687',
-            status: 'pending',
-            savings: 105000,
-            date_joined: '2023-10-25'
-        }
-    ];
+    // Tab switching
+    function switchTab(tabName) {
+        // Hide all content
+        document.getElementById('allContent').classList.add('hidden');
+        document.getElementById('activeContent').classList.add('hidden');
+        document.getElementById('pendingContent').classList.add('hidden');
+        document.getElementById('rejectedContent').classList.add('hidden');
 
-    // Modal Functions
-    function openAddMemberModal() {
-        document.getElementById('addMemberModal').classList.remove('hidden');
+        // Remove active from all tabs
+        document.getElementById('allTab').classList.remove('border-b-2', 'border-blue-600', 'text-blue-700');
+        document.getElementById('allTab').classList.add('text-gray-500');
+        document.getElementById('activeTab').classList.remove('border-b-2', 'border-blue-600', 'text-blue-700');
+        document.getElementById('activeTab').classList.add('text-gray-500');
+        document.getElementById('pendingTab').classList.remove('border-b-2', 'border-blue-600', 'text-blue-700');
+        document.getElementById('pendingTab').classList.add('text-gray-500');
+        document.getElementById('rejectedTab').classList.remove('border-b-2', 'border-blue-600', 'text-blue-700');
+        document.getElementById('rejectedTab').classList.add('text-gray-500');
+
+        // Show selected content
+        document.getElementById(tabName + 'Content').classList.remove('hidden');
+
+        // Activate selected tab
+        document.getElementById(tabName + 'Tab').classList.add('border-b-2', 'border-blue-600', 'text-blue-700');
+        document.getElementById(tabName + 'Tab').classList.remove('text-gray-500');
     }
 
-    function closeAddMemberModal() {
-        document.getElementById('addMemberModal').classList.add('hidden');
+    // Rejection modal functions
+    let currentMemberId = null;
+
+    function rejectMember(memberId) {
+        currentMemberId = memberId;
+        const form = document.getElementById('rejectionForm');
+        form.action = `/secretary/members/${memberId}/reject`;
+        document.getElementById('rejectionModal').classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
     }
 
-    // Submit member form (dummy function)
-    function submitMemberForm() {
-        // Get form values
-        const empNumber = document.getElementById('employee_number').value;
-        const name = document.getElementById('full_name').value;
-
-        if (!empNumber || !name) {
-            alert('Please fill in required fields');
-            return;
-        }
-
-        // Simulate form submission
-        closeAddMemberModal();
-
-        // Show success toast
-        const toast = document.getElementById('successToast');
-        toast.classList.remove('hidden');
-
-        // Add new member to dummy data (for demo)
-        const newMember = {
-            id: dummyMembers.length + 1,
-            employee_number: empNumber,
-            name: name,
-            email: document.getElementById('email').value || 'new@makamithi.com',
-            department: document.getElementById('department').value || 'General',
-            position: document.getElementById('position').value || 'Employee',
-            phone: document.getElementById('phone').value || '0712 000 000',
-            status: 'pending',
-            savings: 0,
-            date_joined: new Date().toISOString().split('T')[0]
-        };
-
-        dummyMembers.unshift(newMember); // Add to beginning
-        renderMembers(); // Refresh table
-
-        // Hide toast after 3 seconds
-        setTimeout(() => {
-            toast.classList.add('hidden');
-        }, 3000);
-
-        // Clear form
-        document.getElementById('addMemberModal').querySelectorAll('input, select').forEach(element => {
-            element.value = '';
-        });
+    function closeRejectionModal() {
+        document.getElementById('rejectionModal').classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+        document.getElementById('rejectionForm').reset();
+        currentMemberId = null;
     }
 
-    // Render members table
-    function renderMembers(filteredMembers = dummyMembers) {
-        const tbody = document.getElementById('membersTableBody');
-        tbody.innerHTML = '';
-
-        filteredMembers.forEach((member, index) => {
-            const row = document.createElement('tr');
-            row.className = 'hover:bg-gray-50';
-            row.innerHTML = `
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium border border-gray-300">
-                    ${index + 1}
-                </td>
-                <td class="px-4 py-3 border border-gray-300">
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-3">
-                            <span class="text-gray-700 text-sm font-medium">
-                                ${member.name.charAt(0).toUpperCase()}
-                            </span>
-                        </div>
-                        <div>
-                            <p class="font-medium text-gray-900 text-sm">${member.name}</p>
-                            <p class="text-gray-500 text-xs">${member.email}</p>
-                        </div>
-                    </div>
-                </td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border border-gray-300">
-                    ${member.employee_number}
-                </td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700 border border-gray-300">
-                    ${member.department}
-                </td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700 border border-gray-300">
-                    ${member.position}
-                </td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700 border border-gray-300">
-                    ${member.phone}
-                </td>
-                <td class="px-4 py-3 whitespace-nowrap border border-gray-300">
-                    ${member.status === 'approved' ?
-                        '<span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full border border-green-200 font-medium">✅ Approved</span>' :
-                        member.status === 'pending' ?
-                        '<span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full border border-orange-200 font-medium">⏳ Pending</span>' :
-                        '<span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full border border-red-200 font-medium">❌ Rejected</span>'}
-                </td>
-                <td class="px-4 py-3 whitespace-nowrap border border-gray-300">
-                    <div class="flex gap-2">
-                        <button onclick="viewMember(${member.id})"
-                            class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1.5 rounded text-xs font-medium">
-                            View
-                        </button>
-                        <button onclick="editMember(${member.id})"
-                            class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium">
-                            Edit
-                        </button>
-                    </div>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
-
-    // Search and filter functionality
+    // Search functionality
     function filterMembers() {
         const searchTerm = document.getElementById('searchInput').value.toLowerCase();
         const departmentFilter = document.getElementById('departmentFilter').value;
-
-        let filtered = dummyMembers.filter(member => {
-            const matchesSearch =
-                member.name.toLowerCase().includes(searchTerm) ||
-                member.employee_number.toLowerCase().includes(searchTerm) ||
-                member.department.toLowerCase().includes(searchTerm) ||
-                member.email.toLowerCase().includes(searchTerm);
-
-            const matchesDepartment = departmentFilter ? member.department === departmentFilter : true;
-
-            return matchesSearch && matchesDepartment;
+        const currentTab = document.querySelector('[class*="border-blue-600"]').id.replace('Tab', '');
+        
+        let rows = document.querySelectorAll(`#${currentTab}Content tbody tr`);
+        
+        rows.forEach(row => {
+            const name = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+            const employeeNumber = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+            const department = row.querySelector('td:nth-child(4)').textContent;
+            const email = row.querySelector('td:nth-child(2) p.text-gray-500').textContent.toLowerCase();
+            
+            const matchesSearch = name.includes(searchTerm) || 
+                                employeeNumber.includes(searchTerm) || 
+                                email.includes(searchTerm);
+            const matchesDepartment = departmentFilter ? department === departmentFilter : true;
+            
+            row.style.display = (matchesSearch && matchesDepartment) ? '' : 'none';
         });
-
-        renderMembers(filtered);
     }
-
-    // View member details
-    function viewMember(id) {
-        const member = dummyMembers.find(m => m.id === id);
-        if (member) {
-            alert(`Member Details:\n\nName: ${member.name}\nEmployee #: ${member.employee_number}\nDepartment: ${member.department}\nPosition: ${member.position}\nEmail: ${member.email}\nPhone: ${member.phone}\nStatus: ${member.status}\nSavings: KES ${member.savings.toLocaleString()}\nDate Joined: ${member.date_joined}`);
-        }
-    }
-
-    // Edit member
-    function editMember(id) {
-        const member = dummyMembers.find(m => m.id === id);
-        if (member) {
-            alert(`Edit Member: ${member.name}\n\nNote: This would open an edit form. For now, this is just a demo.`);
-        }
-    }
-
-    // Tab switching
-    function switchTab(tabName) {
-    // Tabs UI
-    ['all', 'approved', 'pending', 'rejected', 'new'].forEach(tab => {
-        document.getElementById(tab + 'Content').classList.add('hidden');
-        document.getElementById(tab + 'Tab').classList.remove(
-            'border-b-2', 'border-blue-600', 'text-blue-700'
-        );
-        document.getElementById(tab + 'Tab').classList.add('text-gray-500');
-    });
-
-    document.getElementById(tabName + 'Content').classList.remove('hidden');
-    document.getElementById(tabName + 'Tab').classList.add(
-        'border-b-2', 'border-blue-600', 'text-blue-700'
-    );
-    document.getElementById(tabName + 'Tab').classList.remove('text-gray-500');
-
-    // DATA FILTERING
-    let filteredMembers = dummyMembers;
-
-    if (tabName === 'approved') {
-        filteredMembers = dummyMembers.filter(m => m.status === 'approved');
-    } else if (tabName === 'pending') {
-        filteredMembers = dummyMembers.filter(m => m.status === 'pending');
-    } else if (tabName === 'rejected') {
-        filteredMembers = dummyMembers.filter(m => m.status === 'rejected');
-    } else if (tabName === 'new') {
-        const lastMonth = new Date();
-        lastMonth.setMonth(lastMonth.getMonth() - 1);
-        filteredMembers = dummyMembers.filter(
-            m => new Date(m.date_joined) >= lastMonth
-        );
-    }
-
-    // RENDER INTO ONE TABLE
-    renderMembers(filteredMembers);
-}
-
 
     // Action functions
-    function generateReport(type) {
-        alert(`Generating ${type} report...`);
-        // window.location.href = `/secretary/reports/members/${type}`;
-    }
-
     function exportMemberData() {
         if (confirm('Export all member data to Excel?')) {
-            // window.location.href = '/secretary/members/export';
-            alert('Exporting member data...');
+            // AJAX call to generate export
+            fetch('/secretary/members/export', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `members-export-${new Date().toISOString().split('T')[0]}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => console.error('Export failed:', error));
         }
     }
 
-    function sendWelcomeMessages() {
-        if (confirm('Send welcome messages to all new members?')) {
-            alert('Welcome messages sent successfully!');
-        }
-    }
-
-    function updateMemberStatuses() {
-        alert('Opening batch update panel...');
+    function sendBulkMessages() {
+        alert('Bulk messaging feature would open here.');
     }
 
     // Initialize
-    document.addEventListener('DOMContentLoaded', function () {
-        renderMembers();
+    document.addEventListener('DOMContentLoaded', function() {
         switchTab('all');
-
+        
         // Add event listeners for search and filter
         document.getElementById('searchInput').addEventListener('input', filterMembers);
         document.getElementById('departmentFilter').addEventListener('change', filterMembers);
 
         // Close modal when clicking outside
-        window.onclick = function (event) {
-            const modal = document.getElementById('addMemberModal');
-            if (event.target === modal) {
-                closeAddMemberModal();
+        document.getElementById('rejectionModal').addEventListener('click', function(e) {
+            if (e.target.id === 'rejectionModal') {
+                closeRejectionModal();
             }
-        }
-
-        // Auto-calculate monthly savings based on salary
-        document.getElementById('monthly_salary').addEventListener('input', function () {
-            const salary = parseFloat(this.value) || 0;
-            const monthlySavings = salary * 0.05; // 5% of salary
-            document.querySelector('input[name="monthly_savings"]').value = monthlySavings.toFixed(2);
         });
     });
+
+    // Success messages
+    @if(session('success'))
+        alert('{{ session('success') }}');
+    @endif
+
+    @if(session('error'))
+        alert('Error: {{ session('error') }}');
+    @endif
 </script>
 @endsection

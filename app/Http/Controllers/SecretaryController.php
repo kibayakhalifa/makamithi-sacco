@@ -18,15 +18,155 @@ use Illuminate\Validation\Rule;
 class SecretaryController extends Controller
 {
     /**
+ * Secretary Dashboard
+ */
+public function dashboard()
+{
+    // Total members count
+    $totalMembers = User::where('role', 'member')->count();
+    
+    // New members this month
+    $newThisMonth = User::where('role', 'member')
+        ->whereMonth('created_at', now()->month)
+        ->whereYear('created_at', now()->year)
+        ->count();
+    
+    // Total savings
+    $totalSavings = \App\Models\Saving::sum('total_savings') ?? 0;
+    
+    // Savings growth (placeholder - you can implement actual growth calculation)
+    $previousMonthSavings = \App\Models\Saving::whereMonth('last_updated', now()->subMonth()->month)
+        ->sum('total_savings') ?? 0;
+    $savingsGrowth = $previousMonthSavings > 0 ? 
+        (($totalSavings - $previousMonthSavings) / $previousMonthSavings) * 100 : 0;
+    
+    // Active loans
+    $activeLoans = \App\Models\Loan::whereIn('status', ['active', 'disbursed'])->get();
+    $totalActiveLoans = $activeLoans->sum('amount') ?? 0;
+    $activeLoansCount = $activeLoans->count();
+    
+    // Pending members
+    $pendingMembers = User::where('role', 'member')
+        ->where('sacco_status', 'pending')
+        ->orderBy('created_at', 'desc')
+        ->limit(5)
+        ->get();
+    
+    $pendingMembersCount = User::where('role', 'member')
+        ->where('sacco_status', 'pending')
+        ->count();
+    
+    // Pending loans
+    $pendingLoans = \App\Models\Loan::where('status', 'pending')->count();
+    
+    // Recent assisted loans
+    $recentLoans = \App\Models\Loan::with('user')
+        ->where('application_type', 'assisted')
+        ->orWhere('assisted_by', auth()->id())
+        ->orderBy('applied_date', 'desc')
+        ->limit(5)
+        ->get();
+    
+    // Overdue loans (placeholder - implement based on your payment schedule)
+    $overdueLoans = \App\Models\Loan::where('status', 'active')
+        ->where('next_payment_date', '<', now())
+        ->count();
+    
+    // Upcoming meetings (you can create a meetings table or use config/array)
+    $upcomingMeetings = [
+        [
+            'title' => 'Monthly SACCO Meeting',
+            'date' => now()->addDays(3)->format('Y-m-d'),
+            'time' => '2:00 PM',
+            'venue' => 'Board Room',
+            'description' => 'Monthly SACCO review meeting'
+        ],
+        [
+            'title' => 'Loan Committee Meeting',
+            'date' => now()->addDays(7)->format('Y-m-d'),
+            'time' => '10:00 AM',
+            'venue' => 'Conference Room A',
+            'description' => 'Review of pending loan applications'
+        ],
+        [
+            'title' => 'AGM Preparation',
+            'date' => now()->addDays(14)->format('Y-m-d'),
+            'time' => '3:00 PM',
+            'venue' => 'Main Hall',
+            'description' => 'Annual General Meeting preparation'
+        ]
+    ];
+    
+    $stats = [
+        'total_members' => $totalMembers,
+        'new_this_month' => $newThisMonth,
+        'total_savings' => $totalSavings,
+        'savings_growth_percentage' => round($savingsGrowth, 1),
+        'total_active_loans' => $totalActiveLoans,
+        'active_loans_count' => $activeLoansCount,
+        'pending_approvals' => $pendingMembersCount + $pendingLoans,
+        'pending_members' => $pendingMembersCount,
+        'pending_loans' => $pendingLoans,
+        'overdue_loans' => $overdueLoans,
+        'pending_documents' => 0, // Implement if you have document management
+    ];
+    
+    return view('secretary.dashboard', compact(
+        'stats',
+        'pendingMembers',
+        'recentLoans',
+        'upcomingMeetings'
+    ));
+}
+    /**
      * Store new member registration (From requirements: "When an employee joins the Company, they are registered into the sacco")
+     */
+    /**
+ * Store new member registration
+ */
+
+    /**
+ * Display all members with real data
+ */
+public function members()
+    {
+        $members = User::where('role', 'member')
+            ->with(['savings', 'nextOfKin'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        // Calculate stats from database
+        $stats = [
+            'total_members' => User::where('role', 'member')->count(),
+            'active_members' => User::where('role', 'member')->where('sacco_status', 'active')->count(),
+            'pending_members' => User::where('role', 'member')->where('sacco_status', 'pending')->count(),
+            'rejected_members' => User::where('role', 'member')->where('sacco_status', 'rejected')->count(),
+            'new_this_month' => User::where('role', 'member')
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->count(),
+        ];
+
+        return view('secretary.members', compact('members', 'stats'));
+    }
+
+    /**
+     * Show form to create a new member
+     */
+    public function createMember()
+    {
+        return view('secretary.members.create');
+    }
+
+    /**
+     * Store new member registration
      */
     public function storeMember(Request $request)
     {
-        // 1. First, dump all request data to see what's being submitted
         \Log::info('Member registration attempt:', $request->all());
 
         try {
-            // 2. Validate the data
+            // Validate the data - Make next of kin optional
             $validated = $request->validate([
                 'employee_number' => 'required|unique:users,employee_number',
                 'national_id' => 'required|unique:users,national_id',
@@ -39,15 +179,18 @@ class SecretaryController extends Controller
                 'employment_date' => 'required|date',
                 'monthly_salary' => 'required|numeric|min:0',
                 'monthly_savings' => 'required|numeric|min:0',
-                'next_of_kin_name' => 'required|string',
-                'next_of_kin_relationship' => 'required|string|in:Spouse,Parent,Sibling,Child,Other,spouse,parent,sibling,child,other',                'next_of_kin_phone' => 'required|string',
+                'initial_topup' => 'nullable|numeric|min:0',
+                'next_of_kin_name' => 'nullable|string',
+                'next_of_kin_relationship' => 'nullable|string|in:Spouse,Parent,Sibling,Child,Other,spouse,parent,sibling,child,other',
+                'next_of_kin_phone' => 'nullable|string',
+                'next_of_kin_id' => 'nullable|string',
             ]);
 
             \Log::info('Validation passed for member:', ['email' => $validated['email']]);
 
             DB::beginTransaction();
 
-            // 3. Create User - SIMPLIFIED VERSION
+            // Create User - Use exact field names from User model
             $user = new User;
             $user->employee_number = $validated['employee_number'];
             $user->national_id = $validated['national_id'];
@@ -64,39 +207,41 @@ class SecretaryController extends Controller
             $user->role = 'member';
             $user->sacco_status = 'pending';
             $user->sacco_join_date = now();
+            $user->created_at = now();
             $user->save();
 
             \Log::info('User created with ID:', ['id' => $user->id]);
 
-            // 4. Create Next of Kin - Check if model exists
-            if (class_exists(\App\Models\NextOfKin::class)) {
+            // Create Next of Kin (OPTIONAL)
+            if (!empty($validated['next_of_kin_name'])) {
                 NextOfKin::create([
                     'user_id' => $user->id,
                     'name' => $validated['next_of_kin_name'],
-                    'relationship' => $validated['next_of_kin_relationship'],
+                    'relationship' => $validated['next_of_kin_relationship'] ?? 'Other',
                     'phone' => $validated['next_of_kin_phone'],
+                    'national_id' => $validated['next_of_kin_id'] ?? null,
                 ]);
                 \Log::info('Next of kin created');
-            } else {
-                \Log::warning('NextOfKin model not found');
             }
 
-            // 5. Create Savings Record - Use direct create
+            // Create Savings Record - Account starts at zero unless initial topup
+            $initialBalance = $validated['initial_topup'] ?? 0;
+            
             Saving::create([
                 'user_id' => $user->id,
                 'payroll_savings' => $validated['monthly_savings'],
                 'voluntary_savings' => 0,
                 'interest_earned' => 0,
-                'total_savings' => $validated['monthly_savings'],
+                'total_savings' => $initialBalance,
                 'withdrawn_savings' => 0,
-                'available_savings' => $validated['monthly_savings'],
-                'loan_eligibility' => $validated['monthly_savings'] * 1.5,
+                'available_savings' => $initialBalance,
+                'loan_eligibility' => $initialBalance * 1.5,
                 'last_updated' => now(),
             ]);
 
             \Log::info('Savings record created');
 
-            // 6. Create Member Approval
+            // Create Member Approval
             MemberApproval::create([
                 'user_id' => $user->id,
                 'submitted_by' => auth()->id(),
@@ -126,13 +271,137 @@ class SecretaryController extends Controller
             \Log::error('Member registration failed:', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'request' => $request->all(),
             ]);
 
             return redirect()->back()
-                ->with('error', 'Failed to register member: '.$e->getMessage())
+                ->with('error', 'Failed to register member: ' . $e->getMessage())
                 ->withInput();
         }
+    }
+
+    /**
+     * Show member details
+     */
+    public function showMember(User $user)
+    {
+        if ($user->role !== 'member') {
+            abort(403, 'Not a member');
+        }
+        
+        $user->load(['savings', 'nextOfKin', 'loans', 'memberApproval']);
+        return view('secretary.members.show', compact('user'));
+    }
+
+    /**
+     * Show form to edit member
+     */
+    public function editMember(User $user)
+    {
+        if ($user->role !== 'member') {
+            abort(403, 'Not a member');
+        }
+        
+        return view('secretary.members.edit', compact('user'));
+    }
+
+    /**
+     * Update member
+     */
+    public function updateMember(Request $request, User $user)
+    {
+        if ($user->role !== 'member') {
+            abort(403, 'Not a member');
+        }
+        
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'phone' => 'required|string|max:20',
+            'department' => 'required|string',
+            'position' => 'required|string',
+            'monthly_salary' => 'required|numeric|min:0',
+            'monthly_savings' => 'required|numeric|min:0',
+        ]);
+
+        $user->update($validated);
+
+        return redirect()->route('secretary.members')
+            ->with('success', 'Member updated successfully!');
+    }
+
+    /**
+     * Delete member
+     */
+    public function destroyMember(User $user)
+    {
+        if ($user->role !== 'member') {
+            abort(403, 'Not a member');
+        }
+        
+        $user->delete();
+
+        return redirect()->route('secretary.members')
+            ->with('success', 'Member deleted successfully!');
+    }
+
+    /**
+     * Approve a member
+     */
+    public function approveMember(User $user)
+    {
+        if ($user->role !== 'member') {
+            abort(403, 'Not a member');
+        }
+        
+        $user->update([
+            'sacco_status' => 'active',
+            'approved_by' => auth()->id(),
+            'approved_at' => now(),
+        ]);
+
+        if ($user->memberApproval) {
+            $user->memberApproval->update([
+                'status' => 'approved',
+                'approved_by' => auth()->id(),
+                'approved_at' => now(),
+                'approval_notes' => 'Approved by secretary',
+            ]);
+        }
+
+        return redirect()->route('secretary.members')
+            ->with('success', 'Member approved successfully!');
+    }
+
+    /**
+     * Reject a member
+     */
+    public function rejectMember(Request $request, User $user)
+    {
+        if ($user->role !== 'member') {
+            abort(403, 'Not a member');
+        }
+        
+        $validated = $request->validate([
+            'rejection_reason' => 'required|string|max:500',
+        ]);
+
+        $user->update([
+            'sacco_status' => 'rejected',
+            'approved_by' => auth()->id(),
+            'approved_at' => now(),
+        ]);
+
+        if ($user->memberApproval) {
+            $user->memberApproval->update([
+                'status' => 'rejected',
+                'approved_by' => auth()->id(),
+                'approved_at' => now(),
+                'rejection_reason' => $validated['rejection_reason'],
+            ]);
+        }
+
+        return redirect()->route('secretary.members')
+            ->with('success', 'Member rejected successfully!');
     }
 
     /**
@@ -334,6 +603,24 @@ class SecretaryController extends Controller
 
         return view('secretary.loan-approvals', compact('loans'));
     }
+    /**
+ * Show loan assistance page
+ */
+public function loanAssist()
+{
+    // Get all active members who can apply for loans
+    $members = User::where('role', 'member')
+        ->where('sacco_status', 'active')
+        ->with(['savings' => function($query) {
+            $query->select('user_id', 'available_savings', 'loan_eligibility');
+        }])
+        ->orderBy('name')
+        ->get(['id', 'employee_number', 'name', 'email', 'department', 'position']);
+    
+    return view('secretary.loan-assist', compact('members'));
+}
+
+
 
     /**
      * Show loan approval detail page

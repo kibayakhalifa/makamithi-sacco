@@ -24,7 +24,7 @@
             <div>
                 <h3 class="font-medium text-gray-900 mb-2">How to Assist Members</h3>
                 <ol class="list-decimal pl-5 text-gray-700 space-y-1">
-                    <li>Select the member who needs assistance from the list below</li>
+                    <li>Select the member who needs assistance from the dropdown below</li>
                     <li>Fill in the loan application details on their behalf</li>
                     <li>Use the real-time calculator to ensure they qualify (1.5× savings rule)</li>
                     <li>Explain the terms (5% fixed interest) to the member</li>
@@ -34,454 +34,418 @@
         </div>
     </div>
 
-    <!-- Member Selection -->
+    <!-- Simple Form Version (Like your working one) -->
     <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
-        <div class="mb-6">
-            <h2 class="text-xl font-semibold text-gray-900">Select Member to Assist</h2>
-            <p class="text-gray-500 text-sm mt-1">Choose a member who needs help with their loan application</p>
-        </div>
-
-        <div class="relative mb-6">
-            <input type="text" id="memberSearch" 
-                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                   placeholder="Search by name, employee number, or department...">
-            <div class="absolute right-3 top-3 text-gray-400">
-                🔍
-            </div>
-        </div>
-
-        <!-- Member List -->
-        <div class="border rounded-lg divide-y max-h-96 overflow-y-auto" id="memberList">
-            <!-- Dummy data will be populated by JavaScript -->
-        </div>
-    </div>
-
-    <!-- Loan Application Form (Initially Hidden) -->
-    <div id="loanForm" class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm hidden">
-        <div class="mb-6">
-            <h2 class="text-xl font-semibold text-gray-900">Loan Application for <span id="selectedMemberName">-</span></h2>
-            <p class="text-gray-500 text-sm mt-1">Member Number: <span id="selectedMemberNumber" class="font-mono">-</span></p>
-        </div>
-
-        <!-- Selected Member Info -->
-        <div class="bg-gray-50 p-4 rounded-lg mb-6">
-            <div class="flex justify-between items-center">
-                <div>
-                    <p class="font-medium text-gray-900" id="displayMemberName">-</p>
-                    <p class="text-sm text-gray-500" id="displayMemberNumber">-</p>
+        <form action="{{ route('secretary.loans.assisted') }}" method="POST" id="loanApplicationForm">
+            @csrf
+            
+            <!-- Member Selection -->
+            <div class="mb-8">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 border-b pb-2 mb-4">
+                    <i class="fas fa-user mr-2"></i> Select Member to Assist
+                </h3>
+                
+                <div class="mb-4">
+                    <label for="member_id" class="block text-sm font-medium text-gray-700">
+                        Member *
+                    </label>
+                    <select name="member_id" id="member_id" 
+                            class="mt-1 block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent sm:text-sm rounded-lg @error('member_id') border-red-300 @enderror" required>
+                        <option value="">Select a member</option>
+                        @foreach($members as $member)
+                            @php
+                                $savings = $member->savings->available_savings ?? 0;
+                                $maxLoan = $savings * 1.5;
+                            @endphp
+                            <option value="{{ $member->id }}" {{ old('member_id') == $member->id ? 'selected' : '' }}
+                                    data-savings="{{ $savings }}"
+                                    data-max-loan="{{ $maxLoan }}">
+                                {{ $member->name }} ({{ $member->employee_number }}) - 
+                                Savings: KES {{ number_format($savings, 2) }} | 
+                                Max Loan: KES {{ number_format($maxLoan, 2) }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('member_id')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
-                <div class="text-right">
-                    <p class="font-medium text-gray-900" id="displayMemberSavings">KES 0.00</p>
-                    <p class="text-xs text-gray-500">Available Savings</p>
-                    <p class="text-xs text-blue-600 mt-1">
-                        Maximum Eligibility: <span id="maxEligibilityDisplay">KES 0.00</span>
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Loan Calculator -->
-        <div id="loanApplicationForm">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Loan Amount (KES) *</label>
-                        <input type="number" id="loanAmount" step="0.01"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                               placeholder="Enter amount"
-                               oninput="calculateLoan()">
+                
+                <!-- Selected Member Info -->
+                <div id="memberInfo" class="bg-gray-50 p-4 rounded-lg {{ old('member_id') ? '' : 'hidden' }}">
+                    <h4 class="font-medium text-gray-900 mb-2">Member Information</h4>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-500">Available Savings:</span>
+                            <span id="availableSavings" class="ml-2 font-medium text-green-600">
+                                {{ old('member_id') ? 'KES ' . number_format($members->firstWhere('id', old('member_id'))?->savings?->available_savings ?? 0, 2) : 'KES 0.00' }}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Maximum Loan Eligibility:</span>
+                            <span id="loanEligibility" class="ml-2 font-medium text-blue-600">
+                                @if(old('member_id'))
+                                    @php
+                                        $member = $members->firstWhere('id', old('member_id'));
+                                        $savings = $member->savings->available_savings ?? 0;
+                                        $maxLoan = $savings * 1.5;
+                                    @endphp
+                                    KES {{ number_format($maxLoan, 2) }}
+                                @else
+                                    KES 0.00
+                                @endif
+                            </span>
+                        </div>
                     </div>
-                    
+                </div>
+            </div>
+
+            <!-- Loan Details -->
+            <div class="mb-8">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 border-b pb-2 mb-4">
+                    <i class="fas fa-file-signature mr-2"></i> Loan Details
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Repayment Period *</label>
-                        <select id="loanPeriod" onchange="calculateLoan()"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent">
-                            <option value="12">12 months (1 year)</option>
-                            <option value="24" selected>24 months (2 years)</option>
-                            <option value="36">36 months (3 years)</option>
-                            <option value="48">48 months (4 years)</option>
-                            <option value="60">60 months (5 years)</option>
+                        <label for="amount" class="block text-sm font-medium text-gray-700">
+                            Loan Amount (KES) *
+                        </label>
+                        <input type="number" name="amount" id="amount" 
+                               class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent @error('amount') border-red-300 @enderror" 
+                               value="{{ old('amount') }}" min="1000" step="1000" required
+                               oninput="calculateLoanPreview()">
+                        @error('amount')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                        <p class="text-xs text-gray-400 mt-1">Minimum: KES 1,000</p>
+                    </div>
+
+                    <div>
+                        <label for="period_months" class="block text-sm font-medium text-gray-700">
+                            Repayment Period (Months) *
+                        </label>
+                        <select name="period_months" id="period_months" 
+                                class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent @error('period_months') border-red-300 @enderror" 
+                                required
+                                onchange="calculateLoanPreview()">
+                            <option value="">Select period</option>
+                            <option value="6" {{ old('period_months') == '6' ? 'selected' : '' }}>6 Months</option>
+                            <option value="12" {{ old('period_months') == '12' ? 'selected' : '' }}>12 Months</option>
+                            <option value="18" {{ old('period_months') == '18' ? 'selected' : '' }}>18 Months</option>
+                            <option value="24" {{ old('period_months') == '24' ? 'selected' : '' }}>24 Months</option>
+                            <option value="36" {{ old('period_months') == '36' ? 'selected' : '' }}>36 Months</option>
+                            <option value="48" {{ old('period_months') == '48' ? 'selected' : '' }}>48 Months</option>
+                            <option value="60" {{ old('period_months') == '60' ? 'selected' : '' }}>60 Months</option>
                         </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Purpose of Loan *</label>
-                        <textarea id="loanPurpose" rows="3"
-                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                                  placeholder="Brief description of what the loan will be used for..."></textarea>
-                        <p class="text-xs text-gray-400 mt-1">e.g., School fees, home renovation, medical expenses</p>
+                        @error('period_months')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
 
-                <!-- Calculation Results -->
-                <div class="bg-gray-50 p-6 rounded-lg">
-                    <h5 class="font-medium text-gray-900 mb-4">Loan Summary</h5>
-                    
-                    <div class="space-y-3">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Loan Amount:</span>
-                            <span class="font-medium" id="displayLoanAmount">KES 0.00</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">5% Fixed Interest:</span>
-                            <span class="font-medium" id="interestAmount">KES 0.00</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Total Repayable:</span>
-                            <span class="font-medium" id="totalRepayable">KES 0.00</span>
-                        </div>
-                        <div class="border-t pt-3">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Monthly Payment:</span>
-                                <span class="text-lg font-semibold text-gray-900" id="monthlyPayment">KES 0.00</span>
-                            </div>
-                            <p class="text-xs text-gray-400 mt-1" id="paymentDuration">For 0 months</p>
-                        </div>
-                    </div>
-
-                    <!-- Eligibility Status -->
-                    <div id="eligibilityStatus" class="mt-4 p-3 rounded-lg hidden">
+                <div class="mt-6">
+                    <label for="loan_type" class="block text-sm font-medium text-gray-700">
+                        Loan Type
+                    </label>
+                    <div class="mt-2 space-y-2">
                         <div class="flex items-center">
-                            <span class="mr-2" id="statusIcon">⚠️</span>
-                            <span class="text-sm" id="statusMessage"></span>
+                            <input type="radio" id="loan_type_normal" name="loan_type" value="normal" 
+                                   class="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300" 
+                                   {{ old('loan_type', 'normal') == 'normal' ? 'checked' : '' }}>
+                            <label for="loan_type_normal" class="ml-3 block text-sm font-medium text-gray-700">
+                                Normal Loan
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="loan_type_topup" name="loan_type" value="topup" 
+                                   class="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300" 
+                                   {{ old('loan_type') == 'topup' ? 'checked' : '' }}>
+                            <label for="loan_type_topup" class="ml-3 block text-sm font-medium text-gray-700">
+                                Top-up Loan (Requires active loan with 50% paid)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <label for="purpose" class="block text-sm font-medium text-gray-700">
+                        Loan Purpose *
+                    </label>
+                    <textarea name="purpose" id="purpose" rows="3" 
+                              class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent @error('purpose') border-red-300 @enderror" 
+                              placeholder="What will the loan be used for? (e.g., School fees, home renovation, medical expenses)" 
+                              required>{{ old('purpose') }}</textarea>
+                    @error('purpose')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Loan Calculation Preview -->
+                <div id="loanPreview" class="mt-6 bg-gray-50 p-6 rounded-lg border border-gray-200 {{ (old('amount') && old('period_months')) ? '' : 'hidden' }}">
+                    <h4 class="font-medium text-gray-900 mb-4 text-lg">Loan Preview</h4>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Principal Amount:</span>
+                                <span id="previewPrincipal" class="font-medium">
+                                    @if(old('amount'))
+                                        KES {{ number_format(old('amount'), 2) }}
+                                    @else
+                                        KES 0.00
+                                    @endif
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Interest (5% per annum):</span>
+                                <span id="previewInterest" class="font-medium text-blue-600">KES 0.00</span>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Total Repayable:</span>
+                                <span id="previewTotal" class="font-medium text-green-600">KES 0.00</span>
+                            </div>
+                            <div class="flex justify-between border-t pt-3">
+                                <span class="text-gray-800 font-medium">Monthly Payment:</span>
+                                <span id="previewMonthly" class="text-xl font-semibold text-gray-900">KES 0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-3" id="paymentDuration">For 0 months</p>
+                </div>
+            </div>
+
+            <!-- Eligibility Warning -->
+            <div id="eligibilityWarning" class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 hidden">
+                <div class="flex items-center">
+                    <span class="text-red-500 mr-2">⚠️</span>
+                    <span class="text-sm text-red-700" id="warningMessage"></span>
+                </div>
+            </div>
+
+            <!-- Terms and Conditions -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <span class="text-yellow-500">📝</span>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-yellow-800">Important Information</h3>
+                        <div class="mt-2 text-sm text-yellow-700">
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li>Loans are issued at 1.5× the member's available savings</li>
+                                <li>Interest rate is fixed at 5% per annum</li>
+                                <li>For top-up loans, member must have paid at least 50% of current loan</li>
+                                <li>All loans require chairman approval after submission</li>
+                                <li>Member will be notified via email/SMS after approval</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Navigation -->
-            <div class="flex justify-between pt-6 border-t mt-6">
-                <button type="button" onclick="resetSelection()"
-                        class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition">
-                    ← Select Different Member
-                </button>
-                <button type="button" onclick="submitLoanApplication()"
-                        class="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition flex items-center">
-                    <span class="mr-2">📤</span>
-                    Submit Application
-                </button>
+            <!-- Form Actions -->
+            <div class="pt-6 border-t border-gray-200">
+                <div class="flex justify-end space-x-3">
+                    <button type="reset" 
+                            class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition focus:outline-none focus:ring-2 focus:ring-gray-500"
+                            onclick="resetForm()">
+                        Clear Form
+                    </button>
+                    <button type="submit" 
+                            class="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition focus:outline-none focus:ring-2 focus:ring-gray-500 flex items-center">
+                        <span class="mr-2">📤</span>
+                        Submit Loan Application
+                    </button>
+                </div>
             </div>
-        </div>
+        </form>
     </div>
 
 </div>
 
 <!-- Success Toast -->
-<div id="successToast" class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg hidden z-50">
-    Loan application submitted successfully! Sent to Chairman for approval.
+@if(session('success'))
+<div id="successToast" class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+    {{ session('success') }}
 </div>
+@endif
 
+<!-- Error Toast -->
+@if(session('error'))
+<div id="errorToast" class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+    {{ session('error') }}
+</div>
+@endif
+@endsection
+
+@push('scripts')
 <script>
-    // Dummy data for members (same as in members view)
-    const dummyMembers = [
-        {
-            id: 1,
-            employee_number: 'EMP001',
-            name: 'John Doe',
-            email: 'john@makamithi.com',
-            department: 'Finance',
-            position: 'Senior Accountant',
-            phone: '0712 345 678',
-            status: 'approved',
-            savings: 150000,
-            date_joined: '2023-01-15'
-        },
-        {
-            id: 2,
-            employee_number: 'EMP002',
-            name: 'Jane Smith',
-            email: 'jane@makamithi.com',
-            department: 'Human Resources',
-            position: 'HR Manager',
-            phone: '0712 345 679',
-            status: 'approved',
-            savings: 120000,
-            date_joined: '2023-02-20'
-        },
-        {
-            id: 3,
-            employee_number: 'EMP003',
-            name: 'Robert Johnson',
-            email: 'robert@makamithi.com',
-            department: 'Operations',
-            position: 'Operations Manager',
-            phone: '0712 345 680',
-            status: 'pending',
-            savings: 200000,
-            date_joined: '2023-03-10'
-        },
-        {
-            id: 4,
-            employee_number: 'EMP004',
-            name: 'Mary Wambui',
-            email: 'mary@makamithi.com',
-            department: 'IT',
-            position: 'Software Developer',
-            phone: '0712 345 681',
-            status: 'approved',
-            savings: 180000,
-            date_joined: '2023-04-05'
-        },
-        {
-            id: 5,
-            employee_number: 'EMP005',
-            name: 'Peter Kamau',
-            email: 'peter@makamithi.com',
-            department: 'Sales',
-            position: 'Sales Executive',
-            phone: '0712 345 682',
-            status: 'approved',
-            savings: 95000,
-            date_joined: '2023-05-12'
-        },
-        {
-            id: 6,
-            employee_number: 'EMP006',
-            name: 'Sarah Mwangi',
-            email: 'sarah@makamithi.com',
-            department: 'Marketing',
-            position: 'Marketing Officer',
-            phone: '0712 345 683',
-            status: 'pending',
-            savings: 110000,
-            date_joined: '2023-06-18'
-        }
-    ];
-
-    // Global variables
-    let selectedMember = null;
-
-    // Render member list
-    function renderMemberList(members = dummyMembers) {
-        const container = document.getElementById('memberList');
-        container.innerHTML = '';
+    // Show/hide member info when member is selected
+    document.getElementById('member_id').addEventListener('change', function() {
+        const memberId = this.value;
+        const memberInfoDiv = document.getElementById('memberInfo');
+        const selectedOption = this.options[this.selectedIndex];
         
-        members.forEach(member => {
-            const memberDiv = document.createElement('div');
-            memberDiv.className = 'p-4 hover:bg-gray-50 cursor-pointer member-item';
-            memberDiv.id = `member-${member.id}`;
-            memberDiv.onclick = () => selectMember(member.id, member.name, member.employee_number, member.savings);
+        if (memberId) {
+            const savings = parseFloat(selectedOption.getAttribute('data-savings')) || 0;
+            const maxLoan = parseFloat(selectedOption.getAttribute('data-max-loan')) || 0;
             
-            const maxLoan = member.savings * 1.5;
+            document.getElementById('availableSavings').textContent = 
+                'KES ' + savings.toLocaleString('en-US', {minimumFractionDigits: 2});
             
-            memberDiv.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="font-medium text-gray-900">${member.name}</p>
-                        <p class="text-sm text-gray-500">${member.employee_number} • ${member.department}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="font-medium text-gray-900">KES ${member.savings.toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
-                        <p class="text-xs text-gray-500">Total Savings</p>
-                        <p class="text-xs text-blue-600 mt-1">
-                            Max Loan: KES ${maxLoan.toLocaleString('en-US', {minimumFractionDigits: 2})}
-                        </p>
-                    </div>
-                </div>
-            `;
-            container.appendChild(memberDiv);
-        });
-    }
-
-    // Member Selection
-    function selectMember(id, name, number, savings) {
-        // Remove previous selection
-        document.querySelectorAll('.member-item').forEach(item => {
-            item.classList.remove('bg-gray-100', 'border-l-4', 'border-gray-900');
-        });
-        
-        // Add selection to clicked item
-        const selectedItem = document.getElementById(`member-${id}`);
-        selectedItem.classList.add('bg-gray-100', 'border-l-4', 'border-gray-900');
-        
-        // Store selected member data
-        selectedMember = {
-            id: id,
-            name: name,
-            number: number,
-            savings: parseFloat(savings)
-        };
-        
-        // Update form
-        document.getElementById('selectedMemberName').textContent = name;
-        document.getElementById('selectedMemberNumber').textContent = number;
-        document.getElementById('displayMemberName').textContent = name;
-        document.getElementById('displayMemberNumber').textContent = number;
-        document.getElementById('displayMemberSavings').textContent = 
-            'KES ' + savings.toLocaleString('en-US', {minimumFractionDigits: 2});
-        
-        // Calculate max eligibility (1.5x savings)
-        const maxEligible = savings * 1.5;
-        document.getElementById('maxEligibilityDisplay').textContent = 
-            'KES ' + maxEligible.toLocaleString('en-US', {minimumFractionDigits: 2});
-        
-        // Show loan form
-        document.getElementById('loanForm').classList.remove('hidden');
-        
-        // Scroll to form
-        document.getElementById('loanForm').scrollIntoView({ behavior: 'smooth' });
-        
-        // Trigger initial calculation
-        calculateLoan();
-    }
-
-    // Reset selection
-    function resetSelection() {
-        selectedMember = null;
-        document.getElementById('loanForm').classList.add('hidden');
-        document.querySelectorAll('.member-item').forEach(item => {
-            item.classList.remove('bg-gray-100', 'border-l-4', 'border-gray-900');
-        });
-        
-        // Reset form
-        document.getElementById('loanAmount').value = '';
-        document.getElementById('loanPurpose').value = '';
-        
-        // Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // Search functionality
-    document.getElementById('memberSearch').addEventListener('input', function(e) {
-        const searchTerm = e.target.value.toLowerCase();
-        const filtered = dummyMembers.filter(member => 
-            member.name.toLowerCase().includes(searchTerm) ||
-            member.employee_number.toLowerCase().includes(searchTerm) ||
-            member.department.toLowerCase().includes(searchTerm)
-        );
-        renderMemberList(filtered);
-    });
-
-    // Loan Calculation
-    function calculateLoan() {
-        if (!selectedMember) return;
-        
-        const amount = parseFloat(document.getElementById('loanAmount').value) || 0;
-        const period = parseInt(document.getElementById('loanPeriod').value);
-        const savings = selectedMember.savings;
-        const maxEligible = savings * 1.5;
-        
-        // Calculate 5% fixed interest
-        const interest = amount * 0.05;
-        const totalRepayable = amount + interest;
-        const monthlyPayment = period > 0 ? totalRepayable / period : 0;
-        
-        // Update display
-        document.getElementById('displayLoanAmount').textContent = 
-            'KES ' + amount.toLocaleString('en-US', {minimumFractionDigits: 2});
-        document.getElementById('interestAmount').textContent = 
-            'KES ' + interest.toLocaleString('en-US', {minimumFractionDigits: 2});
-        document.getElementById('totalRepayable').textContent = 
-            'KES ' + totalRepayable.toLocaleString('en-US', {minimumFractionDigits: 2});
-        document.getElementById('monthlyPayment').textContent = 
-            'KES ' + monthlyPayment.toLocaleString('en-US', {minimumFractionDigits: 2});
-        document.getElementById('paymentDuration').textContent = 
-            `For ${period} months (${(period/12).toFixed(1)} years)`;
-        
-        // Update eligibility status
-        const statusEl = document.getElementById('eligibilityStatus');
-        const statusIcon = document.getElementById('statusIcon');
-        const statusMessage = document.getElementById('statusMessage');
-        
-        if (amount > maxEligible) {
-            statusEl.className = 'mt-4 p-3 rounded-lg bg-red-100 border border-red-200';
-            statusIcon.textContent = '❌';
-            statusMessage.textContent = `Amount exceeds maximum eligibility of KES ${maxEligible.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-            statusEl.classList.remove('hidden');
-        } else if (amount <= 0) {
-            statusEl.classList.add('hidden');
+            document.getElementById('loanEligibility').textContent = 
+                'KES ' + maxLoan.toLocaleString('en-US', {minimumFractionDigits: 2});
+            
+            memberInfoDiv.classList.remove('hidden');
+            
+            // Validate loan amount if already entered
+            validateLoanAmount();
         } else {
-            statusEl.className = 'mt-4 p-3 rounded-lg bg-green-100 border border-green-200';
-            statusIcon.textContent = '✅';
-            statusMessage.textContent = 'Member qualifies for this loan amount';
-            statusEl.classList.remove('hidden');
+            memberInfoDiv.classList.add('hidden');
         }
-    }
-
-    // Submit loan application
-    function submitLoanApplication() {
-        if (!selectedMember) {
-            alert('Please select a member first');
-            return;
-        }
-        
-        const amount = parseFloat(document.getElementById('loanAmount').value) || 0;
-        const purpose = document.getElementById('loanPurpose').value;
-        const period = parseInt(document.getElementById('loanPeriod').value);
-        const savings = selectedMember.savings;
-        const maxEligible = savings * 1.5;
-        
-        if (amount <= 0) {
-            alert('Please enter a valid loan amount');
-            return;
-        }
-        
-        if (amount > maxEligible) {
-            alert('Loan amount exceeds maximum eligibility of KES ' + maxEligible.toLocaleString());
-            return;
-        }
-        
-        if (!purpose.trim()) {
-            alert('Please enter the purpose of the loan');
-            return;
-        }
-        
-        // Calculate loan details
-        const interest = amount * 0.05;
-        const totalRepayable = amount + interest;
-        const monthlyPayment = totalRepayable / period;
-        
-        // Confirmation dialog
-        const confirmed = confirm(
-            `Submit loan application for ${selectedMember.name}?\n\n` +
-            `Loan Amount: KES ${amount.toLocaleString('en-US', {minimumFractionDigits: 2})}\n` +
-            `Interest (5%): KES ${interest.toLocaleString('en-US', {minimumFractionDigits: 2})}\n` +
-            `Total Repayable: KES ${totalRepayable.toLocaleString('en-US', {minimumFractionDigits: 2})}\n` +
-            `Monthly Payment: KES ${monthlyPayment.toLocaleString('en-US', {minimumFractionDigits: 2})}\n` +
-            `Period: ${period} months\n` +
-            `Purpose: ${purpose}\n\n` +
-            `This will be sent to the Chairman for approval.`
-        );
-        
-        if (confirmed) {
-            // Show success toast
-            const toast = document.getElementById('successToast');
-            toast.classList.remove('hidden');
-            
-            // Reset form
-            resetSelection();
-            
-            // Hide toast after 3 seconds
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 3000);
-            
-            // Log the application (for demo purposes)
-            console.log('Loan Application Submitted:', {
-                member: selectedMember.name,
-                employee_number: selectedMember.number,
-                amount: amount,
-                period: period,
-                purpose: purpose,
-                monthly_payment: monthlyPayment,
-                timestamp: new Date().toISOString()
-            });
-        }
-    }
-
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        renderMemberList();
     });
-</script>
-
-<style>
-    .member-item:hover {
-        background-color: #f9fafb;
+    
+    // Calculate loan preview
+    function calculateLoanPreview() {
+        const amount = parseFloat(document.getElementById('amount').value) || 0;
+        const period = parseInt(document.getElementById('period_months').value) || 0;
+        const loanPreview = document.getElementById('loanPreview');
+        
+        if (amount > 0 && period > 0) {
+            // Calculate 5% annual interest
+            const interestRate = 0.05; // 5% per year
+            const interestAmount = amount * interestRate * (period / 12);
+            const totalRepayable = amount + interestAmount;
+            const monthlyPayment = period > 0 ? totalRepayable / period : 0;
+            
+            // Update preview
+            document.getElementById('previewPrincipal').textContent = 
+                'KES ' + amount.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('previewInterest').textContent = 
+                'KES ' + interestAmount.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('previewTotal').textContent = 
+                'KES ' + totalRepayable.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('previewMonthly').textContent = 
+                'KES ' + monthlyPayment.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('paymentDuration').textContent = 
+                `For ${period} months (${(period/12).toFixed(1)} years)`;
+            
+            loanPreview.classList.remove('hidden');
+            
+            // Validate against eligibility
+            validateLoanAmount();
+        } else {
+            loanPreview.classList.add('hidden');
+        }
     }
     
-    .member-item.bg-gray-100 {
-        background-color: #f3f4f6;
+    // Validate loan amount against eligibility
+    function validateLoanAmount() {
+        const amount = parseFloat(document.getElementById('amount').value) || 0;
+        const memberSelect = document.getElementById('member_id');
+        const selectedOption = memberSelect.options[memberSelect.selectedIndex];
+        const warningDiv = document.getElementById('eligibilityWarning');
+        const warningMessage = document.getElementById('warningMessage');
+        
+        if (selectedOption && selectedOption.value) {
+            const maxEligible = parseFloat(selectedOption.getAttribute('data-max-loan')) || 0;
+            
+            if (amount > maxEligible) {
+                warningMessage.textContent = 
+                    `Loan amount exceeds maximum eligibility of KES ${maxEligible.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+                warningDiv.classList.remove('hidden');
+                
+                // Add red border to amount input
+                document.getElementById('amount').classList.add('border-red-300', 'focus:ring-red-500', 'focus:border-red-500');
+            } else {
+                warningDiv.classList.add('hidden');
+                document.getElementById('amount').classList.remove('border-red-300', 'focus:ring-red-500', 'focus:border-red-500');
+            }
+        }
     }
-</style>
-@endsection
+    
+    // Reset form
+    function resetForm() {
+        document.getElementById('memberInfo').classList.add('hidden');
+        document.getElementById('loanPreview').classList.add('hidden');
+        document.getElementById('eligibilityWarning').classList.add('hidden');
+        document.getElementById('amount').classList.remove('border-red-300', 'focus:ring-red-500', 'focus:border-red-500');
+    }
+    
+    // Auto-hide toasts after 5 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+        const toasts = document.querySelectorAll('#successToast, #errorToast');
+        toasts.forEach(toast => {
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 5000);
+        });
+        
+        // Calculate preview if form has old values
+        if (document.getElementById('amount').value && document.getElementById('period_months').value) {
+            calculateLoanPreview();
+        }
+    });
+    
+    // Form validation on submit
+    document.getElementById('loanApplicationForm').addEventListener('submit', function(e) {
+        const memberId = document.getElementById('member_id').value;
+        const amount = parseFloat(document.getElementById('amount').value) || 0;
+        const period = document.getElementById('period_months').value;
+        const purpose = document.getElementById('purpose').value.trim();
+        
+        // Basic validation
+        if (!memberId) {
+            e.preventDefault();
+            alert('Please select a member');
+            return false;
+        }
+        
+        if (amount < 1000) {
+            e.preventDefault();
+            alert('Loan amount must be at least KES 1,000');
+            return false;
+        }
+        
+        if (!period) {
+            e.preventDefault();
+            alert('Please select a repayment period');
+            return false;
+        }
+        
+        if (!purpose) {
+            e.preventDefault();
+            alert('Please enter the loan purpose');
+            return false;
+        }
+        
+        // Eligibility validation
+        const selectedOption = document.getElementById('member_id').options[document.getElementById('member_id').selectedIndex];
+        if (selectedOption) {
+            const maxEligible = parseFloat(selectedOption.getAttribute('data-max-loan')) || 0;
+            if (amount > maxEligible) {
+                e.preventDefault();
+                alert('Loan amount exceeds maximum eligibility of KES ' + 
+                      maxEligible.toLocaleString('en-US', {minimumFractionDigits: 2}));
+                return false;
+            }
+        }
+        
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.innerHTML = '<span class="mr-2">⏳</span> Processing...';
+            submitBtn.disabled = true;
+        }
+        
+        return true;
+    });
+</script>
+@endpush

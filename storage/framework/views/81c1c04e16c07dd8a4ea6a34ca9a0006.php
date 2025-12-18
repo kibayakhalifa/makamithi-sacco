@@ -23,55 +23,76 @@
 
         <!-- Stats Cards - Adjusted for smaller screens -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Total Members -->
             <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
                 <div class="flex justify-between items-start">
                     <div class="flex-1">
                         <p class="text-sm text-gray-500">Total Members</p>
-                        <p class="text-2xl font-semibold mt-1 text-gray-900">156</p>
+                        <p class="text-2xl font-semibold mt-1 text-gray-900"><?php echo e($stats['total_members']); ?></p>
                     </div>
                     <div class="text-2xl">👥</div>
                 </div>
                 <div class="mt-3 pt-3 border-t border-gray-100">
-                    <span class="text-green-600 text-xs font-medium">+12 this month</span>
+                    <span class="text-green-600 text-xs font-medium">
+                        +<?php echo e($stats['new_this_month']); ?> this month
+                    </span>
                 </div>
             </div>
 
+            <!-- Total Savings -->
             <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
                 <div class="flex justify-between items-start">
                     <div class="flex-1">
                         <p class="text-sm text-gray-500">Total Savings</p>
-                        <p class="text-2xl font-semibold mt-1 text-gray-900">KES 4.5M</p>
+                        <p class="text-2xl font-semibold mt-1 text-gray-900">
+                            KES <?php echo e(number_format($stats['total_savings'], 1)); ?>
+
+                        </p>
                     </div>
                     <div class="text-2xl">💰</div>
                 </div>
                 <div class="mt-3 pt-3 border-t border-gray-100">
-                    <span class="text-blue-600 text-xs font-medium">+KES 150K this month</span>
+                    <span class="text-blue-600 text-xs font-medium">
+                        +<?php echo e(number_format($stats['savings_growth_percentage'], 1)); ?>% growth
+                    </span>
                 </div>
             </div>
 
+            <!-- Active Loans -->
             <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
                 <div class="flex justify-between items-start">
                     <div class="flex-1">
                         <p class="text-sm text-gray-500">Active Loans</p>
-                        <p class="text-2xl font-semibold mt-1 text-gray-900">KES 3.8M</p>
+                        <p class="text-2xl font-semibold mt-1 text-gray-900">
+                            KES <?php echo e(number_format($stats['total_active_loans'], 1)); ?>
+
+                        </p>
                     </div>
                     <div class="text-2xl">📝</div>
                 </div>
                 <div class="mt-3 pt-3 border-t border-gray-100">
-                    <span class="text-orange-600 text-xs font-medium">24 active loans</span>
+                    <span class="text-orange-600 text-xs font-medium">
+                        <?php echo e($stats['active_loans_count']); ?> active loans
+                    </span>
                 </div>
             </div>
 
+            <!-- Pending Approvals -->
             <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
                 <div class="flex justify-between items-start">
                     <div class="flex-1">
-                        <p class="text-sm text-gray-500">Next Meeting</p>
-                        <p class="text-2xl font-semibold mt-1 text-gray-900">15 Apr 2024</p>
+                        <p class="text-sm text-gray-500">Pending Approvals</p>
+                        <p class="text-2xl font-semibold mt-1 text-gray-900">
+                            <?php echo e($stats['pending_approvals']); ?>
+
+                        </p>
                     </div>
-                    <div class="text-2xl">📅</div>
+                    <div class="text-2xl">⏳</div>
                 </div>
                 <div class="mt-3 pt-3 border-t border-gray-100">
-                    <span class="text-purple-600 text-xs font-medium">Monday, 2:00 PM</span>
+                    <span class="text-purple-600 text-xs font-medium">
+                        <?php echo e($stats['pending_loans']); ?> loans, <?php echo e($stats['pending_members']); ?> members
+                    </span>
                 </div>
             </div>
         </div>
@@ -98,13 +119,13 @@
                                 <span class="text-green-700 text-sm">👤</span>
                             </div>
                             <div class="flex-1">
-                                <h3 class="font-semibold text-gray-900 text-sm group-hover:text-green-700">Add Member</h3>
-                                <p class="text-gray-500 text-xs">Register new employees</p>
+                                <h3 class="font-semibold text-gray-900 text-sm group-hover:text-green-700">Member Management</h3>
+                                <p class="text-gray-500 text-xs">Register & manage members</p>
                             </div>
                         </div>
                         <div class="mt-3 pt-2 border-t border-gray-100">
                             <span class="text-green-600 text-xs font-medium">
-                                Requires Chairman approval
+                                <?php echo e($stats['total_members']); ?> total members
                             </span>
                         </div>
                     </div>
@@ -125,7 +146,7 @@
                         </div>
                         <div class="mt-3 pt-2 border-t border-gray-100">
                             <span class="text-blue-600 text-xs font-medium">
-                                1.5× savings rule applies
+                                <?php echo e($stats['active_loans_count']); ?> active loans
                             </span>
                         </div>
                     </div>
@@ -146,14 +167,14 @@
                         </div>
                         <div class="mt-3 pt-2 border-t border-gray-100">
                             <span class="text-blue-600 text-xs font-medium">
-                                Approve or reject
+                                <?php echo e($stats['pending_loans']); ?> pending
                             </span>
                         </div>
                     </div>
                 </a>
 
                 <!-- Communications -->
-                <div class="group cursor-pointer" onclick="openCommunications()">
+                <a href="<?php echo e(route('communications.index')); ?>" class="group">
                     <div
                         class="border border-gray-200 rounded-lg p-4 hover:border-green-300 hover:shadow-md transition-all duration-200 bg-white">
                         <div class="flex items-center gap-3">
@@ -167,11 +188,11 @@
                         </div>
                         <div class="mt-3 pt-2 border-t border-gray-100">
                             <span class="text-green-600 text-xs font-medium">
-                                SMS & Email ready
+                                <?php echo e($stats['total_members']); ?> recipients
                             </span>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
 
@@ -179,19 +200,11 @@
         <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
                 <h2 class="text-lg md:text-xl font-semibold text-gray-900">Pending Member Approvals</h2>
-                <a href="<?php echo e(route('secretary.pending-approvals')); ?>"
+                <a href="<?php echo e(route('secretary.members')); ?>?status=pending"
                     class="px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition">
-                    View All
+                    View All (<?php echo e($stats['pending_members']); ?>)
                 </a>
             </div>
-
-            <?php
-                $pendingMembers = [
-                    ['name' => 'Michael Otieno', 'emp' => 'EMP011', 'dept' => 'Finance', 'days' => 2],
-                    ['name' => 'Susan Njeru', 'emp' => 'EMP012', 'dept' => 'Marketing', 'days' => 1],
-                    ['name' => 'David Kiprop', 'emp' => 'EMP013', 'dept' => 'IT', 'days' => 0],
-                ];
-            ?>
 
             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(count($pendingMembers) > 0): ?>
                 <div class="overflow-x-auto border border-gray-300 rounded-lg">
@@ -216,10 +229,17 @@
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
                                     Status
                                 </th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">
+                                    Action
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $pendingMembers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $member): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
+                                    $daysPending = now()->diffInDays($member->created_at);
+                                    $statusColor = $daysPending == 0 ? 'text-green-600' : ($daysPending <= 2 ? 'text-orange-600' : 'text-red-600');
+                                ?>
                                 <tr class="hover:bg-gray-50 transition">
                                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium border border-gray-300">
                                         <?php echo e($index + 1); ?>
@@ -228,22 +248,22 @@
                                     <td class="px-4 py-3 whitespace-nowrap border border-gray-300">
                                         <div class="flex items-center gap-2">
                                             <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
-                                                <span class="text-gray-700 font-medium"><?php echo e(substr($member['name'], 0, 1)); ?></span>
+                                                <span class="text-gray-700 font-medium"><?php echo e(substr($member->name, 0, 1)); ?></span>
                                             </div>
-                                            <span class="text-sm text-gray-900"><?php echo e($member['name']); ?></span>
+                                            <span class="text-sm text-gray-900"><?php echo e($member->name); ?></span>
                                         </div>
                                     </td>
                                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border border-gray-300">
-                                        <?php echo e($member['emp']); ?>
+                                        <?php echo e($member->employee_number); ?>
 
                                     </td>
                                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 border border-gray-300">
-                                        <?php echo e($member['dept']); ?>
+                                        <?php echo e($member->department); ?>
 
                                     </td>
                                     <td class="px-4 py-3 whitespace-nowrap text-sm font-medium border border-gray-300">
-                                        <span class="<?php echo e($member['days'] == 0 ? 'text-green-600' : ($member['days'] <= 2 ? 'text-orange-600' : 'text-red-600')); ?>">
-                                            <?php echo e($member['days'] == 0 ? 'Today' : $member['days'] . ' days'); ?>
+                                        <span class="<?php echo e($statusColor); ?>">
+                                            <?php echo e($daysPending == 0 ? 'Today' : $daysPending . ' days'); ?>
 
                                         </span>
                                     </td>
@@ -251,6 +271,12 @@
                                         <span class="px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-800 border border-orange-200">
                                             Pending
                                         </span>
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap border border-gray-300">
+                                        <a href="<?php echo e(route('secretary.members.show', $member)); ?>" 
+                                           class="text-xs text-blue-600 hover:text-blue-800 hover:underline">
+                                            Review
+                                        </a>
                                     </td>
                                 </tr>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
@@ -273,39 +299,66 @@
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-lg font-semibold text-gray-900">Recent Assisted Loans</h3>
                     <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                        Total: 24
+                        Total: <?php echo e(count($recentLoans)); ?>
+
                     </span>
                 </div>
 
                 <div class="space-y-3">
-                    <?php
-                        $assistedLoans = [
-                            ['member' => 'John Doe', 'amount' => 150000, 'date' => '2 days ago', 'status' => 'approved'],
-                            ['member' => 'Jane Smith', 'amount' => 75000, 'date' => '1 day ago', 'status' => 'processing'],
-                            ['member' => 'Robert Johnson', 'amount' => 200000, 'date' => '3 days ago', 'status' => 'pending'],
-                        ];
-                    ?>
-
-                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $assistedLoans; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $loan): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $recentLoans; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $loan): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <?php
+                            $statusColor = match($loan->status) {
+                                'approved' => 'text-green-600',
+                                'disbursed' => 'text-blue-600',
+                                'active' => 'text-blue-600',
+                                'pending' => 'text-orange-600',
+                                'rejected' => 'text-red-600',
+                                default => 'text-gray-600'
+                            };
+                            
+                            $statusText = match($loan->status) {
+                                'approved' => 'Approved',
+                                'disbursed' => 'Disbursed',
+                                'active' => 'Active',
+                                'pending' => 'Pending',
+                                'rejected' => 'Rejected',
+                                default => $loan->status
+                            };
+                            
+                            $daysAgo = $loan->applied_date ? now()->diffInDays($loan->applied_date) : 0;
+                            $dateText = $daysAgo == 0 ? 'Today' : ($daysAgo == 1 ? 'Yesterday' : $daysAgo . ' days ago');
+                        ?>
                         <div class="flex items-center justify-between p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
                                     <span class="text-blue-600 text-sm">📝</span>
                                 </div>
                                 <div>
-                                    <p class="font-medium text-gray-900 text-sm"><?php echo e($loan['member']); ?></p>
-                                    <p class="text-gray-500 text-xs">KES <?php echo e(number_format($loan['amount'])); ?></p>
+                                    <p class="font-medium text-gray-900 text-sm">
+                                        <?php echo e($loan->user->name ?? 'Unknown Member'); ?>
+
+                                    </p>
+                                    <p class="text-gray-500 text-xs">
+                                        KES <?php echo e(number_format($loan->amount)); ?> • <?php echo e($loan->loan_number); ?>
+
+                                    </p>
                                 </div>
                             </div>
                             <div class="text-right">
-                                <span class="text-sm font-semibold <?php echo e($loan['status'] == 'approved' ? 'text-green-600' : ($loan['status'] == 'processing' ? 'text-blue-600' : 'text-orange-600')); ?>">
-                                    <?php echo e(ucfirst($loan['status'])); ?>
+                                <span class="text-sm font-semibold <?php echo e($statusColor); ?>">
+                                    <?php echo e($statusText); ?>
 
                                 </span>
-                                <p class="text-gray-500 text-xs"><?php echo e($loan['date']); ?></p>
+                                <p class="text-gray-500 text-xs"><?php echo e($dateText); ?></p>
                             </div>
                         </div>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                        <div class="text-center py-8">
+                            <div class="text-3xl mb-3">📝</div>
+                            <h4 class="text-base font-medium text-gray-900 mb-1">No Assisted Loans</h4>
+                            <p class="text-gray-500 text-sm">No loan assistance records found</p>
+                        </div>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
             </div>
 
@@ -316,10 +369,34 @@
                 <div class="space-y-3">
                     <?php
                         $memberStats = [
-                            ['label' => 'New Applications This Month', 'value' => '12', 'icon' => '📥', 'color' => 'bg-blue-50'],
-                            ['label' => 'Members Requiring Follow-up', 'value' => '8', 'icon' => '📞', 'color' => 'bg-orange-50'],
-                            ['label' => 'Overdue Loan Payments', 'value' => '3', 'icon' => '⏰', 'color' => 'bg-red-50'],
-                            ['label' => 'Pending Documentation', 'value' => '5', 'icon' => '📄', 'color' => 'bg-yellow-50'],
+                            [
+                                'label' => 'New Applications This Month', 
+                                'value' => $stats['new_this_month'], 
+                                'icon' => '📥', 
+                                'color' => 'bg-blue-50',
+                                'route' => 'secretary.members'
+                            ],
+                            [
+                                'label' => 'Members Requiring Follow-up', 
+                                'value' => $stats['pending_members'], 
+                                'icon' => '📞', 
+                                'color' => 'bg-orange-50',
+                                'route' => 'secretary.members'
+                            ],
+                            [
+                                'label' => 'Overdue Loan Payments', 
+                                'value' => $stats['overdue_loans'] ?? 0, 
+                                'icon' => '⏰', 
+                                'color' => 'bg-red-50',
+                                'route' => 'secretary.loan-history'
+                            ],
+                            [
+                                'label' => 'Pending Documentation', 
+                                'value' => $stats['pending_documents'] ?? 0, 
+                                'icon' => '📄', 
+                                'color' => 'bg-yellow-50',
+                                'route' => 'secretary.documents'
+                            ],
                         ];
                     ?>
 
@@ -332,8 +409,13 @@
                                 <span class="text-sm text-gray-600"><?php echo e($stat['label']); ?></span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="px-2 py-1 rounded bg-gray-100 text-gray-900 font-semibold text-sm"><?php echo e($stat['value']); ?></span>
-                                <a href="#" class="text-xs text-gray-500 hover:text-gray-700">View →</a>
+                                <span class="px-2 py-1 rounded bg-gray-100 text-gray-900 font-semibold text-sm">
+                                    <?php echo e($stat['value']); ?>
+
+                                </span>
+                                <a href="<?php echo e(route($stat['route'])); ?>" class="text-xs text-gray-500 hover:text-gray-700">
+                                    View →
+                                </a>
                             </div>
                         </div>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
@@ -341,78 +423,76 @@
             </div>
         </div>
 
-        <!-- Quick Communications -->
+        <!-- Upcoming Meetings -->
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(count($upcomingMeetings) > 0): ?>
         <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
                 <div>
-                    <h2 class="text-lg md:text-xl font-semibold text-gray-900">Quick Communications</h2>
-                    <p class="text-gray-500 text-sm">Send notifications to members</p>
+                    <h2 class="text-lg md:text-xl font-semibold text-gray-900">Upcoming Meetings</h2>
+                    <p class="text-gray-500 text-sm">SACCO meetings and events</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span class="text-xs px-3 py-1 bg-green-100 text-green-800 rounded-full">SMS & Email</span>
+                    <span class="text-xs px-3 py-1 bg-purple-100 text-purple-800 rounded-full">
+                        <?php echo e(count($upcomingMeetings)); ?> upcoming
+                    </span>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- SMS Notification -->
-                <div class="border border-gray-200 rounded-lg p-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
-                                <span class="text-gray-700">📱</span>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $upcomingMeetings; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $meeting): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php
+                        $meetingDate = \Carbon\Carbon::parse($meeting['date']);
+                        $isToday = $meetingDate->isToday();
+                        $isTomorrow = $meetingDate->isTomorrow();
+                        $daysDiff = now()->diffInDays($meetingDate, false);
+                    ?>
+                    <div class="border border-gray-200 rounded-lg p-4 hover:border-purple-300 hover:shadow-md transition-all duration-200">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-900"><?php echo e($meeting['title']); ?></h3>
+                                <p class="text-gray-500 text-sm mt-1"><?php echo e($meeting['description'] ?? 'SACCO Meeting'); ?></p>
                             </div>
-                            <span class="font-medium text-gray-900">SMS Notification</span>
+                            <div class="text-2xl">📅</div>
                         </div>
-                        <span class="text-xs text-gray-500">Remaining: 98</span>
-                    </div>
-                    <textarea
-                        class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-gray-400 focus:ring-0 transition-colors resize-none"
-                        rows="2" placeholder="Type your message here..."></textarea>
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mt-3">
-                        <select
-                            class="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:border-gray-400 focus:ring-0 transition-colors">
-                            <option>Select Members</option>
-                            <option>All Members</option>
-                            <option>Pending Approvals</option>
-                            <option>Loan Applicants</option>
-                        </select>
-                        <button
-                            class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition">
-                            Send SMS
-                        </button>
-                    </div>
-                </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="text-gray-700"><?php echo e($meetingDate->format('d M Y')); ?></span>
+                                <span class="text-gray-500">•</span>
+                                <span class="text-gray-700"><?php echo e($meeting['time'] ?? '2:00 PM'); ?></span>
+                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs font-medium 
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($isToday): ?> bg-green-100 text-green-800
+                                <?php elseif($isTomorrow): ?> bg-blue-100 text-blue-800
+                                <?php elseif($daysDiff < 7): ?> bg-orange-100 text-orange-800
+                                <?php else: ?> bg-gray-100 text-gray-800 <?php endif; ?>">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($isToday): ?> Today
+                                <?php elseif($isTomorrow): ?> Tomorrow
+                                <?php elseif($daysDiff < 7): ?> In <?php echo e($daysDiff); ?> days
+                                <?php else: ?> <?php echo e($meetingDate->format('M d')); ?>
 
-                <!-- Email Notification -->
-                <div class="border border-gray-200 rounded-lg p-4">
-                    <div class="flex items-center gap-2 mb-3">
-                        <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
-                            <span class="text-gray-700">✉️</span>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            </span>
                         </div>
-                        <span class="font-medium text-gray-900">Email Notification</span>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!empty($meeting['venue'])): ?>
+                        <div class="mt-3 pt-3 border-t border-gray-100">
+                            <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <span>📍</span>
+                                <span><?php echo e($meeting['venue']); ?></span>
+                            </div>
+                        </div>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </div>
-                    <input type="text"
-                        class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm mb-2 focus:border-gray-400 focus:ring-0 transition-colors"
-                        placeholder="Subject">
-                    <textarea
-                        class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-gray-400 focus:ring-0 transition-colors resize-none"
-                        rows="2" placeholder="Email content..."></textarea>
-                    <div class="flex justify-end mt-3">
-                        <button
-                            class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition">
-                            Send Email
-                        </button>
-                    </div>
-                </div>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </div>
         </div>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
         <!-- Quick Actions -->
         <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <h3 class="text-lg font-semibold text-gray-900 mb-6">Quick Actions</h3>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <a href="<?php echo e(route('secretary.members')); ?>"
+                <a href="<?php echo e(route('secretary.members.create')); ?>"
                     class="flex items-center justify-center gap-2 bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 transition text-sm">
                     <span>👤</span>
                     <span>Add Member</span>
@@ -430,371 +510,20 @@
                     <span>Review Loans</span>
                 </a>
 
-                <button onclick="openCommunications()"
+                <a href="<?php echo e(route('communications.create')); ?>"
                     class="flex items-center justify-center gap-2 bg-orange-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-orange-700 transition text-sm">
                     <span>📨</span>
                     <span>Send Notifications</span>
-                </button>
+                </a>
             </div>
         </div>
 
     </div>
-
-    <!-- Communications Modal -->
-    <div id="communicationsModal"
-        class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 hidden items-center justify-center p-4 transition-opacity duration-200">
-        <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div class="p-6 border-b border-gray-200">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-semibold text-gray-900">Send Communications</h3>
-                    <button onclick="closeCommunications()"
-                        class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors">
-                        <span class="text-gray-500 hover:text-gray-700">✕</span>
-                    </button>
-                </div>
-                <p class="text-gray-500 text-sm mt-1">Send notifications to SACCO members</p>
-            </div>
-
-            <div class="p-6 space-y-6">
-                <!-- Communication Type -->
-                <div>
-                    <h4 class="text-lg font-medium text-gray-900 mb-4">Select Communication Type</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <button
-                            class="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-all duration-200 text-left group"
-                            onclick="selectCommType('sms')">
-                            <div class="flex items-center mb-2">
-                                <div
-                                    class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center mr-3 group-hover:bg-gray-200 transition-colors">
-                                    <span class="text-gray-700">📱</span>
-                                </div>
-                                <div>
-                                    <p class="font-medium text-gray-900">SMS Notification</p>
-                                    <p class="text-sm text-gray-500">Quick text messages</p>
-                                </div>
-                            </div>
-                            <p class="text-xs text-gray-400">Ideal for urgent updates</p>
-                        </button>
-                        <button
-                            class="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-all duration-200 text-left group"
-                            onclick="selectCommType('email')">
-                            <div class="flex items-center mb-2">
-                                <div
-                                    class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center mr-3 group-hover:bg-gray-200 transition-colors">
-                                    <span class="text-gray-700">✉️</span>
-                                </div>
-                                <div>
-                                    <p class="font-medium text-gray-900">Email Notification</p>
-                                    <p class="text-sm text-gray-500">Detailed communications</p>
-                                </div>
-                            </div>
-                            <p class="text-xs text-gray-400">For formal announcements</p>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Recipient Selection -->
-                <div id="recipientSection" class="hidden">
-                    <h4 class="text-lg font-medium text-gray-900 mb-4">Select Recipients</h4>
-                    <div class="space-y-3">
-                        <div
-                            class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors">
-                            <div
-                                class="w-5 h-5 rounded border-2 border-gray-300 mr-3 flex items-center justify-center group-has-[input:checked]:bg-gray-900 group-has-[input:checked]:border-gray-900 transition-colors">
-                                <svg class="w-3 h-3 text-white opacity-0 group-has-[input:checked]:opacity-100 transition-opacity"
-                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                        d="M5 13l4 4L19 7"></path>
-                                </svg>
-                            </div>
-                            <input type="checkbox" class="sr-only">
-                            <span class="font-medium text-gray-900">All Members (156)</span>
-                        </div>
-                        <div
-                            class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors">
-                            <div
-                                class="w-5 h-5 rounded border-2 border-gray-300 mr-3 flex items-center justify-center group-has-[input:checked]:bg-gray-900 group-has-[input:checked]:border-gray-900 transition-colors">
-                                <svg class="w-3 h-3 text-white opacity-0 group-has-[input:checked]:opacity-100 transition-opacity"
-                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                        d="M5 13l4 4L19 7"></path>
-                                </svg>
-                            </div>
-                            <input type="checkbox" class="sr-only">
-                            <span class="font-medium text-gray-900">Pending Approvals (8)</span>
-                        </div>
-                        <div
-                            class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors">
-                            <div
-                                class="w-5 h-5 rounded border-2 border-gray-300 mr-3 flex items-center justify-center group-has-[input:checked]:bg-gray-900 group-has-[input:checked]:border-gray-900 transition-colors">
-                                <svg class="w-3 h-3 text-white opacity-0 group-has-[input:checked]:opacity-100 transition-opacity"
-                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                        d="M5 13l4 4L19 7"></path>
-                                </svg>
-                            </div>
-                            <input type="checkbox" class="sr-only">
-                            <span class="font-medium text-gray-900">Active Loan Holders (24)</span>
-                        </div>
-                        <div
-                            class="flex flex-col sm:flex-row sm:items-center gap-2 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                            <div class="flex items-center">
-                                <div class="w-5 h-5 rounded border-2 border-gray-300 mr-3"></div>
-                                <span class="font-medium text-gray-900">Specific Department</span>
-                            </div>
-                            <select
-                                class="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:border-gray-400 focus:ring-0 transition-colors">
-                                <option>Select Department</option>
-                                <option>Finance</option>
-                                <option>Operations</option>
-                                <option>HR</option>
-                                <option>IT</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Message Content -->
-                <div id="messageSection" class="hidden">
-                    <h4 class="text-lg font-medium text-gray-900 mb-4">Message Content</h4>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Subject (Email only)</label>
-                        <input type="text" id="messageSubject"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 transition-colors mb-4"
-                            placeholder="Meeting announcement, loan approval, etc.">
-
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Message *</label>
-                        <textarea id="messageContent" rows="4"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-900 focus:border-gray-400 focus:ring-0 transition-colors resize-none"
-                            placeholder="Type your message here..."></textarea>
-                        <p class="text-xs text-gray-400 mt-2" id="charCount">0/160 characters</p>
-                    </div>
-
-                    <!-- Template Suggestions -->
-                    <div class="mt-4">
-                        <p class="text-sm font-medium text-gray-700 mb-2">Quick Templates:</p>
-                        <div class="flex flex-wrap gap-2">
-                            <button onclick="useTemplate('meeting')"
-                                class="px-3 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition-colors">
-                                📅 Meeting Reminder
-                            </button>
-                            <button onclick="useTemplate('approval')"
-                                class="px-3 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition-colors">
-                                ✅ Loan Approved
-                            </button>
-                            <button onclick="useTemplate('payment')"
-                                class="px-3 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition-colors">
-                                💳 Payment Due
-                            </button>
-                            <button onclick="useTemplate('savings')"
-                                class="px-3 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition-colors">
-                                💰 Savings Update
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Preview & Send -->
-                <div id="previewSection" class="hidden">
-                    <h4 class="text-lg font-medium text-gray-900 mb-4">Preview & Send</h4>
-                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
-                        <p class="text-sm font-medium text-gray-700 mb-2">Preview:</p>
-                        <div class="bg-white p-4 rounded-lg border border-gray-200">
-                            <p class="font-medium text-gray-900 mb-1" id="previewSubject"></p>
-                            <p class="text-gray-700 whitespace-pre-wrap leading-relaxed" id="previewMessage"></p>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-2" id="previewRecipients"></p>
-                    </div>
-                </div>
-
-                <!-- Navigation -->
-                <div class="flex flex-col sm:flex-row justify-between gap-4 pt-6 border-t border-gray-200">
-                    <button onclick="prevCommStep()" id="prevBtn"
-                        class="hidden px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-all duration-200">
-                        ← Back
-                    </button>
-                    <button onclick="nextCommStep()" id="nextBtn"
-                        class="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-all duration-200 shadow-sm hover:shadow">
-                        Next: Select Recipients →
-                    </button>
-                    <button onclick="sendCommunication()" id="sendBtn"
-                        class="hidden px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-all duration-200 shadow-sm hover:shadow flex items-center">
-                        <span class="mr-2">📤</span>
-                        Send Now
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Communications Modal
-        let currentStep = 0;
-        let commType = '';
-
-        function openCommunications() {
-            document.getElementById('communicationsModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-            resetCommSteps();
-        }
-
-        function closeCommunications() {
-            document.getElementById('communicationsModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-            resetCommSteps();
-        }
-
-        function resetCommSteps() {
-            currentStep = 0;
-            commType = '';
-            document.getElementById('recipientSection').classList.add('hidden');
-            document.getElementById('messageSection').classList.add('hidden');
-            document.getElementById('previewSection').classList.add('hidden');
-            document.getElementById('prevBtn').classList.add('hidden');
-            document.getElementById('sendBtn').classList.add('hidden');
-            document.getElementById('nextBtn').classList.remove('hidden');
-            document.getElementById('nextBtn').textContent = 'Next: Select Recipients →';
-        }
-
-        function selectCommType(type) {
-            commType = type;
-            nextCommStep();
-        }
-
-        function nextCommStep() {
-            currentStep++;
-
-            if (currentStep === 1) {
-                document.getElementById('recipientSection').classList.remove('hidden');
-                document.getElementById('prevBtn').classList.remove('hidden');
-                document.getElementById('nextBtn').textContent = 'Next: Compose Message →';
-            } else if (currentStep === 2) {
-                document.getElementById('messageSection').classList.remove('hidden');
-                document.getElementById('nextBtn').textContent = 'Next: Preview & Send →';
-
-                // Update character count for SMS
-                const messageContent = document.getElementById('messageContent');
-                if (commType === 'sms') {
-                    messageContent.addEventListener('input', function () {
-                        const count = this.value.length;
-                        const charCount = document.getElementById('charCount');
-                        charCount.textContent = `${count}/160 characters`;
-
-                        if (count > 160) {
-                            charCount.classList.add('text-red-500');
-                        } else {
-                            charCount.classList.remove('text-red-500');
-                        }
-                    });
-                }
-            } else if (currentStep === 3) {
-                document.getElementById('previewSection').classList.remove('hidden');
-                document.getElementById('nextBtn').classList.add('hidden');
-                document.getElementById('sendBtn').classList.remove('hidden');
-
-                // Update preview
-                const subject = document.getElementById('messageSubject');
-                const message = document.getElementById('messageContent');
-                document.getElementById('previewSubject').textContent =
-                    subject.value || '(No subject)';
-                document.getElementById('previewMessage').textContent =
-                    message.value;
-                document.getElementById('previewRecipients').textContent =
-                    'Will be sent to selected recipients';
-            }
-        }
-
-        function prevCommStep() {
-            currentStep--;
-
-            if (currentStep === 0) {
-                document.getElementById('recipientSection').classList.add('hidden');
-                document.getElementById('prevBtn').classList.add('hidden');
-                document.getElementById('nextBtn').textContent = 'Next: Select Recipients →';
-            } else if (currentStep === 1) {
-                document.getElementById('messageSection').classList.add('hidden');
-                document.getElementById('previewSection').classList.add('hidden');
-                document.getElementById('sendBtn').classList.add('hidden');
-                document.getElementById('nextBtn').classList.remove('hidden');
-                document.getElementById('nextBtn').textContent = 'Next: Compose Message →';
-            } else if (currentStep === 2) {
-                document.getElementById('previewSection').classList.add('hidden');
-                document.getElementById('sendBtn').classList.add('hidden');
-                document.getElementById('nextBtn').classList.remove('hidden');
-                document.getElementById('nextBtn').textContent = 'Next: Preview & Send →';
-            }
-        }
-
-        function useTemplate(type) {
-            const templates = {
-                'meeting': 'Dear member, please be reminded of our SACCO meeting on [Date] at [Time] in [Venue]. Your attendance is important.',
-                'approval': 'Congratulations! Your loan application has been approved. Amount: KES [Amount]. Please visit the office for further instructions.',
-                'payment': 'Reminder: Your loan payment of KES [Amount] is due on [Date]. Please ensure timely payment to avoid penalties.',
-                'savings': 'Your current savings balance is KES [Amount]. Thank you for your consistent contributions to the SACCO.'
-            };
-
-            document.getElementById('messageContent').value = templates[type] || '';
-
-            // Update character count
-            if (commType === 'sms') {
-                const count = document.getElementById('messageContent').value.length;
-                const charCount = document.getElementById('charCount');
-                charCount.textContent = `${count}/160 characters`;
-
-                if (count > 160) {
-                    charCount.classList.add('text-red-500');
-                } else {
-                    charCount.classList.remove('text-red-500');
-                }
-            }
-        }
-
-        function sendCommunication() {
-            const message = document.getElementById('messageContent').value.trim();
-
-            if (!message) {
-                alert('Please enter a message');
-                return;
-            }
-
-            if (commType === 'sms' && message.length > 160) {
-                alert('SMS messages must be 160 characters or less');
-                return;
-            }
-
-            // Show success message
-            alert(`${commType.toUpperCase()} notification sent successfully!`);
-            closeCommunications();
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function (event) {
-            const modal = document.getElementById('communicationsModal');
-            if (event.target === modal) {
-                closeCommunications();
-            }
-        }
-
-        // Close modal with Escape key
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') {
-                closeCommunications();
-            }
-        });
-
-        // Initialize checkbox interactions
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('#recipientSection input[type="checkbox"]').forEach(checkbox => {
-                checkbox.addEventListener('change', function () {
-                    const container = this.closest('.group');
-                    if (this.checked) {
-                        container.classList.add('border-gray-900');
-                    } else {
-                        container.classList.remove('border-gray-900');
-                    }
-                });
-            });
-        });
-    </script>
 <?php $__env->stopSection(); ?>
+
+<?php $__env->startPush('scripts'); ?>
+<script>
+    
+</script>
+<?php $__env->stopPush(); ?>
 <?php echo $__env->make('components.dashboard-layout', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ADMIN\Desktop\makamithi-sacco\resources\views/secretary/dashboard.blade.php ENDPATH**/ ?>
