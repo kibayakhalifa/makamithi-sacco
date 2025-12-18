@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
         TreasurerSeeder::class,
         MemberSeeder::class,
         LoanTestSeeder::class,
+        SavingsTransactionsSeeder::class,
     ]);
     }
 }

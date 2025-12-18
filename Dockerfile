@@ -24,21 +24,26 @@ COPY . .
 # Ensure .env exists
 RUN cp .env.example .env || true
 
-# Install Composer (copy from official composer image)
+# Ensure Laravel cache directories exist
+RUN mkdir -p storage/framework/cache/data storage/framework/views storage/logs bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache storage/framework \
+    && chmod -R 775 storage bootstrap/cache storage/framework
+
+# Install Composer (from official image)
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Install dependencies without scripts (package:discover will run at runtime)
+# Install dependencies without scripts (we'll run scripts at runtime)
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Set permissions for Laravel
-RUN chown -R www-data:www-data storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
-
-# Copy Nginx configuration
+# Copy nginx config
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Expose port 80 for Railway
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Expose port for Railway
 EXPOSE 80
 
-# Start services and run package discovery at runtime
-CMD php artisan package:discover --ansi && php-fpm -D && nginx -g 'daemon off;'
+# Use entrypoint script
+CMD ["/usr/local/bin/docker-entrypoint.sh"]
