@@ -60,12 +60,8 @@
                         <span>New: {{ $pendingMembersList->where('days_pending', 0)->count() }}</span>
                         @php
                             $oldestDays = $pendingMembersList->max('days_pending') ?? 0;
-                            $oldestDate = \Carbon\Carbon::now()->subDays($oldestDays);
                         @endphp
-
-                        <span>Oldest: {{ $oldestDate->diffForHumans() }}</span>
-
-
+                        <span>Oldest: {{ $oldestDays }} days</span>
                     </div>
                 </div>
             </div>
@@ -93,12 +89,9 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-sm text-gray-500">Total Savings</p>
-                        <p class="text-3xl font-semibold mt-2 text-gray-900">KES
-                            {{ number_format($stats['total_savings']) }}
-                        </p>
+                        <p class="text-3xl font-semibold mt-2 text-gray-900">KES {{ number_format($stats['total_savings']) }}</p>
                         @if($stats['monthly_savings_increase'] > 0)
-                            <p class="text-xs text-green-600 mt-1">+KES {{ number_format($stats['monthly_savings_increase']) }}
-                                this month</p>
+                            <p class="text-xs text-green-600 mt-1">+KES {{ number_format($stats['monthly_savings_increase']) }} this month</p>
                         @else
                             <p class="text-xs text-gray-500 mt-1">No increase this month</p>
                         @endif
@@ -108,94 +101,87 @@
                 <div class="mt-4 pt-4 border-t">
                     <div class="flex justify-between text-xs text-gray-500">
                         <span>Members: {{ $stats['active_members'] ?? 0 }}</span>
-                        <span>Avg: KES
-                            {{ $stats['total_members'] > 0 ? number_format($stats['total_savings'] / $stats['total_members']) : 0 }}</span>
+                        <span>Avg: KES {{ $stats['total_members'] > 0 ? number_format($stats['total_savings'] / $stats['total_members']) : 0 }}</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Pending Approvals Section -->
-        <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
-            <div class="flex justify-between items-center mb-6">
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
                 <div>
                     <h2 class="text-xl font-semibold text-gray-900">Pending Member Approvals</h2>
-                    <p class="text-gray-500 text-sm mt-1">New members submitted by Secretary awaiting your approval</p>
+                    <p class="text-gray-500 text-sm mt-1">New members awaiting your approval</p>
                 </div>
                 @if($pendingMembersList->count() > 0)
                     <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
-                        {{ $pendingMembersList->count() }} pending review
+                        {{ $pendingMembersList->count() }} pending
                     </span>
                 @else
                     <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                        ✅ All approved
+                        All approved
                     </span>
                 @endif
             </div>
 
             @if($pendingMembersList->count() > 0)
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto border border-gray-300 rounded-lg">
                     <table class="w-full text-sm border-collapse">
                         <thead>
-                            <tr class="bg-gray-50 border-b-2 border-gray-300">
-                                <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">No.</th>
-                                <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Employee #
-                                </th>
-                                <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Name &
-                                    Details</th>
-                                <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Employment
-                                    Info</th>
-                                <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Submitted
-                                </th>
-                                <th class="px-6 py-3 text-left text-gray-600 font-semibold">Actions</th>
+                            <tr class="bg-gray-50">
+                                <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">#</th>
+                                <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Emp No</th>
+                                <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Full Name</th>
+                                <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Email</th>
+                                <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Department</th>
+                                <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Position</th>
+                                <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Submitted</th>
+                                <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Days Ago</th>
+                                <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Actions</th>
                             </tr>
                         </thead>
 
                         <tbody>
                             @foreach($pendingMembersList as $index => $member)
-                                <tr class="border-b border-gray-300 hover:bg-gray-50 transition">
-                                    <td class="px-6 py-4 text-gray-900 font-medium border-r border-gray-300">{{ $index + 1 }}</td>
-                                    <td class="px-6 py-4 font-mono text-gray-900 border-r border-gray-300">
-                                        {{ $member['employee_number'] }}
-                                    </td>
-                                    <td class="px-6 py-4 border-r border-gray-300">
+                                @php
+                                    $submittedDate = \Carbon\Carbon::parse($member['submitted_date']);
+                                    $submittedAgo = $submittedDate->diffForHumans();
+                                @endphp
+                                <tr class="border-t border-gray-300 hover:bg-gray-50">
+                                    <td class="px-4 py-3 text-gray-900 font-medium border border-gray-300 text-center">{{ $index + 1 }}</td>
+                                    <td class="px-4 py-3 font-mono text-gray-900 border border-gray-300">{{ $member['employee_number'] }}</td>
+                                    <td class="px-4 py-3 border border-gray-300 whitespace-nowrap">
                                         <div class="font-medium text-gray-900">{{ $member['name'] }}</div>
-                                        <div class="text-gray-500 text-xs">{{ $member['email'] }}</div>
-                                        <div class="mt-1">
-                                            <span
-                                                class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                {{ $member['days_pending'] == 0 ? 'Today' : $member['days_pending'] . ' days ago' }}
-                                            </span>
-                                        </div>
                                     </td>
-                                    <td class="px-6 py-4 border-r border-gray-300">
-                                        <div class="text-gray-700">{{ $member['department'] }}</div>
-                                        <div class="text-gray-500 text-xs">{{ $member['position'] }}</div>
-                                        <div class="text-gray-500 text-xs mt-1">KES {{ number_format($member['salary']) }}/month
-                                        </div>
+                                    <td class="px-4 py-3 border border-gray-300">
+                                        <div class="text-gray-700 truncate max-w-[150px]">{{ $member['email'] }}</div>
                                     </td>
-                                    <td class="px-6 py-4 border-r border-gray-300">
-                                        <div class="text-gray-700">{{ $member['submitted_date']->format('d M Y') }}</div>
+                                    <td class="px-4 py-3 border border-gray-300">{{ $member['department'] }}</td>
+                                    <td class="px-4 py-3 border border-gray-300">{{ $member['position'] }}</td>
+                                    <td class="px-4 py-3 border border-gray-300">
+                                        <div class="text-gray-700">{{ $submittedDate->format('M d, Y') }}</div>
                                         <div class="text-gray-500 text-xs">By {{ $member['submitted_by'] }}</div>
                                     </td>
-                                    <td class="px-6 py-4">
-                                        <div class="relative inline-block group">
-                                            <button
-                                                class="px-4 py-2 bg-gray-600 text-white rounded-lg text-xs font-medium hover:bg-gray-700 transition flex items-center gap-1">
-                                                Actions ▼
+                                    <td class="px-4 py-3 border border-gray-300">
+                                        <span class="px-2 py-1 bg-{{ $member['days_pending'] > 7 ? 'red' : 'yellow' }}-100 text-{{ $member['days_pending'] > 7 ? 'red' : 'yellow' }}-800 rounded text-xs whitespace-nowrap">
+                                            {{ $member['days_pending'] }} day{{ $member['days_pending'] !== 1 ? 's' : '' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3 border border-gray-300">
+                                        <div class="flex gap-1">
+                                            <button onclick="viewMemberDetails({{ $member['id'] }})"
+                                                class="px-2 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded text-xs font-medium border border-blue-200 whitespace-nowrap">
+                                                View
                                             </button>
-                                            <div
-                                                class="hidden group-hover:block absolute right-0 mt-0 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                                                <button onclick="viewMemberDetails({{ $member['id'] }})"
-                                                    class="w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 border-b border-gray-200 text-sm">👁
-                                                    Review</button>
-                                                <button onclick="approveMember({{ $member['id'] }})"
-                                                    class="w-full text-left px-4 py-2 text-green-600 hover:bg-green-50 border-b border-gray-200 text-sm">✓
-                                                    Approve</button>
-                                                <button onclick="rejectMember({{ $member['id'] }})"
-                                                    class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 text-sm">✗
-                                                    Reject</button>
-                                            </div>
+                                            <button onclick="approveMember({{ $member['id'] }})"
+                                                class="px-2 py-1 bg-green-50 text-green-700 hover:bg-green-100 rounded text-xs font-medium border border-green-200 whitespace-nowrap">
+                                                Approve
+                                            </button>
+                                            <button onclick="rejectMember({{ $member['id'] }})"
+                                                class="px-2 py-1 bg-red-50 text-red-700 hover:bg-red-100 rounded text-xs font-medium border border-red-200 whitespace-nowrap">
+                                                Reject
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -204,7 +190,7 @@
                     </table>
                 </div>
             @else
-                <div class="text-center py-12">
+                <div class="text-center py-8 border border-gray-300 rounded-lg">
                     <div class="text-4xl mb-4">✅</div>
                     <h3 class="text-lg font-medium text-gray-900">No pending approvals</h3>
                     <p class="text-gray-500 mt-1">All members have been approved</p>
@@ -213,16 +199,16 @@
         </div>
 
         <!-- All Members Section -->
-        <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
-            <div class="flex justify-between items-center mb-6">
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
                 <div>
                     <h2 class="text-xl font-semibold text-gray-900">All SACCO Members</h2>
                     <p class="text-gray-500 text-sm mt-1">Complete list of Makamithi SACCO members</p>
                 </div>
-                <div class="flex space-x-3">
+                <div class="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
                     <input type="text" placeholder="Search members..."
-                        class="px-4 py-2 border border-gray-300 rounded-lg text-sm" id="searchMembers">
-                    <select class="px-4 py-2 border border-gray-300 rounded-lg text-sm" id="filterDepartment">
+                        class="px-4 py-2 border border-gray-300 rounded-lg text-sm w-full sm:w-48" id="searchMembers">
+                    <select class="px-4 py-2 border border-gray-300 rounded-lg text-sm w-full sm:w-40" id="filterDepartment">
                         <option value="">All Departments</option>
                         @php
                             $departments = $allMembers->pluck('department')->unique()->filter()->sort();
@@ -231,7 +217,7 @@
                             <option value="{{ $dept }}">{{ $dept }}</option>
                         @endforeach
                     </select>
-                    <select class="px-4 py-2 border border-gray-300 rounded-lg text-sm" id="filterStatus">
+                    <select class="px-4 py-2 border border-gray-300 rounded-lg text-sm w-full sm:w-32" id="filterStatus">
                         <option value="">All Status</option>
                         <option value="active">Active</option>
                         <option value="pending">Pending</option>
@@ -240,84 +226,74 @@
                 </div>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto border border-gray-300 rounded-lg">
                 <table class="w-full text-sm border-collapse" id="membersTable">
                     <thead>
-                        <tr class="bg-gray-50 border-b-2 border-gray-300">
-                            <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">No.</th>
-                            <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Member #
-                            </th>
-                            <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Name</th>
-                            <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Department
-                            </th>
-                            <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Savings
-                            </th>
-                            <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Loan
-                                Eligibility</th>
-                            <th class="px-6 py-3 text-left text-gray-600 font-semibold border-r border-gray-300">Status</th>
-                            <th class="px-6 py-3 text-left text-gray-600 font-semibold">Actions</th>
+                        <tr class="bg-gray-50">
+                            <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">#</th>
+                            <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Emp No</th>
+                            <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Full Name</th>
+                            <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Email</th>
+                            <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Department</th>
+                            <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Position</th>
+                            <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Savings (KES)</th>
+                            <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Loan Eligibility</th>
+                            <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Status</th>
+                            <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Actions</th>
                         </tr>
                     </thead>
 
                     <tbody id="membersTableBody">
                         @foreach($allMembers as $index => $member)
-                            <tr class="border-b border-gray-300 hover:bg-gray-50 transition">
-                                <td class="px-6 py-4 text-gray-900 font-medium border-r border-gray-300">{{ $index + 1 }}</td>
-                                <td class="px-6 py-4 font-mono text-gray-900 border-r border-gray-300">
-                                    {{ $member['employee_number'] }}
-                                </td>
-                                <td class="px-6 py-4 border-r border-gray-300">
+                            @php
+                                $joinedDate = \Carbon\Carbon::parse($member['date_joined']);
+                                $joinedAgo = $joinedDate->diffForHumans();
+                            @endphp
+                            <tr class="border-t border-gray-300 hover:bg-gray-50">
+                                <td class="px-4 py-3 text-gray-900 font-medium border border-gray-300 text-center">{{ $index + 1 }}</td>
+                                <td class="px-4 py-3 font-mono text-gray-900 border border-gray-300 whitespace-nowrap">{{ $member['employee_number'] }}</td>
+                                <td class="px-4 py-3 border border-gray-300 whitespace-nowrap">
                                     <div class="font-medium text-gray-900">{{ $member['name'] }}</div>
-                                    <div class="text-gray-500 text-xs">{{ $member['email'] }}</div>
                                 </td>
-                                <td class="px-6 py-4 text-gray-700 border-r border-gray-300">
-                                    {{ $member['department'] }}
-                                    <div class="text-gray-500 text-xs">{{ $member['position'] }}</div>
+                                <td class="px-4 py-3 border border-gray-300">
+                                    <div class="text-gray-700 truncate max-w-[150px]">{{ $member['email'] }}</div>
                                 </td>
-                                <td class="px-6 py-4 border-r border-gray-300">
-                                    <div class="font-medium text-gray-900">KES {{ number_format($member['savings']) }}</div>
+                                <td class="px-4 py-3 text-gray-700 border border-gray-300">{{ $member['department'] }}</td>
+                                <td class="px-4 py-3 text-gray-700 border border-gray-300">{{ $member['position'] }}</td>
+                                <td class="px-4 py-3 border border-gray-300 text-right whitespace-nowrap">
+                                    <div class="font-medium text-gray-900">{{ number_format($member['savings']) }}</div>
                                 </td>
-                                <td class="px-6 py-4 border-r border-gray-300">
-                                    <div class="font-medium text-gray-900">KES {{ number_format($member['loan_eligibility']) }}
-                                    </div>
-                                    <div class="text-gray-500 text-xs">1.5× savings rule</div>
+                                <td class="px-4 py-3 border border-gray-300 text-right whitespace-nowrap">
+                                    <div class="font-medium text-gray-900">{{ number_format($member['loan_eligibility']) }}</div>
                                 </td>
-                                <td class="px-6 py-4 border-r border-gray-300">
+                                <td class="px-4 py-3 border border-gray-300">
                                     @if($member['status'] === 'active')
-                                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">✅
-                                            Active</span>
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium whitespace-nowrap">Active</span>
                                     @elseif($member['status'] === 'pending')
-                                        <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">⏳
-                                            Pending</span>
+                                        <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-medium whitespace-nowrap">Pending</span>
                                     @else
-                                        <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">❌
-                                            Inactive</span>
+                                        <span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-medium whitespace-nowrap">Inactive</span>
                                     @endif
                                     @if($member['loan_status'] === 'default')
-                                        <div class="mt-1"><span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">⚠️
-                                                Defaulting</span></div>
+                                        <div class="mt-1"><span class="px-2 py-0.5 bg-red-100 text-red-800 rounded text-xs whitespace-nowrap">Default</span></div>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="relative inline-block group">
-                                        <button
-                                            class="px-4 py-2 bg-gray-600 text-white rounded-lg text-xs font-medium hover:bg-gray-700 transition flex items-center gap-1">
-                                            Actions ▼
+                                <td class="px-4 py-3 border border-gray-300">
+                                    <div class="flex gap-1">
+                                        <button onclick="viewMemberDetails({{ $member['id'] }})"
+                                            class="px-2 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded text-xs font-medium border border-blue-200 whitespace-nowrap">
+                                            View
                                         </button>
-                                        <div
-                                            class="hidden group-hover:block absolute right-0 mt-0 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                                            <button onclick="viewMemberDetails({{ $member['id'] }})"
-                                                class="w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 border-b border-gray-200 text-sm">👁
-                                                View</button>
-                                            @if($member['status'] === 'pending')
-                                                <button onclick="approveMember({{ $member['id'] }})"
-                                                    class="w-full text-left px-4 py-2 text-green-600 hover:bg-green-50 border-b border-gray-200 text-sm">✓
-                                                    Approve</button>
-                                                <button onclick="rejectMember({{ $member['id'] }})"
-                                                    class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 text-sm">✗
-                                                    Reject</button>
-                                            @endif
-                                        </div>
+                                        @if($member['status'] === 'pending')
+                                            <button onclick="approveMember({{ $member['id'] }})"
+                                                class="px-2 py-1 bg-green-50 text-green-700 hover:bg-green-100 rounded text-xs font-medium border border-green-200 whitespace-nowrap">
+                                                Approve
+                                            </button>
+                                            <button onclick="rejectMember({{ $member['id'] }})"
+                                                class="px-2 py-1 bg-red-50 text-red-700 hover:bg-red-100 rounded text-xs font-medium border border-red-200 whitespace-nowrap">
+                                                Reject
+                                            </button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -326,14 +302,13 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
-            <div class="flex justify-between items-center mt-8 pt-6 border-t">
-                <p class="text-sm text-gray-500" id="paginationInfo">Showing {{ $allMembers->count() }} of
-                    {{ $allMembers->count() }} members
+            <!-- Member Count -->
+            <div class="flex justify-between items-center mt-4">
+                <p class="text-sm text-gray-500" id="paginationInfo">
+                    {{ $allMembers->count() }} member{{ $allMembers->count() !== 1 ? 's' : '' }}
                 </p>
-                <div class="flex space-x-2">
-                    <!-- Simple pagination for now -->
-                    <span class="text-sm text-gray-500">All members loaded</span>
+                <div class="text-sm text-gray-500">
+                    Last updated: {{ now()->format('h:i A') }}
                 </div>
             </div>
         </div>
@@ -348,8 +323,7 @@
                         <div>
                             <div class="flex justify-between text-sm mb-1">
                                 <span class="text-gray-700">{{ $dept['name'] }}</span>
-                                <span class="font-medium text-gray-900">{{ $dept['count'] }} members
-                                    ({{ $dept['percentage'] }}%)</span>
+                                <span class="font-medium text-gray-900">{{ $dept['count'] }} members ({{ $dept['percentage'] }}%)</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-2">
                                 <div class="bg-blue-600 h-2 rounded-full" style="width: {{ $dept['percentage'] }}%"></div>
@@ -364,14 +338,12 @@
                 <h3 class="text-lg font-semibold text-gray-900 mb-6">Member Status Overview</h3>
                 <div class="grid grid-cols-2 gap-6">
                     <div class="text-center p-4 border border-gray-200 rounded-lg">
-                        <div class="text-3xl font-semibold text-green-600 mb-2">{{ $statusOverview['active_members'] }}
-                        </div>
+                        <div class="text-3xl font-semibold text-green-600 mb-2">{{ $statusOverview['active_members'] }}</div>
                         <p class="text-gray-700">Active Members</p>
                         <p class="text-xs text-gray-500 mt-1">Can access all SACCO services</p>
                     </div>
                     <div class="text-center p-4 border border-gray-200 rounded-lg">
-                        <div class="text-3xl font-semibold text-yellow-600 mb-2">{{ $statusOverview['pending_approval'] }}
-                        </div>
+                        <div class="text-3xl font-semibold text-yellow-600 mb-2">{{ $statusOverview['pending_approval'] }}</div>
                         <p class="text-gray-700">Pending Approval</p>
                         <p class="text-xs text-gray-500 mt-1">Awaiting your review</p>
                     </div>
@@ -397,17 +369,13 @@
             <div class="p-6 border-b">
                 <div class="flex justify-between items-center">
                     <h3 class="text-xl font-semibold text-gray-900">Member Details</h3>
-                    <button onclick="closeMemberDetails()" class="text-gray-500 hover:text-gray-700">
-                        ✕
-                    </button>
+                    <button onclick="closeMemberDetails()" class="text-gray-500 hover:text-gray-700">✕</button>
                 </div>
                 <p class="text-gray-500 text-sm mt-1" id="modalMemberNumber"></p>
             </div>
 
             <div class="p-6">
-                <div id="memberDetailsContent">
-                    <!-- Content will be loaded by JavaScript -->
-                </div>
+                <div id="memberDetailsContent"></div>
             </div>
         </div>
     </div>
@@ -423,23 +391,13 @@
             <div class="p-6 space-y-4">
                 <div id="rejectionReason" class="hidden">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Rejection</label>
-                    <textarea id="rejectionComments" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg"
-                        placeholder="Provide reason for rejection..."></textarea>
+                    <textarea id="rejectionComments" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="Provide reason for rejection..."></textarea>
                 </div>
 
                 <div class="flex justify-end space-x-3">
-                    <button onclick="closeApprovalModal()"
-                        class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition">
-                        Cancel
-                    </button>
-                    <button onclick="confirmApproval()" id="confirmApproveBtn"
-                        class="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition hidden">
-                        ✅ Approve Member
-                    </button>
-                    <button onclick="confirmRejection()" id="confirmRejectBtn"
-                        class="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition hidden">
-                        ❌ Reject Member
-                    </button>
+                    <button onclick="closeApprovalModal()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition">Cancel</button>
+                    <button onclick="confirmApproval()" id="confirmApproveBtn" class="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition hidden">✅ Approve</button>
+                    <button onclick="confirmRejection()" id="confirmRejectBtn" class="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition hidden">❌ Reject</button>
                 </div>
             </div>
         </div>
@@ -448,7 +406,7 @@
     <script>
         // State variables
         let currentMemberId = null;
-        let approvalAction = ''; // 'approve' or 'reject'
+        let approvalAction = '';
         let allMembers = @json($allMembers);
 
         // Search and filter functionality
@@ -479,56 +437,50 @@
             tbody.innerHTML = '';
 
             filteredMembers.forEach((member, index) => {
+                const joinedDate = new Date(member.date_joined);
                 const row = document.createElement('tr');
-                row.className = 'border-b border-gray-300 hover:bg-gray-50 transition';
+                row.className = 'border-t border-gray-300 hover:bg-gray-50';
+                
                 row.innerHTML = `
-                                <td class="px-6 py-4 text-gray-900 font-medium border-r border-gray-300">${index + 1}</td>
-                                <td class="px-6 py-4 font-mono text-gray-900 border-r border-gray-300">${member.employee_number}</td>
-                                <td class="px-6 py-4 border-r border-gray-300">
-                                    <div class="font-medium text-gray-900">${member.name}</div>
-                                    <div class="text-gray-500 text-xs">${member.email}</div>
-                                </td>
-                                <td class="px-6 py-4 text-gray-700 border-r border-gray-300">
-                                    ${member.department}
-                                    <div class="text-gray-500 text-xs">${member.position}</div>
-                                </td>
-                                <td class="px-6 py-4 border-r border-gray-300">
-                                    <div class="font-medium text-gray-900">KES ${member.savings.toLocaleString()}</div>
-                                </td>
-                                <td class="px-6 py-4 border-r border-gray-300">
-                                    <div class="font-medium text-gray-900">KES ${member.loan_eligibility.toLocaleString()}</div>
-                                    <div class="text-gray-500 text-xs">1.5× savings rule</div>
-                                </td>
-                                <td class="px-6 py-4 border-r border-gray-300">
-                                    ${member.status === 'active' ?
-                        '<span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">✅ Active</span>' :
-                        member.status === 'pending' ?
-                            '<span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">⏳ Pending</span>' :
-                            '<span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">❌ Inactive</span>'}
-                                    ${member.loan_status === 'default' ?
-                        '<div class="mt-1"><span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">⚠️ Defaulting</span></div>' : ''}
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="relative inline-block group">
-                                        <button class="px-4 py-2 bg-gray-600 text-white rounded-lg text-xs font-medium hover:bg-gray-700 transition flex items-center gap-1">
-                                            Actions ▼
-                                        </button>
-                                        <div class="hidden group-hover:block absolute right-0 mt-0 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                                            <button onclick="viewMemberDetails(${member.id})" class="w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 border-b border-gray-200 text-sm">👁 View</button>
-                                            ${member.status === 'pending' ? `
-                                                <button onclick="approveMember(${member.id})" class="w-full text-left px-4 py-2 text-green-600 hover:bg-green-50 border-b border-gray-200 text-sm">✓ Approve</button>
-                                                <button onclick="rejectMember(${member.id})" class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 text-sm">✗ Reject</button>
-                                            ` : ''}
-                                        </div>
-                                    </div>
-                                </td>
-                            `;
+                    <td class="px-4 py-3 text-gray-900 font-medium border border-gray-300 text-center">${index + 1}</td>
+                    <td class="px-4 py-3 font-mono text-gray-900 border border-gray-300 whitespace-nowrap">${member.employee_number}</td>
+                    <td class="px-4 py-3 border border-gray-300 whitespace-nowrap">
+                        <div class="font-medium text-gray-900">${member.name}</div>
+                    </td>
+                    <td class="px-4 py-3 border border-gray-300">
+                        <div class="text-gray-700 truncate max-w-[150px]">${member.email}</div>
+                    </td>
+                    <td class="px-4 py-3 text-gray-700 border border-gray-300">${member.department}</td>
+                    <td class="px-4 py-3 text-gray-700 border border-gray-300">${member.position}</td>
+                    <td class="px-4 py-3 border border-gray-300 text-right whitespace-nowrap">
+                        <div class="font-medium text-gray-900">${member.savings.toLocaleString()}</div>
+                    </td>
+                    <td class="px-4 py-3 border border-gray-300 text-right whitespace-nowrap">
+                        <div class="font-medium text-gray-900">${member.loan_eligibility.toLocaleString()}</div>
+                    </td>
+                    <td class="px-4 py-3 border border-gray-300">
+                        ${member.status === 'active' ? 
+                            '<span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium whitespace-nowrap">Active</span>' : 
+                         member.status === 'pending' ? 
+                            '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-medium whitespace-nowrap">Pending</span>' : 
+                            '<span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-medium whitespace-nowrap">Inactive</span>'}
+                        ${member.loan_status === 'default' ? 
+                            '<div class="mt-1"><span class="px-2 py-0.5 bg-red-100 text-red-800 rounded text-xs whitespace-nowrap">Default</span></div>' : ''}
+                    </td>
+                    <td class="px-4 py-3 border border-gray-300">
+                        <div class="flex gap-1">
+                            <button onclick="viewMemberDetails(${member.id})" class="px-2 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded text-xs font-medium border border-blue-200 whitespace-nowrap">View</button>
+                            ${member.status === 'pending' ? `
+                                <button onclick="approveMember(${member.id})" class="px-2 py-1 bg-green-50 text-green-700 hover:bg-green-100 rounded text-xs font-medium border border-green-200 whitespace-nowrap">Approve</button>
+                                <button onclick="rejectMember(${member.id})" class="px-2 py-1 bg-red-50 text-red-700 hover:bg-red-100 rounded text-xs font-medium border border-red-200 whitespace-nowrap">Reject</button>
+                            ` : ''}
+                        </div>
+                    </td>
+                `;
                 tbody.appendChild(row);
             });
 
-            // Update pagination info
-            document.getElementById('paginationInfo').textContent =
-                `Showing ${filteredMembers.length} of ${allMembers.length} members`;
+            document.getElementById('paginationInfo').textContent = `${filteredMembers.length} member${filteredMembers.length !== 1 ? 's' : ''}`;
         }
 
         // View member details
@@ -540,101 +492,91 @@
                 if (data.success) {
                     const member = data.member;
                     currentMemberId = id;
-
                     document.getElementById('modalMemberNumber').textContent = `Member: ${member.employee_number}`;
 
                     const detailsHtml = `
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <!-- Personal Information -->
-                                        <div>
-                                            <h4 class="text-lg font-medium text-gray-900 mb-4">Personal Information</h4>
-                                            <div class="space-y-3">
-                                                <div>
-                                                    <p class="text-sm text-gray-500">Full Name</p>
-                                                    <p class="font-medium text-gray-900">${member.name}</p>
-                                                </div>
-                                                <div>
-                                                    <p class="text-sm text-gray-500">Email Address</p>
-                                                    <p class="font-medium text-gray-900">${member.email}</p>
-                                                </div>
-                                                <div>
-                                                    <p class="text-sm text-gray-500">Phone Number</p>
-                                                    <p class="font-medium text-gray-900">${member.phone}</p>
-                                                </div>
-                                                <div>
-                                                    <p class="text-sm text-gray-500">Date Joined</p>
-                                                    <p class="font-medium text-gray-900">${member.date_joined}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Employment Details -->
-                                        <div>
-                                            <h4 class="text-lg font-medium text-gray-900 mb-4">Employment Details</h4>
-                                            <div class="space-y-3">
-                                                <div>
-                                                    <p class="text-sm text-gray-500">Department</p>
-                                                    <p class="font-medium text-gray-900">${member.department}</p>
-                                                </div>
-                                                <div>
-                                                    <p class="text-sm text-gray-500">Position</p>
-                                                    <p class="font-medium text-gray-900">${member.position}</p>
-                                                </div>
-                                                <div>
-                                                    <p class="text-sm text-gray-500">Employee Number</p>
-                                                    <p class="font-medium text-gray-900">${member.employee_number}</p>
-                                                </div>
-                                                <div>
-                                                    <p class="text-sm text-gray-500">Member Status</p>
-                                                    <p class="font-medium ${member.status === 'active' ? 'text-green-600' : member.status === 'pending' ? 'text-yellow-600' : 'text-red-600'}">
-                                                        ${member.status.charAt(0).toUpperCase() + member.status.slice(1)}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Financial Summary -->
-                                        <div class="md:col-span-2">
-                                            <h4 class="text-lg font-medium text-gray-900 mb-4">Financial Summary</h4>
-                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                                <div class="bg-gray-50 p-4 rounded-lg">
-                                                    <p class="text-sm text-gray-500">Total Savings</p>
-                                                    <p class="text-2xl font-semibold text-gray-900">KES ${member.savings.toLocaleString()}</p>
-                                                </div>
-                                                <div class="bg-gray-50 p-4 rounded-lg">
-                                                    <p class="text-sm text-gray-500">Loan Eligibility</p>
-                                                    <p class="text-2xl font-semibold text-gray-900">KES ${member.loan_eligibility.toLocaleString()}</p>
-                                                    <p class="text-xs text-gray-500 mt-1">Based on 1.5× savings rule</p>
-                                                </div>
-                                                <div class="bg-gray-50 p-4 rounded-lg">
-                                                    <p class="text-sm text-gray-500">Loan Status</p>
-                                                    <p class="text-xl font-semibold ${member.loan_status === 'active' ? 'text-blue-600' : member.loan_status === 'default' ? 'text-red-600' : 'text-gray-600'}">
-                                                        ${member.loan_status_text}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Action Buttons -->
-                                        ${member.status === 'pending' ? `
-                                        <div class="md:col-span-2 pt-6 border-t">
-                                            <h4 class="text-lg font-medium text-gray-900 mb-4">Approval Actions</h4>
-                                            <div class="flex space-x-4">
-                                                <button onclick="approveMember(${member.id})"
-                                                        class="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition flex items-center">
-                                                    <span class="mr-2">✅</span>
-                                                    Approve Member
-                                                </button>
-                                                <button onclick="rejectMember(${member.id})"
-                                                        class="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition flex items-center">
-                                                    <span class="mr-2">❌</span>
-                                                    Reject Member
-                                                </button>
-                                            </div>
-                                        </div>
-                                        ` : ''}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Personal Information -->
+                            <div>
+                                <h4 class="text-lg font-medium text-gray-900 mb-4">Personal Information</h4>
+                                <div class="space-y-3">
+                                    <div>
+                                        <p class="text-sm text-gray-500">Full Name</p>
+                                        <p class="font-medium text-gray-900">${member.name}</p>
                                     </div>
-                                `;
+                                    <div>
+                                        <p class="text-sm text-gray-500">Email Address</p>
+                                        <p class="font-medium text-gray-900">${member.email}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Phone Number</p>
+                                        <p class="font-medium text-gray-900">${member.phone}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Date Joined</p>
+                                        <p class="font-medium text-gray-900">${member.date_joined}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Employment Details -->
+                            <div>
+                                <h4 class="text-lg font-medium text-gray-900 mb-4">Employment Details</h4>
+                                <div class="space-y-3">
+                                    <div>
+                                        <p class="text-sm text-gray-500">Department</p>
+                                        <p class="font-medium text-gray-900">${member.department}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Position</p>
+                                        <p class="font-medium text-gray-900">${member.position}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Employee Number</p>
+                                        <p class="font-medium text-gray-900">${member.employee_number}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Member Status</p>
+                                        <p class="font-medium ${member.status === 'active' ? 'text-green-600' : member.status === 'pending' ? 'text-yellow-600' : 'text-red-600'}">${member.status.charAt(0).toUpperCase() + member.status.slice(1)}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Financial Summary -->
+                            <div class="md:col-span-2">
+                                <h4 class="text-lg font-medium text-gray-900 mb-4">Financial Summary</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <p class="text-sm text-gray-500">Total Savings</p>
+                                        <p class="text-2xl font-semibold text-gray-900">KES ${member.savings.toLocaleString()}</p>
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <p class="text-sm text-gray-500">Loan Eligibility</p>
+                                        <p class="text-2xl font-semibold text-gray-900">KES ${member.loan_eligibility.toLocaleString()}</p>
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <p class="text-sm text-gray-500">Loan Status</p>
+                                        <p class="text-xl font-semibold ${member.loan_status === 'active' ? 'text-blue-600' : member.loan_status === 'default' ? 'text-red-600' : 'text-gray-600'}">${member.loan_status_text}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            ${member.status === 'pending' ? `
+                            <div class="md:col-span-2 pt-6 border-t">
+                                <h4 class="text-lg font-medium text-gray-900 mb-4">Approval Actions</h4>
+                                <div class="flex space-x-4">
+                                    <button onclick="approveMember(${member.id})" class="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition flex items-center">
+                                        <span class="mr-2">✅</span> Approve Member
+                                    </button>
+                                    <button onclick="rejectMember(${member.id})" class="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition flex items-center">
+                                        <span class="mr-2">❌</span> Reject Member
+                                    </button>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
 
                     document.getElementById('memberDetailsContent').innerHTML = detailsHtml;
                     document.getElementById('memberDetailsModal').classList.remove('hidden');
@@ -706,7 +648,6 @@
                 });
 
                 if (response.ok) {
-                    // Reload the page to show updated data
                     window.location.reload();
                 } else {
                     alert('Failed to approve member');
@@ -738,7 +679,6 @@
                 });
 
                 if (response.ok) {
-                    // Reload the page to show updated data
                     window.location.reload();
                 } else {
                     alert('Failed to reject member');
@@ -751,45 +691,17 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function () {
-            // Add event listeners for search and filter
             document.getElementById('searchMembers').addEventListener('input', filterMembers);
             document.getElementById('filterDepartment').addEventListener('change', filterMembers);
             document.getElementById('filterStatus').addEventListener('change', filterMembers);
 
-            // Close modals when clicking outside
             window.onclick = function (event) {
                 const detailsModal = document.getElementById('memberDetailsModal');
                 const approvalModal = document.getElementById('approvalModal');
 
-                if (event.target == detailsModal) {
-                    closeMemberDetails();
-                }
-                if (event.target == approvalModal) {
-                    closeApprovalModal();
-                }
+                if (event.target == detailsModal) closeMemberDetails();
+                if (event.target == approvalModal) closeApprovalModal();
             }
         });
     </script>
-
-    <style>
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .progress-bar {
-            height: 0.5rem;
-            border-radius: 0.25rem;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #3b82f6, #10b981);
-        }
-    </style>
 @endsection
