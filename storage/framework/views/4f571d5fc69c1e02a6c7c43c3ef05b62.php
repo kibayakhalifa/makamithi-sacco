@@ -487,11 +487,7 @@
                         <input type="text" name="cheque_number" id="cheque_number" 
                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
                     </div>
-                    <div>
-                        <label for="bank_name" class="block text-sm font-medium text-gray-700">Bank Name</label>
-                        <input type="text" name="bank_name" id="bank_name" 
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
-                    </div>
+                     
                 </div>
 
                 <!-- Bank Transfer Details (Conditional) -->
@@ -633,7 +629,15 @@
                     case 'cheque':
                         document.getElementById('chequeDetails').classList.remove('hidden');
                         document.getElementById('commonBankDetails').classList.remove('hidden');
-                        document.getElementById('cheque_number').required = true;
+                        const chequeFields = ['cheque_number', 'bank_name', 'branch_code'];
+                        chequeFields.forEach(fieldId => {
+                            const field = document.getElementById(fieldId);
+                            if (field) {
+                                field.required = true;
+                                // Also make sure they're visible
+                                field.closest('div').style.display = 'block';
+                            }
+                        });
                         break;
                     case 'bank_transfer':
                         document.getElementById('bankTransferDetails').classList.remove('hidden');

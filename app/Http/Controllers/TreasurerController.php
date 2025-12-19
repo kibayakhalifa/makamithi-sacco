@@ -71,11 +71,11 @@ class TreasurerController extends Controller
 
         $paymentStats = [
             'total_pending' => $pendingDisbursements->sum('amount') +
-                              $pendingWithdrawals->sum('amount') +
-                              $pendingExpenses->sum('amount'),
+                $pendingWithdrawals->sum('amount') +
+                $pendingExpenses->sum('amount'),
             'pending_count' => $pendingDisbursements->count() +
-                              $pendingWithdrawals->count() +
-                              $pendingExpenses->count(),
+                $pendingWithdrawals->count() +
+                $pendingExpenses->count(),
             'today_completed' => Payment::whereDate('payment_date', Carbon::today())
                 ->where('status', 'completed')
                 ->sum('amount'),
@@ -124,9 +124,14 @@ class TreasurerController extends Controller
      */
     public function viewLoan(Loan $loan)
     {
-        $loan->load(['user', 'approver', 'disburser', 'payments' => function ($query) {
-            $query->orderBy('payment_date', 'asc');
-        }]);
+        $loan->load([
+            'user',
+            'approver',
+            'disburser',
+            'payments' => function ($query) {
+                $query->orderBy('payment_date', 'asc');
+            }
+        ]);
 
         return view('treasurer.loan-detail', compact('loan'));
     }
@@ -197,7 +202,7 @@ class TreasurerController extends Controller
                 'amount' => $request->amount,
                 'payment_date' => $request->payment_date ?? now(),
                 'payment_method' => $request->payment_method ?? 'cash',
-                'reference_number' => 'PAY-'.time().rand(100, 999),
+                'reference_number' => 'PAY-' . time() . rand(100, 999),
                 'notes' => $request->notes,
                 'recorded_by' => auth()->id(),
             ]);
@@ -225,7 +230,7 @@ class TreasurerController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error recording payment: '.$e->getMessage(),
+                'message' => 'Error recording payment: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -241,8 +246,10 @@ class TreasurerController extends Controller
         // Compute stats via queries to avoid relying on the paginator collection
         $expenseStats = [
             'total_expenses' => Expense::sum('amount'),
-            'month_expenses' => Expense::whereBetween('expense_date',
-                [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])->sum('amount'),
+            'month_expenses' => Expense::whereBetween(
+                'expense_date',
+                [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()]
+            )->sum('amount'),
             'pending_expenses' => Expense::where('status', 'pending')->count(),
             'approved_expenses' => Expense::where('status', 'approved')->count(),
             'paid_expenses' => Expense::where('payment_status', 'paid')->count(),
@@ -388,7 +395,7 @@ class TreasurerController extends Controller
 
         $loan = Loan::findOrFail($loanId);
 
-        if (! in_array($loan->status, ['active', 'disbursed'])) {
+        if (!in_array($loan->status, ['active', 'disbursed'])) {
             return redirect()->back()
                 ->with('error', 'Loan is not active.');
         }
@@ -433,7 +440,7 @@ class TreasurerController extends Controller
             $payment = Payment::create([
                 'loan_id' => $loanId,
                 'user_id' => $loan->user_id,
-                'payment_ref' => 'PAY-'.date('Ymd').'-'.str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT),
+                'payment_ref' => 'PAY-' . date('Ymd') . '-' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT),
                 'amount' => $request->amount,
                 'principal' => $principal,
                 'interest' => $interest,
@@ -457,14 +464,14 @@ class TreasurerController extends Controller
             // $this->sendPaymentReceipt($loan, $request->amount);
 
             return redirect()->route('treasurer.payments')
-                ->with('success', 'Payment processed successfully. New balance: KES '.number_format($loan->remaining_balance, 2))
+                ->with('success', 'Payment processed successfully. New balance: KES ' . number_format($loan->remaining_balance, 2))
                 ->with('payment_ref', $payment->payment_ref);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
             return redirect()->back()
-                ->with('error', 'Payment failed: '.$e->getMessage());
+                ->with('error', 'Payment failed: ' . $e->getMessage());
         }
     }
 
@@ -535,13 +542,13 @@ class TreasurerController extends Controller
             // ]);
 
             return redirect()->route('treasurer.payments')
-                ->with('success', 'Cheque '.$cheque->cheque_number.' issued for loan '.$loan->loan_number.'. Member eligibility reduced.');
+                ->with('success', 'Cheque ' . $cheque->cheque_number . ' issued for loan ' . $loan->loan_number . '. Member eligibility reduced.');
 
         } catch (\Exception $e) {
             DB::rollBack();
 
             return redirect()->back()
-                ->with('error', 'Cheque issuance failed: '.$e->getMessage());
+                ->with('error', 'Cheque issuance failed: ' . $e->getMessage());
         }
     }
 
@@ -550,34 +557,61 @@ class TreasurerController extends Controller
      */
     public function disburseLoan(Request $request, $loanId)
 {
-    $request->validate([
-        'payment_method' => 'required|in:cheque,bank_transfer,rtgs,cash,mobile_money',
-        'disbursement_date' => 'required|date',
-        'cheque_number' => 'nullable|required_if:payment_method,cheque|string|max:50',
-        'bank_name' => 'nullable|string|max:100',
-        'account_number' => 'nullable|string|max:50',
-        'branch_code' => 'nullable|string|max:50',
-        'reference_number' => 'nullable|string|max:100',
-        'swift_code' => 'nullable|string|max:20',
-        'notes' => 'nullable|string|max:500',
-    ]);
+    \Log::info('=== DISBURSEMENT STARTED ===');
+    \Log::info('Loan ID: ' . $loanId);
+    \Log::info('Payment Method: ' . $request->payment_method);
+
+    try {
+        // Debug: Log all request data
+        \Log::info('Request Data:', $request->all());
+
+        $validated = $request->validate([
+            'payment_method' => 'required|in:cheque,bank_transfer,rtgs,cash,mobile_money',
+            'disbursement_date' => 'required|date',
+            'cheque_number' => 'nullable|required_if:payment_method,cheque|string|max:255|unique:cheque_records,cheque_number',
+            
+            // Bank name ONLY required for bank_transfer, NOT for cheque
+            'bank_name' => 'nullable|required_if:payment_method,bank_transfer|string|max:255',
+            
+            'account_number' => 'nullable|required_if:payment_method,bank_transfer|string|max:255',
+            'branch_code' => 'nullable|string|max:255',
+            'reference_number' => 'nullable|string|max:100',
+            'swift_code' => 'nullable|string|max:20',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        \Log::info('Validation passed');
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        \Log::error('Validation failed: ', $e->errors());
+        return redirect()->back()
+            ->withErrors($e->validator)
+            ->withInput();
+    }
 
     $loan = Loan::with('user')->findOrFail($loanId);
 
+    \Log::info('Loan found: ' . $loan->loan_number . ' - Status: ' . $loan->status);
+
     if ($loan->status !== 'approved') {
+        \Log::warning('Loan not approved. Status: ' . $loan->status);
         return redirect()->back()
-            ->with('error', 'Loan must be approved before disbursement.');
+            ->with('error', 'Loan must be approved before disbursement. Current status: ' . $loan->status);
     }
 
     // Generate reference
     if ($request->payment_method === 'cheque') {
         $reference = $request->cheque_number;
+        \Log::info('Cheque reference: ' . $reference);
     } else {
         $reference = $request->reference_number ?? strtoupper($request->payment_method) . '-' . date('YmdHis');
+        \Log::info('Other payment reference: ' . $reference);
     }
 
     DB::beginTransaction();
     try {
+        \Log::info('Updating loan status to disbursed...');
+
         // Update loan
         $loan->update([
             'status' => 'disbursed',
@@ -586,7 +620,10 @@ class TreasurerController extends Controller
             'next_payment_date' => \Carbon\Carbon::parse($request->disbursement_date)->addMonth(),
         ]);
 
+        \Log::info('Loan updated successfully');
+
         // Create payment WITHOUT triggering events
+        \Log::info('Creating payment record...');
         $payment = new Payment();
         $payment->loan_id = $loan->id;
         $payment->user_id = $loan->user_id;
@@ -599,19 +636,45 @@ class TreasurerController extends Controller
         $payment->posted_date = now();
         $payment->posted_by = auth()->id();
         $payment->notes = $request->notes ?? 'Loan disbursement';
-        
+
         // Save without events
         $payment->saveQuietly();
+        \Log::info('Payment created: ID ' . $payment->id);
 
         // Create cheque record if needed
         if ($request->payment_method === 'cheque') {
-            ChequeRecord::create([
+            \Log::info('Creating cheque record...');
+            \Log::info('Cheque data:', [
+                'cheque_number' => $request->cheque_number,
+                'bank_name' => $request->bank_name,
+                'branch_code' => $request->branch_code,
+                'account_number' => $request->account_number,
+            ]);
+
+            // Check if cheque already exists
+            $existingCheque = ChequeRecord::where('cheque_number', $request->cheque_number)->first();
+            if ($existingCheque) {
+                throw new \Exception('Cheque number ' . $request->cheque_number . ' already exists');
+            }
+
+            // REMOVED: Bank name validation for cheque (not required anymore)
+            // if (empty($request->bank_name)) {
+            //     throw new \Exception('Bank name is required for cheque disbursement');
+            // }
+
+            $bankBranch = $request->branch_code;
+            if (empty($bankBranch)) {
+                $bankBranch = 'Main Branch'; // Default value
+                \Log::warning('Branch code empty, using default: ' . $bankBranch);
+            }
+
+            $cheque = ChequeRecord::create([
                 'loan_id' => $loan->id,
                 'user_id' => $loan->user_id,
                 'cheque_number' => $request->cheque_number,
-                'bank_name' => $request->bank_name,
-                'bank_branch' => $request->branch_code,
-                'account_number' => $request->account_number,
+                'bank_name' => $request->bank_name ?? 'Not Specified', // Use default if empty
+                'bank_branch' => $bankBranch,
+                'account_number' => $request->account_number ?? 'N/A',
                 'amount' => $loan->amount,
                 'purpose' => 'loan_disbursement',
                 'status' => 'issued',
@@ -619,18 +682,35 @@ class TreasurerController extends Controller
                 'issued_by' => auth()->id(),
                 'issue_notes' => $request->notes,
             ]);
+
+            \Log::info('Cheque created successfully: ID ' . $cheque->id);
         }
 
         DB::commit();
+        \Log::info('=== DISBURSEMENT COMPLETED SUCCESSFULLY ===');
 
         return redirect()->route('treasurer.payments')
-            ->with('success', 'Loan ' . $loan->loan_number . ' disbursed successfully!');
+            ->with('success', 'Loan ' . $loan->loan_number . ' disbursed successfully!')
+            ->with('disbursement_ref', $reference);
 
     } catch (\Exception $e) {
         DB::rollBack();
-        
+
+        \Log::error('Disbursement failed: ' . $e->getMessage());
+        \Log::error('Stack trace: ' . $e->getTraceAsString());
+
+        $errorMessage = 'Loan disbursement failed: ' . $e->getMessage();
+
+        // Provide more specific error messages
+        if (str_contains($e->getMessage(), 'cheque_records.cheque_number')) {
+            $errorMessage = 'Cheque number already exists. Please use a unique cheque number.';
+        } elseif (str_contains($e->getMessage(), 'Column cannot be null')) {
+            $errorMessage = 'Missing required information. Please fill all required fields.';
+        }
+
         return redirect()->back()
-            ->with('error', 'Loan disbursement failed: ' . $e->getMessage());
+            ->with('error', $errorMessage)
+            ->withInput();
     }
 }
     /**
@@ -681,7 +761,7 @@ class TreasurerController extends Controller
                 DB::commit();
 
                 return redirect()->route('treasurer.savings')
-                    ->with('success', "Payroll deductions processed successfully. {$processedCount} members, total: KES ".number_format($totalAmount, 2));
+                    ->with('success', "Payroll deductions processed successfully. {$processedCount} members, total: KES " . number_format($totalAmount, 2));
 
             } else {
                 return redirect()->back()
@@ -692,7 +772,7 @@ class TreasurerController extends Controller
             DB::rollBack();
 
             return redirect()->back()
-                ->with('error', 'Payroll processing failed: '.$e->getMessage());
+                ->with('error', 'Payroll processing failed: ' . $e->getMessage());
         }
     }
 
@@ -729,7 +809,7 @@ class TreasurerController extends Controller
         }
 
         return redirect()->route('treasurer.cheques')
-            ->with('success', 'Cheque '.$cheque->cheque_number.' marked as cleared.');
+            ->with('success', 'Cheque ' . $cheque->cheque_number . ' marked as cleared.');
     }
 
     /**
@@ -751,7 +831,7 @@ class TreasurerController extends Controller
         ]);
 
         return redirect()->route('treasurer.expenses')
-            ->with('success', 'Expense #'.$expense->expense_number.' approved successfully.');
+            ->with('success', 'Expense #' . $expense->expense_number . ' approved successfully.');
     }
 
     /**
@@ -800,13 +880,13 @@ class TreasurerController extends Controller
             DB::commit();
 
             return redirect()->route('treasurer.expenses')
-                ->with('success', 'Expense #'.$expense->expense_number.' paid successfully.');
+                ->with('success', 'Expense #' . $expense->expense_number . ' paid successfully.');
 
         } catch (\Exception $e) {
             DB::rollBack();
 
             return redirect()->back()
-                ->with('error', 'Expense payment failed: '.$e->getMessage());
+                ->with('error', 'Expense payment failed: ' . $e->getMessage());
         }
     }
 
@@ -850,7 +930,7 @@ class TreasurerController extends Controller
             Payment::create([
                 'savings_transaction_id' => $transactionId,
                 'user_id' => $transaction->user_id,
-                'payment_ref' => 'WDL-'.date('Ymd').'-'.str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT),
+                'payment_ref' => 'WDL-' . date('Ymd') . '-' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT),
                 'amount' => $transaction->amount,
                 'payment_method' => $request->payment_method ?? 'bank_transfer',
                 'reference_number' => $request->reference_number,
@@ -864,13 +944,13 @@ class TreasurerController extends Controller
             DB::commit();
 
             return redirect()->route('treasurer.savings')
-                ->with('success', 'Withdrawal of KES '.number_format($transaction->amount, 2).' processed successfully.');
+                ->with('success', 'Withdrawal of KES ' . number_format($transaction->amount, 2) . ' processed successfully.');
 
         } catch (\Exception $e) {
             DB::rollBack();
 
             return redirect()->back()
-                ->with('error', 'Withdrawal processing failed: '.$e->getMessage());
+                ->with('error', 'Withdrawal processing failed: ' . $e->getMessage());
         }
     }
 
@@ -904,7 +984,7 @@ class TreasurerController extends Controller
             DB::rollBack();
 
             return redirect()->back()
-                ->with('error', 'Rejection failed: '.$e->getMessage());
+                ->with('error', 'Rejection failed: ' . $e->getMessage());
         }
     }
 
@@ -945,7 +1025,7 @@ class TreasurerController extends Controller
 
             $statusMessage = $difference == 0
                 ? 'Reconciliation completed successfully. Accounts are balanced.'
-                : 'Reconciliation completed with difference of KES '.number_format(abs($difference), 2);
+                : 'Reconciliation completed with difference of KES ' . number_format(abs($difference), 2);
 
             return redirect()->route('treasurer.reconciliation')
                 ->with('success', $statusMessage);
@@ -954,7 +1034,7 @@ class TreasurerController extends Controller
             DB::rollBack();
 
             return redirect()->back()
-                ->with('error', 'Reconciliation failed: '.$e->getMessage());
+                ->with('error', 'Reconciliation failed: ' . $e->getMessage());
         }
     }
 

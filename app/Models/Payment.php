@@ -212,68 +212,68 @@ class Payment extends Model
 
     // NEW: Check if payment is on time
     public function isOnTime()
-{
-    if (!$this->loan) {
-        return true;
-    }
+    {
+        if (!$this->loan) {
+            return true;
+        }
 
-    $dueDate = $this->loan->getDueDateForInstallment($this->installment_number);
-    
-    // If no due date, consider it on time
-    if (!$dueDate || !$this->payment_date) {
-        return true;
-    }
+        $dueDate = $this->loan->getDueDateForInstallment($this->installment_number);
 
-    $paymentDate = \Carbon\Carbon::parse($this->payment_date);
-    return $paymentDate->lte($dueDate);
-}
+        // If no due date, consider it on time
+        if (!$dueDate || !$this->payment_date) {
+            return true;
+        }
+
+        $paymentDate = \Carbon\Carbon::parse($this->payment_date);
+        return $paymentDate->lte($dueDate);
+    }
     // NEW: Calculate penalty if any
     // In Payment.php, update the calculatePenalty() method:
-public function calculatePenalty()
-{
-    // Only calculate penalty for loan payments
-    if (!$this->loan || !$this->loan_id) {
+    public function calculatePenalty()
+    {
+        // Only calculate penalty for loan payments
+        if (!$this->loan || !$this->loan_id) {
+            return 0;
+        }
+
+        // Get due date from loan
+        $dueDate = $this->loan->getDueDateForInstallment($this->installment_number);
+
+        // If no due date or payment date is not set, return 0
+        if (!$dueDate || !$this->payment_date) {
+            return 0;
+        }
+
+        // Check if payment is late
+        $paymentDate = \Carbon\Carbon::parse($this->payment_date);
+
+        if ($paymentDate->greaterThan($dueDate)) {
+            $daysLate = $dueDate->diffInDays($paymentDate);
+
+            // Example penalty calculation: 1% per month or ~0.033% per day
+            $dailyPenaltyRate = 0.00033; // ~1% per month
+            $penalty = $this->amount * $dailyPenaltyRate * $daysLate;
+
+            return max(0, $penalty);
+        }
+
         return 0;
     }
-
-    // Get due date from loan
-    $dueDate = $this->loan->getDueDateForInstallment($this->installment_number);
-    
-    // If no due date or payment date is not set, return 0
-    if (!$dueDate || !$this->payment_date) {
-        return 0;
-    }
-
-    // Check if payment is late
-    $paymentDate = \Carbon\Carbon::parse($this->payment_date);
-    
-    if ($paymentDate->greaterThan($dueDate)) {
-        $daysLate = $dueDate->diffInDays($paymentDate);
-        
-        // Example penalty calculation: 1% per month or ~0.033% per day
-        $dailyPenaltyRate = 0.00033; // ~1% per month
-        $penalty = $this->amount * $dailyPenaltyRate * $daysLate;
-        
-        return max(0, $penalty);
-    }
-
-    return 0;
-}
     // NEW: Get payment type (with early repayment detection)
     public function getTypeAttribute()
     {
         if ($this->is_early_repayment) {
             return 'early_repayment';
         }
-        
+
         if ($this->loan_id) {
             return 'loan_payment';
         }
-        
+
         if ($this->savings_transaction_id) {
             return 'savings_withdrawal';
         }
-        
+
         if ($this->expense_id) {
             return 'expense_payment';
         }
@@ -301,11 +301,11 @@ public function calculatePenalty()
 
         if ($this->loan && $this->loan->user) {
             $beneficiary = $this->loan->user->name;
-            
+
             if ($this->installment_number) {
                 $beneficiary .= " (Installment #{$this->installment_number})";
             }
-            
+
             if ($this->is_early_repayment) {
                 $beneficiary .= " [Early Repayment]";
             }
@@ -320,24 +320,24 @@ public function calculatePenalty()
 
     public function getFormattedAmountAttribute()
     {
-        return 'KES '.number_format($this->amount, 2);
+        return 'KES ' . number_format($this->amount, 2);
     }
 
     // NEW: Get formatted amount with penalty
     public function getTotalAmountAttribute()
     {
         $total = $this->amount;
-        
+
         if ($this->penalty_amount && !$this->penalty_waived) {
             $total += $this->penalty_amount;
         }
-        
+
         return $total;
     }
 
     public function getFormattedTotalAmountAttribute()
     {
-        return 'KES '.number_format($this->total_amount, 2);
+        return 'KES ' . number_format($this->total_amount, 2);
     }
 
     // NEW: Check if payment covers multiple installments
@@ -386,47 +386,28 @@ public function calculatePenalty()
                 $payment->payment_ref = "{$prefix}{$date}-{$sequence}";
             }
 
-            // Set defaults
+            // Set payment date default
             if (empty($payment->payment_date)) {
                 $payment->payment_date = now();
             }
 
+            // REMOVE THIS LINE: Don't auto-set status to 'completed'
+            // if (empty($payment->status)) {
+            //     $payment->status = 'completed';
+            // }
+
+            // Instead, default to 'pending' or leave it empty
             if (empty($payment->status)) {
-                $payment->status = 'completed';
+                $payment->status = 'pending';
             }
 
-            if ($payment->loan_id && empty($payment->installment_number)) {
-                // Auto-determine installment number
-                $lastPayment = self::where('loan_id', $payment->loan_id)
-                    ->whereNotNull('installment_number')
-                    ->orderBy('installment_number', 'desc')
-                    ->first();
-                
-                $payment->installment_number = $lastPayment 
-                    ? $lastPayment->installment_number + 1 
-                    : 1;
-            }
-
-            // Auto-calculate penalty if applicable
-            if ($payment->loan_id && $payment->status === 'completed') {
-                $penalty = $payment->calculatePenalty();
-                if ($penalty > 0 && !$payment->penalty_waived) {
-                    $payment->penalty_amount = $penalty;
-                }
-            }
+            // ... rest of the code ...
         });
 
         static::created(function ($payment) {
             // Update loan balance after payment creation
+            // ONLY if status is 'completed' (not for pending payments)
             if ($payment->loan && $payment->status === 'completed') {
-                $payment->updateLoanBalance();
-            }
-        });
-
-        static::updated(function ($payment) {
-            // Update loan balance if payment amount or status changed
-            if ($payment->loan && $payment->status === 'completed' && 
-                ($payment->isDirty('amount') || $payment->isDirty('status'))) {
                 $payment->updateLoanBalance();
             }
         });
