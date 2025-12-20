@@ -3,21 +3,17 @@
 @section('title', 'Chairman Dashboard')
 
 @php
-    // Temporary fallback if recentActivities is not set
     $recentActivities = $recentActivities ?? collect();
 @endphp
 
 @section('content')
     <div class="space-y-6">
-
         <!-- Header -->
         <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 class="text-2xl font-semibold text-gray-900 tracking-tight">Chairman Dashboard</h1>
-                    <p class="text-gray-500 text-sm mt-1">
-                        Welcome back, {{ auth()->user()->name }}
-                    </p>
+                    <p class="text-gray-500 text-sm mt-1">Welcome back, {{ auth()->user()->name }}</p>
                 </div>
                 <div class="text-right">
                     <p class="text-sm text-gray-500">Today</p>
@@ -66,7 +62,7 @@
             </div>
         </div>
 
-        <!-- PENDING LOANS FIRST - UPDATED to show latest on top -->
+        <!-- PENDING LOANS -->
         <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
                 <div>
@@ -99,7 +95,6 @@
                         </thead>
                         <tbody>
                             @php
-                                // Sort loans by created_at (latest first) and re-index
                                 $sortedLoans = $pendingLoans->sortByDesc('created_at')->values();
                             @endphp
                             @foreach($sortedLoans as $index => $loan)
@@ -158,7 +153,7 @@
             @endif
         </div>
 
-        <!-- PENDING MEMBER REGISTRATIONS SECOND - UPDATED to show latest on top -->
+        <!-- PENDING MEMBER REGISTRATIONS -->
         <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
                 <div>
@@ -188,7 +183,6 @@
                         </thead>
                         <tbody>
                             @php
-                                // Sort members by created_at (latest first) and re-index
                                 $sortedMembers = $pendingMembersList->sortByDesc('created_at')->values();
                             @endphp
                             @foreach($sortedMembers as $index => $member)
@@ -210,10 +204,11 @@
                                     </td>
                                     <td class="px-3 py-2 border border-gray-300">
                                         <div class="flex gap-1">
-                                            <a href="{{ route('chairman.member.details', $member->id) }}" 
+                                            <!-- Changed from <a> link to button with onclick -->
+                                            <button onclick="viewMemberDetails({{ $member->id }})"
                                                 class="px-2 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded text-xs font-medium border border-blue-200">
                                                 View
-                                            </a>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -232,7 +227,6 @@
 
         <!-- Activity + Reports -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
             <!-- Recent Activity -->
             <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
                 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
@@ -284,16 +278,6 @@
                         </div>
                     @endforelse
                 </div>
-                
-                @if($recentActivities->count() > 0)
-                    <div class="mt-4 pt-4 border-t border-gray-100">
-                        <a href="{{ route('chairman.loan-approvals') }}" 
-                           class="flex items-center justify-center gap-1 text-blue-600 hover:text-blue-800 text-xs font-medium">
-                            <span>View All</span>
-                            <span>→</span>
-                        </a>
-                    </div>
-                @endif
             </div>
 
             <!-- Quick Reports -->
@@ -326,6 +310,52 @@
                         <span class="text-base">📋</span>
                         <span class="text-sm font-medium">View All Reports</span>
                     </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Member Details Modal -->
+        <div id="memberDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+            <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xl font-semibold text-gray-900">Member Details</h3>
+                        <button onclick="closeMemberDetails()" class="text-gray-500 hover:text-gray-700">✕</button>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-1" id="modalMemberNumber"></p>
+                </div>
+
+                <div class="p-6">
+                    <div id="memberDetailsContent">
+                        <!-- Content will be loaded here by JavaScript -->
+                        <div class="text-center py-10">
+                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+                            <p class="text-gray-500 mt-4">Loading member details...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Approval Confirmation Modal -->
+        <div id="approvalModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+            <div class="bg-white rounded-2xl w-full max-w-md">
+                <div class="p-6 border-b">
+                    <h3 class="text-xl font-semibold text-gray-900" id="approvalTitle">Approve Member</h3>
+                    <p class="text-gray-500 text-sm mt-1" id="approvalMessage"></p>
+                </div>
+
+                <div class="p-6 space-y-4">
+                    <div id="rejectionReason" class="hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Rejection</label>
+                        <textarea id="rejectionComments" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="Provide reason for rejection..."></textarea>
+                    </div>
+
+                    <div class="flex justify-end space-x-3">
+                        <button onclick="closeApprovalModal()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition">Cancel</button>
+                        <button onclick="confirmApproval()" id="confirmApproveBtn" class="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition hidden">✅ Approve</button>
+                        <button onclick="confirmRejection()" id="confirmRejectBtn" class="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition hidden">❌ Reject</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -378,31 +408,287 @@
                 </form>
             </div>
         </div>
+    </div>
 
-        <script>
-            function openReportModal(reportType) {
-                const titles = {
-                    'financial': 'Generate Financial Report',
-                    'loan_performance': 'Loan Performance Report',
-                    'members': 'Member Statistics Report',
-                    'savings': 'Savings Growth Report'
-                };
-                document.getElementById('reportType').value = reportType;
-                document.getElementById('reportTitle').textContent = titles[reportType];
-                document.getElementById('reportModal').classList.remove('hidden');
+    <script>
+        // State variables
+        let currentMemberId = null;
+        let approvalAction = '';
+
+        // View member details
+        async function viewMemberDetails(id) {
+            try {
+                currentMemberId = id;
+                
+                // Show loading in modal
+                document.getElementById('memberDetailsContent').innerHTML = `
+                    <div class="text-center py-10">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+                        <p class="text-gray-500 mt-4">Loading member details...</p>
+                    </div>
+                `;
+                
+                // Show modal
+                document.getElementById('memberDetailsModal').classList.remove('hidden');
+                
+                // Fetch member details
+                const response = await fetch(`/chairman/member/${id}/details`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const member = data.member;
+                    document.getElementById('modalMemberNumber').textContent = `Employee: ${member.employee_number}`;
+
+                    const detailsHtml = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Personal Information -->
+                            <div>
+                                <h4 class="text-lg font-medium text-gray-900 mb-4">Personal Information</h4>
+                                <div class="space-y-3">
+                                    <div>
+                                        <p class="text-sm text-gray-500">Full Name</p>
+                                        <p class="font-medium text-gray-900">${member.name}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Email Address</p>
+                                        <p class="font-medium text-gray-900">${member.email}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Phone Number</p>
+                                        <p class="font-medium text-gray-900">${member.phone}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Date Joined</p>
+                                        <p class="font-medium text-gray-900">${member.date_joined}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Employment Details -->
+                            <div>
+                                <h4 class="text-lg font-medium text-gray-900 mb-4">Employment Details</h4>
+                                <div class="space-y-3">
+                                    <div>
+                                        <p class="text-sm text-gray-500">Department</p>
+                                        <p class="font-medium text-gray-900">${member.department}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Position</p>
+                                        <p class="font-medium text-gray-900">${member.position}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Employee Number</p>
+                                        <p class="font-medium text-gray-900">${member.employee_number}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Member Status</p>
+                                        <p class="font-medium ${member.status === 'active' ? 'text-green-600' : member.status === 'pending' ? 'text-yellow-600' : 'text-red-600'}">${member.status.charAt(0).toUpperCase() + member.status.slice(1)}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Financial Summary -->
+                            <div class="md:col-span-2">
+                                <h4 class="text-lg font-medium text-gray-900 mb-4">Financial Summary</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <p class="text-sm text-gray-500">Total Savings</p>
+                                        <p class="text-2xl font-semibold text-gray-900">KES ${member.savings.toLocaleString()}</p>
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <p class="text-sm text-gray-500">Loan Eligibility</p>
+                                        <p class="text-2xl font-semibold text-gray-900">KES ${member.loan_eligibility.toLocaleString()}</p>
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <p class="text-sm text-gray-500">Loan Status</p>
+                                        <p class="text-xl font-semibold ${member.loan_status === 'active' ? 'text-blue-600' : member.loan_status === 'default' ? 'text-red-600' : 'text-gray-600'}">${member.loan_status_text}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            ${member.status === 'pending' ? `
+                            <div class="md:col-span-2 pt-6 border-t">
+                                <h4 class="text-lg font-medium text-gray-900 mb-4">Approval Actions</h4>
+                                <div class="flex space-x-4">
+                                    <button onclick="approveMember(${member.id})" class="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition flex items-center">
+                                        <span class="mr-2">✅</span> Approve Member
+                                    </button>
+                                    <button onclick="rejectMember(${member.id})" class="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition flex items-center">
+                                        <span class="mr-2">❌</span> Reject Member
+                                    </button>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+
+                    document.getElementById('memberDetailsContent').innerHTML = detailsHtml;
+                } else {
+                    document.getElementById('memberDetailsContent').innerHTML = `
+                        <div class="text-center py-10">
+                            <div class="text-3xl mb-4">❌</div>
+                            <h3 class="text-lg font-medium text-gray-900">Error Loading Details</h3>
+                            <p class="text-gray-500 mt-1">Failed to load member details. Please try again.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading member details:', error);
+                document.getElementById('memberDetailsContent').innerHTML = `
+                    <div class="text-center py-10">
+                        <div class="text-3xl mb-4">❌</div>
+                        <h3 class="text-lg font-medium text-gray-900">Connection Error</h3>
+                        <p class="text-gray-500 mt-1">Unable to connect to server. Please check your internet connection.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function closeMemberDetails() {
+            document.getElementById('memberDetailsModal').classList.add('hidden');
+            currentMemberId = null;
+        }
+
+        // Approve member
+        function approveMember(id) {
+            const memberName = document.querySelector('#memberDetailsContent .font-medium.text-gray-900')?.textContent || 'this member';
+            currentMemberId = id;
+            approvalAction = 'approve';
+
+            document.getElementById('approvalTitle').textContent = 'Approve Member';
+            document.getElementById('approvalMessage').textContent = `Approve ${memberName} as a SACCO member?`;
+            document.getElementById('rejectionReason').classList.add('hidden');
+            document.getElementById('confirmApproveBtn').classList.remove('hidden');
+            document.getElementById('confirmRejectBtn').classList.add('hidden');
+            document.getElementById('rejectionComments').value = '';
+
+            document.getElementById('approvalModal').classList.remove('hidden');
+        }
+
+        // Reject member
+        function rejectMember(id) {
+            const memberName = document.querySelector('#memberDetailsContent .font-medium.text-gray-900')?.textContent || 'this member';
+            currentMemberId = id;
+            approvalAction = 'reject';
+
+            document.getElementById('approvalTitle').textContent = 'Reject Member';
+            document.getElementById('approvalMessage').textContent = `Reject ${memberName}'s membership application?`;
+            document.getElementById('rejectionReason').classList.remove('hidden');
+            document.getElementById('confirmApproveBtn').classList.add('hidden');
+            document.getElementById('confirmRejectBtn').classList.remove('hidden');
+            document.getElementById('rejectionComments').value = '';
+
+            document.getElementById('approvalModal').classList.remove('hidden');
+        }
+
+        function closeApprovalModal() {
+            document.getElementById('approvalModal').classList.add('hidden');
+            currentMemberId = null;
+            approvalAction = '';
+            document.getElementById('rejectionComments').value = '';
+        }
+
+        async function confirmApproval() {
+            if (!currentMemberId) return;
+
+            try {
+                const formData = new FormData();
+                formData.append('_token', '{{ csrf_token() }}');
+                formData.append('action', 'approve');
+                formData.append('notes', '');
+                formData.append('rejection_reason', ''); // Empty for approval
+
+                const response = await fetch(`/chairman/member/${currentMemberId}/approve`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    alert('Member approved successfully!');
+                    window.location.reload();
+                } else {
+                    const error = await response.json();
+                    alert(`Failed to approve member: ${error.message || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error approving member. Please try again.');
+            }
+        }
+
+        async function confirmRejection() {
+            if (!currentMemberId) return;
+
+            const reason = document.getElementById('rejectionComments').value;
+            if (!reason.trim()) {
+                alert('Please provide a reason for rejection');
+                return;
             }
 
-            function closeReportModal() {
-                document.getElementById('reportModal').classList.add('hidden');
-            }
+            try {
+                const formData = new FormData();
+                formData.append('_token', '{{ csrf_token() }}');
+                formData.append('action', 'reject');
+                formData.append('rejection_reason', reason);
+                formData.append('notes', '');
 
-            // Close modal when clicking outside
+                const response = await fetch(`/chairman/member/${currentMemberId}/approve`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    alert('Member rejected successfully!');
+                    window.location.reload();
+                } else {
+                    const error = await response.json();
+                    alert(`Failed to reject member: ${error.message || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error rejecting member. Please try again.');
+            }
+        }
+
+        // Report modal functions
+        function openReportModal(reportType) {
+            const titles = {
+                'financial': 'Generate Financial Report',
+                'loan_performance': 'Loan Performance Report',
+                'members': 'Member Statistics Report',
+                'savings': 'Savings Growth Report'
+            };
+            document.getElementById('reportType').value = reportType;
+            document.getElementById('reportTitle').textContent = titles[reportType];
+            document.getElementById('reportModal').classList.remove('hidden');
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.add('hidden');
+        }
+
+        // Initialize event listeners
+        document.addEventListener('DOMContentLoaded', function () {
+            // Close modals when clicking outside
             window.onclick = function (event) {
+                const memberModal = document.getElementById('memberDetailsModal');
+                const approvalModal = document.getElementById('approvalModal');
                 const reportModal = document.getElementById('reportModal');
-                if (event.target == reportModal) {
+
+                if (event.target == memberModal) closeMemberDetails();
+                if (event.target == approvalModal) closeApprovalModal();
+                if (event.target == reportModal) closeReportModal();
+            }
+
+            // Close with Escape key
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    closeMemberDetails();
+                    closeApprovalModal();
                     closeReportModal();
                 }
-            }
-        </script>
-    </div>
+            });
+        });
+    </script>
 @endsection

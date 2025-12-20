@@ -438,4 +438,10 @@ class User extends Authenticatable
         // ... rest of your code
         return view('member.profile', compact('user', 'accountSummary', 'loanEligibility'));
     }
+    // In your User model (App\Models\User.php)
+    public function canResendCredentials()
+    {
+        // Define who can resend credentials
+        return in_array($this->role, ['secretary', 'admin', 'chairman', 'treasurer']);
+    }
 }

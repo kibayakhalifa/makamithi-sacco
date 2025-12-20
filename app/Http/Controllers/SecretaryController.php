@@ -18,117 +18,117 @@ use Illuminate\Validation\Rule;
 class SecretaryController extends Controller
 {
     /**
- * Secretary Dashboard
- */
-public function dashboard()
-{
-    // Total members count
-    $totalMembers = User::where('role', 'member')->count();
-    
-    // New members this month
-    $newThisMonth = User::where('role', 'member')
-        ->whereMonth('created_at', now()->month)
-        ->whereYear('created_at', now()->year)
-        ->count();
-    
-    // Total savings
-    $totalSavings = \App\Models\Saving::sum('total_savings') ?? 0;
-    
-    // Savings growth (placeholder - you can implement actual growth calculation)
-    $previousMonthSavings = \App\Models\Saving::whereMonth('last_updated', now()->subMonth()->month)
-        ->sum('total_savings') ?? 0;
-    $savingsGrowth = $previousMonthSavings > 0 ? 
-        (($totalSavings - $previousMonthSavings) / $previousMonthSavings) * 100 : 0;
-    
-    // Active loans
-    $activeLoans = \App\Models\Loan::whereIn('status', ['active', 'disbursed'])->get();
-    $totalActiveLoans = $activeLoans->sum('amount') ?? 0;
-    $activeLoansCount = $activeLoans->count();
-    
-    // Pending members
-    $pendingMembers = User::where('role', 'member')
-        ->where('sacco_status', 'pending')
-        ->orderBy('created_at', 'desc')
-        ->limit(5)
-        ->get();
-    
-    $pendingMembersCount = User::where('role', 'member')
-        ->where('sacco_status', 'pending')
-        ->count();
-    
-    // Pending loans
-    $pendingLoans = \App\Models\Loan::where('status', 'pending')->count();
-    
-    // Recent assisted loans
-    $recentLoans = \App\Models\Loan::with('user')
-        ->where('application_type', 'assisted')
-        ->orWhere('assisted_by', auth()->id())
-        ->orderBy('applied_date', 'desc')
-        ->limit(5)
-        ->get();
-    
-    // Overdue loans (placeholder - implement based on your payment schedule)
-    $overdueLoans = \App\Models\Loan::where('status', 'active')
-        ->where('next_payment_date', '<', now())
-        ->count();
-    
-    // Upcoming meetings (you can create a meetings table or use config/array)
-    $upcomingMeetings = [
-        [
-            'title' => 'Monthly SACCO Meeting',
-            'date' => now()->addDays(3)->format('Y-m-d'),
-            'time' => '2:00 PM',
-            'venue' => 'Board Room',
-            'description' => 'Monthly SACCO review meeting'
-        ],
-        [
-            'title' => 'Loan Committee Meeting',
-            'date' => now()->addDays(7)->format('Y-m-d'),
-            'time' => '10:00 AM',
-            'venue' => 'Conference Room A',
-            'description' => 'Review of pending loan applications'
-        ],
-        [
-            'title' => 'AGM Preparation',
-            'date' => now()->addDays(14)->format('Y-m-d'),
-            'time' => '3:00 PM',
-            'venue' => 'Main Hall',
-            'description' => 'Annual General Meeting preparation'
-        ]
-    ];
-    
-    $stats = [
-        'total_members' => $totalMembers,
-        'new_this_month' => $newThisMonth,
-        'total_savings' => $totalSavings,
-        'savings_growth_percentage' => round($savingsGrowth, 1),
-        'total_active_loans' => $totalActiveLoans,
-        'active_loans_count' => $activeLoansCount,
-        'pending_approvals' => $pendingMembersCount + $pendingLoans,
-        'pending_members' => $pendingMembersCount,
-        'pending_loans' => $pendingLoans,
-        'overdue_loans' => $overdueLoans,
-        'pending_documents' => 0, // Implement if you have document management
-    ];
-    
-    return view('secretary.dashboard', compact(
-        'stats',
-        'pendingMembers',
-        'recentLoans',
-        'upcomingMeetings'
-    ));
-}
+     * Secretary Dashboard
+     */
+    public function dashboard()
+    {
+        // Total members count
+        $totalMembers = User::where('role', 'member')->count();
+
+        // New members this month
+        $newThisMonth = User::where('role', 'member')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+
+        // Total savings
+        $totalSavings = \App\Models\Saving::sum('total_savings') ?? 0;
+
+        // Savings growth (placeholder - you can implement actual growth calculation)
+        $previousMonthSavings = \App\Models\Saving::whereMonth('last_updated', now()->subMonth()->month)
+            ->sum('total_savings') ?? 0;
+        $savingsGrowth = $previousMonthSavings > 0 ?
+            (($totalSavings - $previousMonthSavings) / $previousMonthSavings) * 100 : 0;
+
+        // Active loans
+        $activeLoans = \App\Models\Loan::whereIn('status', ['active', 'disbursed'])->get();
+        $totalActiveLoans = $activeLoans->sum('amount') ?? 0;
+        $activeLoansCount = $activeLoans->count();
+
+        // Pending members
+        $pendingMembers = User::where('role', 'member')
+            ->where('sacco_status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        $pendingMembersCount = User::where('role', 'member')
+            ->where('sacco_status', 'pending')
+            ->count();
+
+        // Pending loans
+        $pendingLoans = \App\Models\Loan::where('status', 'pending')->count();
+
+        // Recent assisted loans
+        $recentLoans = \App\Models\Loan::with('user')
+            ->where('application_type', 'assisted')
+            ->orWhere('assisted_by', auth()->id())
+            ->orderBy('applied_date', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Overdue loans (placeholder - implement based on your payment schedule)
+        $overdueLoans = \App\Models\Loan::where('status', 'active')
+            ->where('next_payment_date', '<', now())
+            ->count();
+
+        // Upcoming meetings (you can create a meetings table or use config/array)
+        $upcomingMeetings = [
+            [
+                'title' => 'Monthly SACCO Meeting',
+                'date' => now()->addDays(3)->format('Y-m-d'),
+                'time' => '2:00 PM',
+                'venue' => 'Board Room',
+                'description' => 'Monthly SACCO review meeting'
+            ],
+            [
+                'title' => 'Loan Committee Meeting',
+                'date' => now()->addDays(7)->format('Y-m-d'),
+                'time' => '10:00 AM',
+                'venue' => 'Conference Room A',
+                'description' => 'Review of pending loan applications'
+            ],
+            [
+                'title' => 'AGM Preparation',
+                'date' => now()->addDays(14)->format('Y-m-d'),
+                'time' => '3:00 PM',
+                'venue' => 'Main Hall',
+                'description' => 'Annual General Meeting preparation'
+            ]
+        ];
+
+        $stats = [
+            'total_members' => $totalMembers,
+            'new_this_month' => $newThisMonth,
+            'total_savings' => $totalSavings,
+            'savings_growth_percentage' => round($savingsGrowth, 1),
+            'total_active_loans' => $totalActiveLoans,
+            'active_loans_count' => $activeLoansCount,
+            'pending_approvals' => $pendingMembersCount + $pendingLoans,
+            'pending_members' => $pendingMembersCount,
+            'pending_loans' => $pendingLoans,
+            'overdue_loans' => $overdueLoans,
+            'pending_documents' => 0, // Implement if you have document management
+        ];
+
+        return view('secretary.dashboard', compact(
+            'stats',
+            'pendingMembers',
+            'recentLoans',
+            'upcomingMeetings'
+        ));
+    }
     /**
      * Store new member registration (From requirements: "When an employee joins the Company, they are registered into the sacco")
      */
     /**
- * Store new member registration
- */
+     * Store new member registration
+     */
 
     /**
- * Display all members with real data
- */
-public function members()
+     * Display all members with real data
+     */
+    public function members()
     {
         $members = User::where('role', 'member')
             ->with(['savings', 'nextOfKin'])
@@ -226,7 +226,7 @@ public function members()
 
             // Create Savings Record - Account starts at zero unless initial topup
             $initialBalance = $validated['initial_topup'] ?? 0;
-            
+
             Saving::create([
                 'user_id' => $user->id,
                 'payroll_savings' => $validated['monthly_savings'],
@@ -287,7 +287,7 @@ public function members()
         if ($user->role !== 'member') {
             abort(403, 'Not a member');
         }
-        
+
         $user->load(['savings', 'nextOfKin', 'loans', 'memberApproval']);
         return view('secretary.members.show', compact('user'));
     }
@@ -300,7 +300,7 @@ public function members()
         if ($user->role !== 'member') {
             abort(403, 'Not a member');
         }
-        
+
         return view('secretary.members.edit', compact('user'));
     }
 
@@ -312,7 +312,7 @@ public function members()
         if ($user->role !== 'member') {
             abort(403, 'Not a member');
         }
-        
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
@@ -337,7 +337,7 @@ public function members()
         if ($user->role !== 'member') {
             abort(403, 'Not a member');
         }
-        
+
         $user->delete();
 
         return redirect()->route('secretary.members')
@@ -352,7 +352,7 @@ public function members()
         if ($user->role !== 'member') {
             abort(403, 'Not a member');
         }
-        
+
         $user->update([
             'sacco_status' => 'active',
             'approved_by' => auth()->id(),
@@ -380,7 +380,7 @@ public function members()
         if ($user->role !== 'member') {
             abort(403, 'Not a member');
         }
-        
+
         $validated = $request->validate([
             'rejection_reason' => 'required|string|max:500',
         ]);
@@ -408,102 +408,150 @@ public function members()
      * Assist with loan application (For illiterate members)
      * From requirements: "A member fills in loan application form"
      */
+    /**
+     * Store assisted loan application 
+     */
     public function storeAssistedLoan(Request $request)
     {
+        // Validate the request
         $validated = $request->validate([
             'member_id' => 'required|exists:users,id',
             'amount' => 'required|numeric|min:1000',
             'period_months' => 'required|integer|min:1|max:60',
+            'loan_type' => 'required|in:first_loan,second_loan',
             'purpose' => 'required|string|max:500',
+            'loan_document' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120', // 5MB
         ]);
 
-        // Get member and their savings
-        $member = User::with('savings')->findOrFail($validated['member_id']);
-
-        if (! $member->savings) {
-            return redirect()->back()
-                ->with('error', 'Member has no savings record.')
-                ->withInput();
-        }
-
-        // Check 1.5× rule (From requirements: "Loans are issued at a rate of 1.5 of your savings")
-        $maxEligible = $member->savings->available_savings * 1.5;
-
-        if ($validated['amount'] > $maxEligible) {
-            return redirect()->back()
-                ->with('error', 'Loan amount exceeds maximum eligibility of KES '.number_format($maxEligible, 2))
-                ->withInput();
-        }
-
-        // Check for active loans if applying for top-up
-        $loanType = $request->loan_type ?? 'normal';
-
-        if ($loanType === 'topup') {
-            $activeLoan = $member->activeLoan;
-
-            if (! $activeLoan) {
-                return redirect()->back()
-                    ->with('error', 'Member has no active loan for top-up.')
-                    ->withInput();
-            }
-
-            // Check 50% repayment rule (From requirements: "paid upto 50% will be eligible for top up loans")
-            if (! $activeLoan->qualifiesForTopUp()) {
-                return redirect()->back()
-                    ->with('error', 'Member must have paid at least 50% of current loan for top-up eligibility.')
-                    ->withInput();
-            }
-
-            // Check total loans don't exceed 1.5× savings
-            $totalLoans = $member->loans()->whereIn('status', ['active', 'disbursed'])->sum('remaining_balance');
-            if (($totalLoans + $validated['amount']) > $maxEligible) {
-                return redirect()->back()
-                    ->with('error', 'Total loans would exceed 1.5× savings limit.')
-                    ->withInput();
-            }
-        }
-
-        DB::beginTransaction();
         try {
-            // Calculate loan details (From requirements: 5% fixed interest calculation)
-            $loanDetails = Loan::calculateLoanDetails($validated['amount'], $validated['period_months']);
+            // Get member with their savings
+            $member = User::with('savings')->findOrFail($validated['member_id']);
 
-            $loan = Loan::create([
-                'user_id' => $validated['member_id'],
-                'loan_number' => Loan::generateLoanNumber(),
-                'loan_type' => $loanType,
-                'amount' => $validated['amount'],
-                'interest_rate' => $loanDetails['interest_rate'],
-                'interest_amount' => $loanDetails['interest_amount'],
-                'total_repayable' => $loanDetails['total_repayable'],
-                'period_months' => $validated['period_months'],
-                'monthly_payment' => $loanDetails['monthly_payment'],
-                'remaining_balance' => $loanDetails['total_repayable'],
-                'months_remaining' => $validated['period_months'],
-                'purpose' => $validated['purpose'],
-                'application_type' => 'assisted',
-                'assisted_by' => auth()->id(),
-                'status' => 'pending',
-                'applied_date' => now(),
-            ]);
+            // Check if member has savings record
+            if (!$member->savings) {
+                return redirect()->back()
+                    ->with('error', 'Member has no savings account. Please set up savings first.')
+                    ->withInput();
+            }
 
-            DB::commit();
+            // Check 1.5× rule
+            $maxEligible = $member->savings->available_savings * 1.5;
 
-            // Send notification to Chairman (From requirements: "goes to the chairman for verification")
-            // $this->sendNotification('new_loan_pending', $loan);
+            if ($validated['amount'] > $maxEligible) {
+                return redirect()->back()
+                    ->with('error', 'Loan amount (KES ' . number_format($validated['amount'], 2) .
+                        ') exceeds maximum eligibility of KES ' . number_format($maxEligible, 2))
+                    ->withInput();
+            }
 
-            return redirect()->route('secretary.dashboard')
-                ->with('success', 'Loan application submitted successfully! Sent to Chairman for verification.');
+            // Loan type specific validations
+            if ($validated['loan_type'] === 'first_loan') {
+                // Check if member already has a first loan
+                $existingFirstLoan = $member->loans()
+                    ->where('loan_type', 'first_loan')
+                    ->whereIn('status', ['pending', 'approved', 'disbursed', 'active'])
+                    ->first();
+
+                if ($existingFirstLoan) {
+                    return redirect()->back()
+                        ->with('error', 'Member already has a first loan. Consider applying for a second loan instead.')
+                        ->withInput();
+                }
+            } elseif ($validated['loan_type'] === 'second_loan') {
+                // Check if member has completed their first loan
+                $completedFirstLoan = $member->loans()
+                    ->where('loan_type', 'first_loan')
+                    ->where('status', 'completed')
+                    ->first();
+
+                if (!$completedFirstLoan) {
+                    return redirect()->back()
+                        ->with('error', 'Member must have completed their first loan before applying for a second loan.')
+                        ->withInput();
+                }
+
+                // Check if member already has a second loan
+                $existingSecondLoan = $member->loans()
+                    ->where('loan_type', 'second_loan')
+                    ->whereIn('status', ['pending', 'approved', 'disbursed', 'active'])
+                    ->first();
+
+                if ($existingSecondLoan) {
+                    return redirect()->back()
+                        ->with('error', 'Member already has a second loan.')
+                        ->withInput();
+                }
+            }
+
+            DB::beginTransaction();
+
+            try {
+                // Upload document
+                $documentPath = null;
+                if ($request->hasFile('loan_document')) {
+                    $file = $request->file('loan_document');
+                    $fileName = time() . '_' . $member->employee_number . '_' . $file->getClientOriginalName();
+                    $documentPath = $file->storeAs('loan_documents', $fileName, 'public');
+                }
+
+                // Calculate loan details
+                $loanDetails = Loan::calculateLoanDetails($validated['amount'], $validated['period_months']);
+
+                // Create the loan application
+                $loan = Loan::create([
+                    'user_id' => $validated['member_id'],
+                    'loan_number' => Loan::generateLoanNumber(),
+                    'loan_type' => $validated['loan_type'],
+                    'amount' => $validated['amount'],
+                    'interest_rate' => $loanDetails['interest_rate'],
+                    'interest_amount' => $loanDetails['interest_amount'],
+                    'total_repayable' => $loanDetails['total_repayable'],
+                    'period_months' => $validated['period_months'],
+                    'monthly_payment' => $loanDetails['monthly_payment'],
+                    'remaining_balance' => $loanDetails['total_repayable'],
+                    'months_remaining' => $validated['period_months'],
+                    'percentage_paid' => 0,
+                    'purpose' => $validated['purpose'],
+                    'support_document' => $documentPath, // Store document path
+                    'application_type' => 'assisted',
+                    'assisted_by' => auth()->id(),
+                    'status' => 'pending',
+                    'applied_date' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                DB::commit();
+
+                // Success message
+                return redirect()->route('secretary.dashboard')
+                    ->with('success', 'Loan application submitted successfully! ' .
+                        'KES ' . number_format($validated['amount'], 2) .
+                        ' for ' . $member->name .
+                        ' has been sent to the Chairman for approval.');
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                \Log::error('Failed to create assisted loan:', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+
+                return redirect()->back()
+                    ->with('error', 'Failed to submit loan application: ' . $e->getMessage())
+                    ->withInput();
+            }
 
         } catch (\Exception $e) {
-            DB::rollBack();
+            \Log::error('Assisted loan validation failed:', [
+                'error' => $e->getMessage()
+            ]);
 
             return redirect()->back()
-                ->with('error', 'Failed to submit loan application: '.$e->getMessage())
+                ->with('error', 'An error occurred: ' . $e->getMessage())
                 ->withInput();
         }
     }
-
     /**
      * Process savings withdrawal request
      * From requirements: "A member can only withdraw savings if they cease to be an employee"
@@ -530,13 +578,13 @@ public function members()
 
             // Record withdrawal transaction
             $transaction = $member->savingsTransactions()->create([
-                'transaction_ref' => 'WD-'.date('Ymd').'-'.str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT),
+                'transaction_ref' => 'WD-' . date('Ymd') . '-' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT),
                 'type' => 'withdrawal',
                 'amount' => $request->amount,
                 'balance_before' => $withdrawalResult['new_balance'] + $request->amount + 2000, // Include retained amount
                 'balance_after' => $withdrawalResult['new_balance'],
                 'status' => 'pending', // Will be completed when cheque is issued
-                'description' => 'Savings withdrawal - '.$request->reason,
+                'description' => 'Savings withdrawal - ' . $request->reason,
                 'transaction_date' => now(),
                 'posted_by' => auth()->id(),
                 'notes' => 'KES 2,000 retained by SACCO as per policy',
@@ -565,13 +613,13 @@ public function members()
             DB::commit();
 
             return redirect()->route('secretary.dashboard')
-                ->with('success', 'Withdrawal request processed. Cheque number '.$cheque->cheque_number.' issued to Treasurer.');
+                ->with('success', 'Withdrawal request processed. Cheque number ' . $cheque->cheque_number . ' issued to Treasurer.');
 
         } catch (\Exception $e) {
             DB::rollBack();
 
             return redirect()->back()
-                ->with('error', 'Withdrawal failed: '.$e->getMessage())
+                ->with('error', 'Withdrawal failed: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -588,7 +636,7 @@ public function members()
 
         $sequence = $lastCheque ? (int) substr($lastCheque->cheque_number, -4) + 1 : 1;
 
-        return "CHQ-{$date}-".str_pad($sequence, 4, '0', STR_PAD_LEFT);
+        return "CHQ-{$date}-" . str_pad($sequence, 4, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -604,21 +652,23 @@ public function members()
         return view('secretary.loan-approvals', compact('loans'));
     }
     /**
- * Show loan assistance page
- */
-public function loanAssist()
-{
-    // Get all active members who can apply for loans
-    $members = User::where('role', 'member')
-        ->where('sacco_status', 'active')
-        ->with(['savings' => function($query) {
-            $query->select('user_id', 'available_savings', 'loan_eligibility');
-        }])
-        ->orderBy('name')
-        ->get(['id', 'employee_number', 'name', 'email', 'department', 'position']);
-    
-    return view('secretary.loan-assist', compact('members'));
-}
+     * Show loan assistance page
+     */
+    public function loanAssist()
+    {
+        // Get all active members who can apply for loans
+        $members = User::where('role', 'member')
+            ->where('sacco_status', 'active')
+            ->with([
+                'savings' => function ($query) {
+                    $query->select('user_id', 'available_savings', 'loan_eligibility');
+                }
+            ])
+            ->orderBy('name')
+            ->get(['id', 'employee_number', 'name', 'email', 'department', 'position']);
+
+        return view('secretary.loan-assist', compact('members'));
+    }
 
 
 
@@ -661,11 +711,11 @@ public function loanAssist()
             $loan->user->notify(new \App\Notifications\LoanApproved($loan));
 
             return redirect()->route('secretary.loan-approvals')
-                ->with('success', 'Loan approved! Amount: KES '.number_format($loan->amount, 2));
+                ->with('success', 'Loan approved! Amount: KES ' . number_format($loan->amount, 2));
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return redirect()->back()->with('error', 'Failed to approve loan: '.$e->getMessage());
+            return redirect()->back()->with('error', 'Failed to approve loan: ' . $e->getMessage());
         }
     }
 
@@ -702,7 +752,7 @@ public function loanAssist()
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return redirect()->back()->with('error', 'Failed to reject loan: '.$e->getMessage());
+            return redirect()->back()->with('error', 'Failed to reject loan: ' . $e->getMessage());
         }
     }
 

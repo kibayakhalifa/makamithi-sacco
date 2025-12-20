@@ -62,4 +62,57 @@ class LoanController extends Controller
             return redirect()->back()->with('error', 'Failed to submit loan application: ' . $e->getMessage());
         }
     }
+    public function show(Loan $loan)
+    {
+        // Check authorization based on role
+        $user = auth()->user();
+        
+        if ($user->hasRole('member')) {
+            // Member can only view their own loans
+            if ($loan->user_id !== $user->id) {
+                abort(403, 'You can only view your own loans.');
+            }
+        }
+        // Treasurer, Chairman, Secretary can view any loan
+        
+        // Load data
+        $loan->load(['user', 'payments' => function($q) {
+            $q->where('status', 'completed')->orderBy('payment_date');
+        }, 'approver', 'disburser']);
+        
+        // Simple calculations
+        $remainingBalance = $loan->remaining_balance;
+        $percentagePaid = $loan->percentage_paid;
+        $monthsPaid = $loan->months_paid;
+        $remainingMonths = max(1, $loan->period_months - $monthsPaid);
+        $futureMonthly = ceil($remainingBalance / $remainingMonths);
+        
+        // Determine which view to show based on role
+        $role = $user->role;
+        
+        return view("loans.show-{$role}", compact(
+            'loan',
+            'remainingBalance',
+            'percentagePaid',
+            'monthsPaid',
+            'futureMonthly'
+        ));
+    }
+    
+    /**
+     * Print schedule for any role
+     */
+    public function printSchedule(Loan $loan)
+    {
+        // Check authorization
+        $user = auth()->user();
+        
+        if ($user->hasRole('member') && $loan->user_id !== $user->id) {
+            abort(403, 'You can only print your own loan schedules.');
+        }
+        
+        $loan->load('user');
+        
+        return view('loans.print-schedule', compact('loan'));
+    }
 }

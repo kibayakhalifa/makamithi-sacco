@@ -87,6 +87,10 @@
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         <div class="border-b border-gray-200">
             <nav class="flex overflow-x-auto">
+                <button onclick="switchTab('completed')" id="completedTab"
+                    class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
+                    ✅ Disbursed Payments ({{ $recentPayments->count() }})
+                </button>
                 <button onclick="switchTab('disbursements')" id="disbursementsTab"
                     class="px-6 py-4 font-medium border-b-2 border-orange-600 text-orange-700 whitespace-nowrap">
                     🏦 Loan Disbursements ({{ $pendingDisbursements->count() }})
@@ -99,10 +103,7 @@
                     class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
                     💸 Expenses ({{ $pendingExpenses->count() }})
                 </button>
-                <button onclick="switchTab('completed')" id="completedTab"
-                    class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
-                    ✅ Completed ({{ $recentPayments->count() }})
-                </button>
+                
             </nav>
         </div>
 
@@ -154,7 +155,7 @@
                                         <div class="flex gap-2">
                                             <button onclick="openDisbursementModal('{{ $loan->id }}', '{{ $loan->amount }}', '{{ $loan->loan_number }}')"
                                                 class="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded text-xs font-medium">
-                                                Disburse
+                                                Approve & Disburse
                                             </button>
                                             <a href="{{ route('member.loans.show', $loan->id) }}"
                                                 class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1.5 rounded text-xs font-medium">

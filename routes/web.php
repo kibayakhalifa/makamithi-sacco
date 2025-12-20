@@ -103,14 +103,14 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/profile', [MemberController::class, 'updateProfile'])->name('profile.update');
         Route::put('/profile/password', [MemberController::class, 'updatePassword'])->name('profile.password');
         //profile view
-         Route::get('/profile', [MemberProfileController::class, 'index'])->name('profile');
-    
+        Route::get('/profile', [MemberProfileController::class, 'index'])->name('profile');
+
         // Profile Update
         Route::patch('/profile', [MemberProfileController::class, 'update'])->name('profile.update');
-        
+
         // Profile Picture Update
-            Route::patch('/profile/picture', [MemberProfileController::class, 'updatePicture'])->name('profile.update-picture');
-            Route::post('/documents', [MemberDocumentController::class, 'store'])->name('documents.store');
+        Route::patch('/profile/picture', [MemberProfileController::class, 'updatePicture'])->name('profile.update-picture');
+        Route::post('/documents', [MemberDocumentController::class, 'store'])->name('documents.store');
         Route::delete('/documents/{document}', [MemberDocumentController::class, 'destroy'])->name('documents.destroy');
         Route::get('/documents/{document}', [MemberDocumentController::class, 'show'])->name('documents.show');
 
@@ -126,11 +126,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/loans/{loan}', [MemberLoanController::class, 'show'])->name('loans.show');
         Route::get('/loans/{loan}/topup', [MemberLoanController::class, 'topup'])->name('loans.topup');
         Route::post('/loans/{loan}/topup', [MemberLoanController::class, 'storeTopup'])->name('loans.topup.store');
+        Route::get('/member/loans/{loan}', [MemberLoanController::class, 'show'])->name('member.loans.show');
 
         // Reports
         Route::get('/reports', [MemberReportController::class, 'index'])->name('reports.index');
         Route::post('/reports/generate', [MemberReportController::class, 'generate'])->name('reports.generate');
         Route::get('/reports/download/{report}', [MemberReportController::class, 'download'])->name('reports.download');
+
+        Route::get('/loans/{loan}/print-schedule', [MemberLoanController::class, 'printSchedule'])
+            ->name('loans.print-schedule');
     });
 
     // ---------- CHAIRMAN ROUTES ----------
@@ -142,6 +146,8 @@ Route::middleware(['auth'])->group(function () {
         // Members Management
         Route::get('/members', [ChairmanController::class, 'members'])->name('members');
         Route::get('/member/{member}/details', [ChairmanController::class, 'getMemberDetails'])->name('member.details');
+        Route::get('/chairman/member/{id}/details', [ChairmanController::class, 'memberDetails'])
+            ->name('chairman.member.details');
         Route::post('/member/{member}/approve', [ChairmanController::class, 'approveMember'])->name('member.approve');
 
         // Loan Approvals
@@ -232,6 +238,10 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/reports/savings', [SecretaryController::class, 'savingsReport'])->name('secretary.reports.savings');
             Route::get('/reports/departments', [SecretaryController::class, 'departmentReport'])->name('secretary.reports.departments');
 
+            Route::post('/members/{user}/resend-credentials', [MemberController::class, 'resendCredentials'])
+                ->name('secretary.members.resend-credentials');
+
+
             // ============ SETTINGS & PROFILE ============
             Route::get('/profile', function () {
                 return view('secretary.profile');
@@ -299,8 +309,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/loans/export', [TreasurerController::class, 'exportLoans'])->name('loans.export');
 
         Route::post('/treasurer/loans/{loan}/record-payment', [App\Http\Controllers\TreasurerController::class, 'recordLoanPayment'])
-        ->name('treasurer.loans.record-payment')
-        ->middleware(['auth']);
+            ->name('treasurer.loans.record-payment')
+            ->middleware(['auth']);
 
         // 3. Savings Summary
         Route::get('/savings', [TreasurerController::class, 'savings'])->name('savings');

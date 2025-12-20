@@ -2,100 +2,109 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Str;
 use App\Models\Loan;
-use App\Models\SavingsTransaction;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use App\Models\SavingsTransaction;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class MemberController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('role:member');
+        $this->middleware('role:member')->except(['resendCredentials']);
     }
 
     /**
      * Display member dashboard
      */
-    
+
     /**
- * Display member dashboard
- */
-public function dashboard()
-{
-    $user = Auth::user();
-    $savings = $user->savings;
-    $nextOfKin = $user->nextOfKin;
+     * Display member dashboard
+     */
+    public function dashboard()
+    {
+        $user = Auth::user();
+        $savings = $user->savings;
+        $nextOfKin = $user->nextOfKin;
 
-    // Get active loans
-    $activeLoans = $user->loans()
-        ->whereIn('status', ['active', 'disbursed'])
-        ->get();
-
-    // Get pending loans
-    $pendingLoans = $user->loans()
-        ->whereIn('status', ['pending', 'under_review'])
-        ->get();
-
-    // Get recent transactions - FIXED: Check if savings exists first
-    $recentTransactions = collect();
-    
-    if ($savings) {
-        $recentTransactions = SavingsTransaction::where('user_id', $user->id)
-            ->orderBy('transaction_date', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->take(5)
+        // Get active loans
+        $activeLoans = $user->loans()
+            ->whereIn('status', ['active', 'disbursed'])
             ->get();
-    }
 
-    // Calculate statistics - FIXED
-    $stats = [
-        'total_savings' => $savings ? $savings->available_savings : 0,
-        'active_loans_count' => $activeLoans->count(),
-        'total_loan_balance' => $activeLoans->sum('remaining_balance'),
-        'withdrawable_amount' => $this->calculateWithdrawableAmount($user),
-        'loan_eligibility' => $savings ? min($savings->available_savings * 1.5, 1000000) : 0, // Cap at 1M
-    ];
-
-    // Get loan payments due this month
-    $duePayments = $activeLoans->flatMap(function ($loan) {
-        return $loan->payments()
-            ->where('status', 'pending')
-            ->whereDate('payment_date', '<=', now()->addDays(7)) // Payments due in next 7 days
+        // Get pending loans
+        $pendingLoans = $user->loans()
+            ->whereIn('status', ['pending', 'under_review'])
             ->get();
-    });
 
-    return view('member.dashboard', compact(
-        'user', 'savings', 'nextOfKin', 'activeLoans',
-        'pendingLoans', 'recentTransactions', 'stats', 'duePayments'
-    ));
-}
+        // Get recent transactions - FIXED: Check if savings exists first
+        $recentTransactions = collect();
 
-/**
- * Calculate withdrawable amount
- */
-private function calculateWithdrawableAmount($user)
-{
-    $savings = $user->savings;
-    
-    if (!$savings) {
-        return 0;
+        if ($savings) {
+            $recentTransactions = SavingsTransaction::where('user_id', $user->id)
+                ->orderBy('transaction_date', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->take(5)
+                ->get();
+        }
+
+        // Calculate statistics - FIXED
+        $stats = [
+            'total_savings' => $savings ? $savings->available_savings : 0,
+            'active_loans_count' => $activeLoans->count(),
+            'total_loan_balance' => $activeLoans->sum('remaining_balance'),
+            'withdrawable_amount' => $this->calculateWithdrawableAmount($user),
+            'loan_eligibility' => $savings ? min($savings->available_savings * 1.5, 1000000) : 0, // Cap at 1M
+        ];
+
+        // Get loan payments due this month
+        $duePayments = $activeLoans->flatMap(function ($loan) {
+            return $loan->payments()
+                ->where('status', 'pending')
+                ->whereDate('payment_date', '<=', now()->addDays(7)) // Payments due in next 7 days
+                ->get();
+        });
+
+        return view('member.dashboard', compact(
+            'user',
+            'savings',
+            'nextOfKin',
+            'activeLoans',
+            'pendingLoans',
+            'recentTransactions',
+            'stats',
+            'duePayments'
+        ));
     }
 
-    // If user is active, they cannot withdraw - only eligible for loans
-    if ($user->sacco_status === 'active') {
-        return 0; // Active members cannot withdraw
-    }
+    /**
+     * Calculate withdrawable amount
+     */
+    private function calculateWithdrawableAmount($user)
+    {
+        $savings = $user->savings;
 
-    // For inactive/exited members, they can withdraw savings minus KES 2,000 retention
-    $withdrawable = $savings->available_savings - 2000;
-    
-    return max(0, $withdrawable); // Ensure not negative
-}
+        if (!$savings) {
+            return 0;
+        }
+
+        // If user is active, they cannot withdraw - only eligible for loans
+        if ($user->sacco_status === 'active') {
+            return 0; // Active members cannot withdraw
+        }
+
+        // For inactive/exited members, they can withdraw savings minus KES 2,000 retention
+        $withdrawable = $savings->available_savings - 2000;
+
+        return max(0, $withdrawable); // Ensure not negative
+    }
 
     /**
      * Display member profile
@@ -182,7 +191,7 @@ private function calculateWithdrawableAmount($user)
                 'address' => $nextOfKinData['next_of_kin_address'],
             ];
 
-            if (! $request->filled(['next_of_kin_name', 'next_of_kin_phone'])) {
+            if (!$request->filled(['next_of_kin_name', 'next_of_kin_phone'])) {
                 return redirect()->route('member.profile')
                     ->with('success', 'Profile updated successfully!');
             }
@@ -215,5 +224,61 @@ private function calculateWithdrawableAmount($user)
 
         return redirect()->route('member.profile')
             ->with('success', 'Password updated successfully!');
+    }
+    public function resendCredentials(User $user)
+    {
+        // Authorization check
+        $allowedRoles = ['secretary', 'admin', 'chairman', 'treasurer'];
+        if (!in_array(auth()->user()->role, $allowedRoles)) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Check if user is pending
+        if ($user->sacco_status === 'pending') {
+            return back()->with('error', 'Cannot resend credentials for pending members. Approve the member first.');
+        }
+
+        try {
+            // Generate a temporary password (8-10 characters with letters and numbers)
+            $temporaryPassword = Str::random(10);
+
+            // Update user's password
+            $user->password = Hash::make($temporaryPassword);
+            $user->save();
+
+            // Log the action with the password (for testing/audit trail)
+            Log::info('New credentials generated for user:', [
+                'user_id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'employee_number' => $user->employee_number,
+                'temporary_password' => $temporaryPassword, // Logged for testing
+                'password_hashed' => 'YES',
+                'timestamp' => now()->toDateTimeString(),
+                'action_by' => auth()->user()->name . ' (ID: ' . auth()->user()->id . ')',
+                'action_by_role' => auth()->user()->role,
+                'note' => 'User should change password on first login'
+            ]);
+
+            // TODO: Uncomment this when you have email setup
+            // Send email to user with credentials
+            // Mail::to($user->email)->send(new CredentialsEmail($user, $temporaryPassword));
+
+            // For now, show the password to the secretary
+            return back()->with([
+                'success' => 'Credentials reset successfully!',
+                'password_info' => [
+                    'user' => $user->name,
+                    'email' => $user->email,
+                    'employee_number' => $user->employee_number,
+                    'temporary_password' => $temporaryPassword,
+                    'message' => 'Share this password with the member. They should change it on first login.'
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to reset credentials for user ' . $user->id . ': ' . $e->getMessage());
+            return back()->with('error', 'Failed to reset credentials: ' . $e->getMessage());
+        }
     }
 }

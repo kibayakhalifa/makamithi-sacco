@@ -157,11 +157,88 @@
                             class="block text-xs uppercase tracking-wider font-semibold text-gray-600 mb-2">Purpose</label>
                         <p class="text-gray-900 bg-gray-50 rounded-lg p-3"><?php echo e($loan->purpose ?? 'Not specified'); ?></p>
                     </div>
-                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!empty($loan->support_document)): ?>
-                        <div class="mt-4">
-                            <label class="block text-sm text-gray-600 font-medium mb-2">Support Document</label>
-                            <p><a href="<?php echo e(asset('storage/' . $loan->support_document)); ?>" target="_blank"
-                                    class="text-blue-600 hover:underline">Open support document</a></p>
+                    <!-- Add this to your loan details section -->
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($loan->support_document): ?>
+                        <div class="mt-6 border-t border-gray-200 pt-6">
+                            <h4 class="font-medium text-gray-900 mb-4">Supporting Document</h4>
+                            
+                            <div class="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div class="flex items-center">
+                                    <?php
+                                        $fileExt = pathinfo($loan->support_document, PATHINFO_EXTENSION);
+                                        $icon = 'fa-file';
+                                        $color = 'text-blue-500';
+                                        
+                                        if (in_array($fileExt, ['pdf'])) {
+                                            $icon = 'fa-file-pdf';
+                                            $color = 'text-red-500';
+                                        } elseif (in_array($fileExt, ['doc', 'docx'])) {
+                                            $icon = 'fa-file-word';
+                                            $color = 'text-blue-600';
+                                        } elseif (in_array($fileExt, ['jpg', 'jpeg', 'png'])) {
+                                            $icon = 'fa-file-image';
+                                            $color = 'text-green-500';
+                                        }
+                                    ?>
+                                    
+                                    <div class="flex items-center justify-center w-12 h-12 bg-white rounded-lg border border-gray-200 mr-4">
+                                        <i class="fas <?php echo e($icon); ?> <?php echo e($color); ?> text-xl"></i>
+                                    </div>
+                                    
+                                    <div>
+                                        <p class="font-medium text-gray-900">
+                                            Loan Application Form
+                                        </p>
+                                        <p class="text-sm text-gray-500 mt-1">
+                                            Uploaded by: <?php echo e($loan->application_type === 'assisted' ? 'Secretary' : 'Member'); ?>
+
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex space-x-2">
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(in_array($fileExt, ['jpg', 'jpeg', 'png'])): ?>
+                                        <a href="<?php echo e(asset('storage/' . $loan->support_document)); ?>" 
+                                        target="_blank"
+                                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium flex items-center">
+                                            <i class="fas fa-eye mr-2"></i> View
+                                        </a>
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    
+                                    <a href="<?php echo e(asset('storage/' . $loan->support_document)); ?>" 
+                                    download
+                                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium flex items-center">
+                                        <i class="fas fa-download mr-2"></i> Download
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <p class="text-xs text-gray-500 mt-3">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($loan->application_type === 'assisted'): ?>
+                                    <i class="fas fa-user-tie mr-1"></i> Assisted by Secretary: 
+                                    <?php echo e($loan->assistedBy->name ?? 'Unknown'); ?>
+
+                                <?php else: ?>
+                                    <i class="fas fa-user mr-1"></i> Self-applied by member
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            </p>
+                        </div>
+                    <?php else: ?>
+                        <div class="mt-6 border-t border-gray-200 pt-6">
+                            <h4 class="font-medium text-gray-900 mb-4">Supporting Document</h4>
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                <div class="flex">
+                                    <div class="text-yellow-500 mr-3">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-yellow-800 font-medium">No supporting document uploaded</p>
+                                        <p class="text-yellow-700 text-sm mt-1">
+                                            This loan application does not have a supporting document attached.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>

@@ -811,7 +811,7 @@ async function submitPayment(form, loanId) {
         // Use the correct route - match your Laravel route pattern
         // OPTION 1: Using the route name (requires meta tag for base URL)
         const baseUrl = document.querySelector('meta[name="base-url"]')?.content || '';
-        const url = `${baseUrl}/treasurer/loans/${loanId}/record-payment`;
+        const url = `${baseUrl}/treasurer/loans/${loanId}/payment`;
         
         // OPTION 2: Hardcode with CSRF token from meta tag
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;

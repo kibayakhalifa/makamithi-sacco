@@ -3,340 +3,252 @@
 <?php $__env->startSection('title', 'Loan Assistance'); ?>
 
 <?php $__env->startSection('content'); ?>
-<div class="space-y-8">
+<div class="space-y-6">
 
     <!-- Header -->
-    <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">Loan Application Assistance</h1>
-                <p class="text-gray-500 mt-1">
-                    Help members who need assistance with their loan applications
-                </p>
-            </div>
-        </div>
+    <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+        <h1 class="text-2xl font-semibold text-gray-900">Loan Application Assistance</h1>
+        <p class="text-gray-500 mt-1">Help members who need assistance with their loan applications</p>
     </div>
 
     <!-- Instructions -->
-    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-6">
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-5">
         <div class="flex items-start">
-            <div class="text-2xl mr-4">📋</div>
+            <div class="text-blue-500 mr-3">
+                <i class="fas fa-info-circle"></i>
+            </div>
             <div>
-                <h3 class="font-medium text-gray-900 mb-2">How to Assist Members</h3>
-                <ol class="list-decimal pl-5 text-gray-700 space-y-1">
-                    <li>Select the member who needs assistance from the dropdown below</li>
-                    <li>Fill in the loan application details on their behalf</li>
-                    <li>Use the real-time calculator to ensure they qualify (1.5× savings rule)</li>
-                    <li>Explain the terms (5% fixed interest) to the member</li>
-                    <li>Submit the application which will go to Chairman for approval</li>
-                </ol>
+                <h3 class="font-medium text-gray-900 mb-1">How to Assist Members</h3>
+                <p class="text-sm text-gray-700">Fill the loan application on behalf of the member. All applications require Chairman approval.</p>
             </div>
         </div>
     </div>
 
-    <!-- Simple Form Version (Like your working one) -->
-    <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
-        <form action="<?php echo e(route('secretary.loans.assisted')); ?>" method="POST" id="loanApplicationForm">
+    <!-- Form -->
+    <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+        <form action="<?php echo e(route('secretary.loans.assisted')); ?>" method="POST" enctype="multipart/form-data" id="loanApplicationForm">
             <?php echo csrf_field(); ?>
             
             <!-- Member Selection -->
-            <div class="mb-8">
-                <h3 class="text-lg leading-6 font-medium text-gray-900 border-b pb-2 mb-4">
-                    <i class="fas fa-user mr-2"></i> Select Member to Assist
-                </h3>
+            <div class="mb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">1. Select Member</h3>
                 
                 <div class="mb-4">
-                    <label for="member_id" class="block text-sm font-medium text-gray-700">
+                    <label for="member_id" class="block text-sm font-medium text-gray-700 mb-2">
                         Member *
                     </label>
                     <select name="member_id" id="member_id" 
-                            class="mt-1 block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent sm:text-sm rounded-lg <?php $__errorArgs = ['member_id'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> border-red-300 <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" required>
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-gray-500 focus:border-transparent" required>
                         <option value="">Select a member</option>
                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $members; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $member): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <?php
                                 $savings = $member->savings->available_savings ?? 0;
                                 $maxLoan = $savings * 1.5;
                             ?>
-                            <option value="<?php echo e($member->id); ?>" <?php echo e(old('member_id') == $member->id ? 'selected' : ''); ?>
-
+                            <option value="<?php echo e($member->id); ?>" 
                                     data-savings="<?php echo e($savings); ?>"
                                     data-max-loan="<?php echo e($maxLoan); ?>">
-                                <?php echo e($member->name); ?> (<?php echo e($member->employee_number); ?>) - 
-                                Savings: KES <?php echo e(number_format($savings, 2)); ?> | 
-                                Max Loan: KES <?php echo e(number_format($maxLoan, 2)); ?>
+                                <?php echo e($member->name); ?> (<?php echo e($member->employee_number); ?>) - Savings: KES <?php echo e(number_format($savings, 2)); ?>
 
                             </option>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </select>
-                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['member_id'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                        <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
-                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
                 
-                <!-- Selected Member Info -->
-                <div id="memberInfo" class="bg-gray-50 p-4 rounded-lg <?php echo e(old('member_id') ? '' : 'hidden'); ?>">
-                    <h4 class="font-medium text-gray-900 mb-2">Member Information</h4>
+                <!-- Member Info -->
+                <div id="memberInfo" class="bg-gray-50 p-4 rounded-lg border border-gray-200 hidden">
                     <div class="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                            <span class="text-gray-500">Available Savings:</span>
-                            <span id="availableSavings" class="ml-2 font-medium text-green-600">
-                                <?php echo e(old('member_id') ? 'KES ' . number_format($members->firstWhere('id', old('member_id'))?->savings?->available_savings ?? 0, 2) : 'KES 0.00'); ?>
-
-                            </span>
+                            <p class="text-gray-500">Available Savings:</p>
+                            <p id="availableSavings" class="font-medium text-green-600">KES 0.00</p>
                         </div>
                         <div>
-                            <span class="text-gray-500">Maximum Loan Eligibility:</span>
-                            <span id="loanEligibility" class="ml-2 font-medium text-blue-600">
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(old('member_id')): ?>
-                                    <?php
-                                        $member = $members->firstWhere('id', old('member_id'));
-                                        $savings = $member->savings->available_savings ?? 0;
-                                        $maxLoan = $savings * 1.5;
-                                    ?>
-                                    KES <?php echo e(number_format($maxLoan, 2)); ?>
-
-                                <?php else: ?>
-                                    KES 0.00
-                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                            </span>
+                            <p class="text-gray-500">Max Loan Eligibility:</p>
+                            <p id="loanEligibility" class="font-medium text-blue-600">KES 0.00</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Loan Details -->
-            <div class="mb-8">
-                <h3 class="text-lg leading-6 font-medium text-gray-900 border-b pb-2 mb-4">
-                    <i class="fas fa-file-signature mr-2"></i> Loan Details
-                </h3>
+            <div class="mb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">2. Loan Details</h3>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label for="amount" class="block text-sm font-medium text-gray-700">
+                        <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">
                             Loan Amount (KES) *
                         </label>
                         <input type="number" name="amount" id="amount" 
-                               class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent <?php $__errorArgs = ['amount'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> border-red-300 <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" 
+                               class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-gray-500 focus:border-transparent" 
                                value="<?php echo e(old('amount')); ?>" min="1000" step="1000" required
+                               placeholder="e.g., 50000"
                                oninput="calculateLoanPreview()">
-                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['amount'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                            <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
-                        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                        <p class="text-xs text-gray-400 mt-1">Minimum: KES 1,000</p>
+                        <p class="text-xs text-gray-500 mt-1">Minimum: KES 1,000</p>
                     </div>
 
                     <div>
-                        <label for="period_months" class="block text-sm font-medium text-gray-700">
+                        <label for="period_months" class="block text-sm font-medium text-gray-700 mb-2">
                             Repayment Period (Months) *
                         </label>
-                        <select name="period_months" id="period_months" 
-                                class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent <?php $__errorArgs = ['period_months'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> border-red-300 <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" 
-                                required
-                                onchange="calculateLoanPreview()">
-                            <option value="">Select period</option>
-                            <option value="6" <?php echo e(old('period_months') == '6' ? 'selected' : ''); ?>>6 Months</option>
-                            <option value="12" <?php echo e(old('period_months') == '12' ? 'selected' : ''); ?>>12 Months</option>
-                            <option value="18" <?php echo e(old('period_months') == '18' ? 'selected' : ''); ?>>18 Months</option>
-                            <option value="24" <?php echo e(old('period_months') == '24' ? 'selected' : ''); ?>>24 Months</option>
-                            <option value="36" <?php echo e(old('period_months') == '36' ? 'selected' : ''); ?>>36 Months</option>
-                            <option value="48" <?php echo e(old('period_months') == '48' ? 'selected' : ''); ?>>48 Months</option>
-                            <option value="60" <?php echo e(old('period_months') == '60' ? 'selected' : ''); ?>>60 Months</option>
-                        </select>
-                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['period_months'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                            <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
-                        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        <input type="number" name="period_months" id="period_months" 
+                               class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-gray-500 focus:border-transparent" 
+                               value="<?php echo e(old('period_months')); ?>" min="1" max="60" required
+                               placeholder="e.g., 12"
+                               oninput="calculateLoanPreview()">
+                        <p class="text-xs text-gray-500 mt-1">1 to 60 months</p>
                     </div>
                 </div>
 
+                <!-- Loan Type -->
                 <div class="mt-6">
-                    <label for="loan_type" class="block text-sm font-medium text-gray-700">
-                        Loan Type
+                    <label class="block text-sm font-medium text-gray-700 mb-3">
+                        Loan Type *
                     </label>
-                    <div class="mt-2 space-y-2">
+                    <div class="flex space-x-6">
                         <div class="flex items-center">
-                            <input type="radio" id="loan_type_normal" name="loan_type" value="normal" 
+                            <input type="radio" id="loan_type_first" name="loan_type" value="first_loan" 
                                    class="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300" 
-                                   <?php echo e(old('loan_type', 'normal') == 'normal' ? 'checked' : ''); ?>>
-                            <label for="loan_type_normal" class="ml-3 block text-sm font-medium text-gray-700">
-                                Normal Loan
+                                   <?php echo e(old('loan_type', 'first_loan') == 'first_loan' ? 'checked' : ''); ?> required>
+                            <label for="loan_type_first" class="ml-2 block text-sm text-gray-700">
+                                First Loan
                             </label>
                         </div>
                         <div class="flex items-center">
-                            <input type="radio" id="loan_type_topup" name="loan_type" value="topup" 
+                            <input type="radio" id="loan_type_second" name="loan_type" value="second_loan" 
                                    class="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300" 
-                                   <?php echo e(old('loan_type') == 'topup' ? 'checked' : ''); ?>>
-                            <label for="loan_type_topup" class="ml-3 block text-sm font-medium text-gray-700">
-                                Top-up Loan (Requires active loan with 50% paid)
+                                   <?php echo e(old('loan_type') == 'second_loan' ? 'checked' : ''); ?>>
+                            <label for="loan_type_second" class="ml-2 block text-sm text-gray-700">
+                                Second Loan
                             </label>
                         </div>
                     </div>
+                    <p class="text-xs text-gray-500 mt-2">Second loan requires completed first loan</p>
                 </div>
 
+                <!-- Purpose -->
                 <div class="mt-6">
-                    <label for="purpose" class="block text-sm font-medium text-gray-700">
+                    <label for="purpose" class="block text-sm font-medium text-gray-700 mb-2">
                         Loan Purpose *
                     </label>
                     <textarea name="purpose" id="purpose" rows="3" 
-                              class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent <?php $__errorArgs = ['purpose'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> border-red-300 <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" 
-                              placeholder="What will the loan be used for? (e.g., School fees, home renovation, medical expenses)" 
+                              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-gray-500 focus:border-transparent" 
+                              placeholder="What will the loan be used for?" 
                               required><?php echo e(old('purpose')); ?></textarea>
-                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['purpose'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                        <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
-                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
 
-                <!-- Loan Calculation Preview -->
-                <div id="loanPreview" class="mt-6 bg-gray-50 p-6 rounded-lg border border-gray-200 <?php echo e((old('amount') && old('period_months')) ? '' : 'hidden'); ?>">
-                    <h4 class="font-medium text-gray-900 mb-4 text-lg">Loan Preview</h4>
-                    <div class="grid grid-cols-2 gap-6">
-                        <div class="space-y-3">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Principal Amount:</span>
-                                <span id="previewPrincipal" class="font-medium">
-                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(old('amount')): ?>
-                                        KES <?php echo e(number_format(old('amount'), 2)); ?>
-
-                                    <?php else: ?>
-                                        KES 0.00
-                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                                </span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Interest (5% per annum):</span>
-                                <span id="previewInterest" class="font-medium text-blue-600">KES 0.00</span>
-                            </div>
+                <!-- Loan Preview -->
+                <div id="loanPreview" class="mt-6 bg-gray-50 p-4 rounded-lg border border-gray-200 hidden">
+                    <h4 class="font-medium text-gray-900 mb-3">Loan Summary</h4>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <p class="text-gray-600">Principal Amount:</p>
+                            <p id="previewPrincipal" class="font-medium">KES 0.00</p>
                         </div>
-                        <div class="space-y-3">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Total Repayable:</span>
-                                <span id="previewTotal" class="font-medium text-green-600">KES 0.00</span>
-                            </div>
-                            <div class="flex justify-between border-t pt-3">
-                                <span class="text-gray-800 font-medium">Monthly Payment:</span>
-                                <span id="previewMonthly" class="text-xl font-semibold text-gray-900">KES 0.00</span>
-                            </div>
+                        <div>
+                            <p class="text-gray-600">Interest (5%):</p>
+                            <p id="previewInterest" class="font-medium text-blue-600">KES 0.00</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Total Repayable:</p>
+                            <p id="previewTotal" class="font-medium text-green-600">KES 0.00</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Monthly Payment:</p>
+                            <p id="previewMonthly" class="font-medium text-gray-900">KES 0.00</p>
                         </div>
                     </div>
-                    <p class="text-xs text-gray-400 mt-3" id="paymentDuration">For 0 months</p>
+                    <p id="paymentDuration" class="text-xs text-gray-500 mt-3">For 0 months</p>
                 </div>
             </div>
 
-            <!-- Eligibility Warning -->
+            <!-- Document Upload -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">3. Upload Loan Application Form</h3>
+                
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition">
+                    <div class="mb-4">
+                        <i class="fas fa-file-upload text-3xl text-gray-400"></i>
+                    </div>
+                    <div class="mb-4">
+                        <label for="loan_document" class="cursor-pointer">
+                            <span class="text-gray-700 font-medium">Click to upload</span>
+                            <p class="text-sm text-gray-500 mt-1">Upload the filled loan application form (PDF, DOC, JPEG, PNG)</p>
+                        </label>
+                        <input type="file" name="loan_document" id="loan_document" 
+                               class="hidden" 
+                               accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                    </div>
+                    
+                    <!-- File Preview -->
+                    <div id="filePreview" class="hidden mt-4">
+                        <div class="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <div class="flex items-center">
+                                <i class="fas fa-file text-blue-500 mr-3"></i>
+                                <div>
+                                    <p id="fileName" class="font-medium text-sm text-gray-900"></p>
+                                    <p id="fileSize" class="text-xs text-gray-500"></p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="removeFile()" class="text-red-500 hover:text-red-700">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <p class="text-xs text-gray-500 mt-4">
+                        Max file size: 5MB. Required for record keeping.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Warning -->
             <div id="eligibilityWarning" class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 hidden">
                 <div class="flex items-center">
-                    <span class="text-red-500 mr-2">⚠️</span>
+                    <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
                     <span class="text-sm text-red-700" id="warningMessage"></span>
                 </div>
             </div>
 
-            <!-- Terms and Conditions -->
-            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6">
+            <!-- Terms -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
                 <div class="flex">
-                    <div class="flex-shrink-0">
-                        <span class="text-yellow-500">📝</span>
+                    <div class="text-yellow-500 mr-3">
+                        <i class="fas fa-exclamation-circle"></i>
                     </div>
-                    <div class="ml-3">
+                    <div>
                         <h3 class="text-sm font-medium text-yellow-800">Important Information</h3>
-                        <div class="mt-2 text-sm text-yellow-700">
-                            <ul class="list-disc pl-5 space-y-1">
-                                <li>Loans are issued at 1.5× the member's available savings</li>
-                                <li>Interest rate is fixed at 5% per annum</li>
-                                <li>For top-up loans, member must have paid at least 50% of current loan</li>
-                                <li>All loans require chairman approval after submission</li>
-                                <li>Member will be notified via email/SMS after approval</li>
-                            </ul>
-                        </div>
+                        <ul class="text-xs text-yellow-700 mt-1 list-disc pl-5 space-y-1">
+                            <li>Loans issued at 1.5× member's savings</li>
+                            <li>5% fixed interest rate</li>
+                            <li>Requires Chairman approval</li>
+                        </ul>
                     </div>
                 </div>
             </div>
 
-            <!-- Form Actions -->
+            <!-- Submit -->
             <div class="pt-6 border-t border-gray-200">
-                <div class="flex justify-end space-x-3">
-                    <button type="reset" 
-                            class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition focus:outline-none focus:ring-2 focus:ring-gray-500"
-                            onclick="resetForm()">
-                        Clear Form
-                    </button>
-                    <button type="submit" 
-                            class="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition focus:outline-none focus:ring-2 focus:ring-gray-500 flex items-center">
-                        <span class="mr-2">📤</span>
-                        Submit Loan Application
+                <div class="flex justify-end">
+                    <button type="submit" class="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition">
+                        <i class="fas fa-paper-plane mr-2"></i>Submit to Chairman
                     </button>
                 </div>
             </div>
         </form>
     </div>
-
 </div>
 
-<!-- Success Toast -->
+<!-- Toasts -->
 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
-<div id="successToast" class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+<div id="successToast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50">
     <?php echo e(session('success')); ?>
 
 </div>
 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-<!-- Error Toast -->
 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('error')): ?>
-<div id="errorToast" class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+<div id="errorToast" class="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg z-50">
     <?php echo e(session('error')); ?>
 
 </div>
@@ -345,7 +257,7 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
 
 <?php $__env->startPush('scripts'); ?>
 <script>
-    // Show/hide member info when member is selected
+    // Show/hide member info
     document.getElementById('member_id').addEventListener('change', function() {
         const memberId = this.value;
         const memberInfoDiv = document.getElementById('memberInfo');
@@ -362,8 +274,6 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                 'KES ' + maxLoan.toLocaleString('en-US', {minimumFractionDigits: 2});
             
             memberInfoDiv.classList.remove('hidden');
-            
-            // Validate loan amount if already entered
             validateLoanAmount();
         } else {
             memberInfoDiv.classList.add('hidden');
@@ -377,13 +287,11 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
         const loanPreview = document.getElementById('loanPreview');
         
         if (amount > 0 && period > 0) {
-            // Calculate 5% annual interest
-            const interestRate = 0.05; // 5% per year
+            const interestRate = 0.05;
             const interestAmount = amount * interestRate * (period / 12);
             const totalRepayable = amount + interestAmount;
             const monthlyPayment = period > 0 ? totalRepayable / period : 0;
             
-            // Update preview
             document.getElementById('previewPrincipal').textContent = 
                 'KES ' + amount.toLocaleString('en-US', {minimumFractionDigits: 2});
             document.getElementById('previewInterest').textContent = 
@@ -396,15 +304,13 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                 `For ${period} months (${(period/12).toFixed(1)} years)`;
             
             loanPreview.classList.remove('hidden');
-            
-            // Validate against eligibility
             validateLoanAmount();
         } else {
             loanPreview.classList.add('hidden');
         }
     }
     
-    // Validate loan amount against eligibility
+    // Validate loan amount
     function validateLoanAmount() {
         const amount = parseFloat(document.getElementById('amount').value) || 0;
         const memberSelect = document.getElementById('member_id');
@@ -419,52 +325,59 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                 warningMessage.textContent = 
                     `Loan amount exceeds maximum eligibility of KES ${maxEligible.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
                 warningDiv.classList.remove('hidden');
-                
-                // Add red border to amount input
-                document.getElementById('amount').classList.add('border-red-300', 'focus:ring-red-500', 'focus:border-red-500');
+                document.getElementById('amount').classList.add('border-red-300');
             } else {
                 warningDiv.classList.add('hidden');
-                document.getElementById('amount').classList.remove('border-red-300', 'focus:ring-red-500', 'focus:border-red-500');
+                document.getElementById('amount').classList.remove('border-red-300');
             }
         }
     }
     
-    // Reset form
-    function resetForm() {
-        document.getElementById('memberInfo').classList.add('hidden');
-        document.getElementById('loanPreview').classList.add('hidden');
-        document.getElementById('eligibilityWarning').classList.add('hidden');
-        document.getElementById('amount').classList.remove('border-red-300', 'focus:ring-red-500', 'focus:border-red-500');
-    }
-    
-    // Auto-hide toasts after 5 seconds
-    document.addEventListener('DOMContentLoaded', function() {
-        const toasts = document.querySelectorAll('#successToast, #errorToast');
-        toasts.forEach(toast => {
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => {
-                    if (toast.parentNode) {
-                        toast.parentNode.removeChild(toast);
-                    }
-                }, 300);
-            }, 5000);
-        });
+    // File upload handling
+    document.getElementById('loan_document').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const filePreview = document.getElementById('filePreview');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
         
-        // Calculate preview if form has old values
-        if (document.getElementById('amount').value && document.getElementById('period_months').value) {
-            calculateLoanPreview();
+        if (file) {
+            // Check file size (5MB limit)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB');
+                this.value = '';
+                return;
+            }
+            
+            // Check file type
+            const validTypes = ['application/pdf', 'application/msword', 
+                              'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                              'image/jpeg', 'image/jpg', 'image/png'];
+            if (!validTypes.includes(file.type)) {
+                alert('Please upload PDF, DOC, or image files only');
+                this.value = '';
+                return;
+            }
+            
+            // Show file preview
+            fileName.textContent = file.name;
+            fileSize.textContent = (file.size / 1024).toFixed(1) + ' KB';
+            filePreview.classList.remove('hidden');
         }
     });
     
-    // Form validation on submit
+    function removeFile() {
+        document.getElementById('loan_document').value = '';
+        document.getElementById('filePreview').classList.add('hidden');
+    }
+    
+    // Form validation
     document.getElementById('loanApplicationForm').addEventListener('submit', function(e) {
         const memberId = document.getElementById('member_id').value;
         const amount = parseFloat(document.getElementById('amount').value) || 0;
         const period = document.getElementById('period_months').value;
         const purpose = document.getElementById('purpose').value.trim();
+        const loanDocument = document.getElementById('loan_document').files[0];
         
-        // Basic validation
         if (!memberId) {
             e.preventDefault();
             alert('Please select a member');
@@ -477,9 +390,9 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
             return false;
         }
         
-        if (!period) {
+        if (!period || period < 1 || period > 60) {
             e.preventDefault();
-            alert('Please select a repayment period');
+            alert('Please enter a valid repayment period (1-60 months)');
             return false;
         }
         
@@ -489,26 +402,33 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
             return false;
         }
         
-        // Eligibility validation
-        const selectedOption = document.getElementById('member_id').options[document.getElementById('member_id').selectedIndex];
-        if (selectedOption) {
-            const maxEligible = parseFloat(selectedOption.getAttribute('data-max-loan')) || 0;
-            if (amount > maxEligible) {
-                e.preventDefault();
-                alert('Loan amount exceeds maximum eligibility of KES ' + 
-                      maxEligible.toLocaleString('en-US', {minimumFractionDigits: 2}));
-                return false;
-            }
+        if (!loanDocument) {
+            e.preventDefault();
+            alert('Please upload the loan application form document');
+            return false;
         }
         
-        // Show loading state
+        // Show loading
         const submitBtn = this.querySelector('button[type="submit"]');
         if (submitBtn) {
-            submitBtn.innerHTML = '<span class="mr-2">⏳</span> Processing...';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
             submitBtn.disabled = true;
         }
+    });
+    
+    // Auto-hide toasts
+    document.addEventListener('DOMContentLoaded', function() {
+        const toasts = document.querySelectorAll('#successToast, #errorToast');
+        toasts.forEach(toast => {
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        });
         
-        return true;
+        if (document.getElementById('amount').value) {
+            calculateLoanPreview();
+        }
     });
 </script>
 <?php $__env->stopPush(); ?>

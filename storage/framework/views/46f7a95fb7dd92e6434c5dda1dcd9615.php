@@ -153,60 +153,155 @@
                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
 
-                <!-- Payment Schedule Table -->
+                <!-- In your loan details view, replace the payment schedule section with: -->
+                                <!-- SIMPLE PAYMENT SCHEDULE -->
                 <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">Payment Schedule</h2>
-                        <p class="text-sm text-gray-500 mt-1"><?php echo e($loan->period_months); ?> monthly payments</p>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h2 class="text-lg font-semibold text-gray-900">Payment Schedule</h2>
+                                <p class="text-sm text-gray-500"><?php echo e($loan->period_months); ?> monthly installments</p>
+                            </div>
+                            <a href="<?php echo e(route('member.loans.print-schedule', $loan)); ?>" target="_blank"
+                            class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 text-sm">
+                                🖨️ Print
+                            </a>
+                        </div>
                     </div>
 
+                    <!-- Quick Summary -->
+                    <div class="px-6 py-4 bg-gray-50 border-b">
+                        <div class="grid grid-cols-3 gap-4 text-sm">
+                            <div>
+                                <div class="text-gray-600">Monthly Payment</div>
+                                <div class="font-semibold">KES <?php echo e(number_format($loan->monthly_payment, 0)); ?></div>
+                            </div>
+                            <div>
+                                <div class="text-gray-600">Remaining</div>
+                                <div class="font-semibold">KES <?php echo e(number_format($loan->remaining_balance, 0)); ?></div>
+                            </div>
+                            <div>
+                                <div class="text-gray-600">Months Left</div>
+                                <div class="font-semibold"><?php echo e($loan->period_months - $loan->months_paid); ?></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- The Simple Table -->
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
+                        <table class="w-full">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-gray-600 font-medium">#</th>
-                                    <th class="px-4 py-3 text-left text-gray-600 font-medium">Due Date</th>
-                                    <th class="px-4 py-3 text-left text-gray-600 font-medium">Amount (KES)</th>
-                                    <th class="px-4 py-3 text-left text-gray-600 font-medium">Status</th>
-                                    <th class="px-4 py-3 text-left text-gray-600 font-medium">Balance</th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">#</th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Due Date</th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Amount</th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Status</th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Balance After</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $paymentSchedule; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $schedule): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <tr class="hover:bg-gray-50 <?php echo e($schedule['is_next'] ? 'bg-blue-50' : ''); ?>">
-                                    <td class="px-4 py-3 text-gray-700"><?php echo e($schedule['installment']); ?></td>
-                                    <td class="px-4 py-3">
-                                        <div class="text-gray-900"><?php echo e($schedule['due_date']->format('d M Y')); ?></div>
-                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($schedule['is_next']): ?>
-                                        <div class="text-xs text-blue-600 font-medium">Next Payment</div>
-                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                                    </td>
-                                    <td class="px-4 py-3 font-medium text-gray-900">
-                                        <?php echo e(number_format($schedule['amount'], 0)); ?>
+                                <?php
+                                    // SIMPLE CALCULATION
+                                    $remainingBalance = $loan->remaining_balance;
+                                    $monthsPaid = $loan->months_paid;
+                                    $totalMonths = $loan->period_months;
+                                    
+                                    // What each future payment should be
+                                    $remainingMonths = max(1, $totalMonths - $monthsPaid);
+                                    $futurePayment = $remainingMonths > 0 ? ceil($remainingBalance / $remainingMonths) : 0;
+                                    
+                                    $startDate = $loan->disbursed_date ? \Carbon\Carbon::parse($loan->disbursed_date) : now();
+                                ?>
+                                
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php for($i = 1; $i <= $totalMonths; $i++): ?>
+                                    <?php
+                                        $dueDate = $startDate->copy()->addMonths($i);
+                                        $isPaid = $i <= $monthsPaid;
+                                        $isNext = $i == $monthsPaid + 1;
+                                        $isPastDue = !$isPaid && $dueDate < now();
+                                        
+                                        // Amount for this installment
+                                        $amount = $isPaid ? $loan->monthly_payment : $futurePayment;
+                                        
+                                        // Calculate balance after this payment
+                                        if ($isPaid) {
+                                            // Already paid - balance was reduced
+                                            $balanceAfter = $remainingBalance + $amount; // Add back to show correctly
+                                        } else {
+                                            // Future payment - reduce balance
+                                            $balanceAfter = max(0, $remainingBalance - $amount);
+                                        }
+                                    ?>
+                                    
+                                    <tr class="<?php echo e($isNext ? 'bg-blue-50' : ''); ?> hover:bg-gray-50">
+                                        <td class="px-4 py-3 text-gray-700">
+                                            <?php echo e($i); ?>
 
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($schedule['status'] === 'paid'): ?>
-                                        <span class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full">Paid</span>
-                                        <?php elseif($schedule['is_overdue']): ?>
-                                        <span class="px-2 py-1 text-xs font-semibold bg-red-100 text-red-700 rounded-full">Overdue</span>
-                                        <?php elseif($schedule['is_next']): ?>
-                                        <span class="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-700 rounded-full">Due</span>
-                                        <?php else: ?>
-                                        <span class="px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-700 rounded-full">Pending</span>
-                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                                    </td>
-                                    <td class="px-4 py-3 font-medium text-gray-900">
-                                        KES <?php echo e(number_format($schedule['remaining_balance'], 0)); ?>
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($isNext): ?><span class="text-xs text-blue-600 ml-1">→</span><?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                        </td>
+                                        
+                                        <td class="px-4 py-3">
+                                            <div><?php echo e($dueDate->format('d M Y')); ?></div>
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($isNext): ?>
+                                            <div class="text-xs text-blue-600 font-medium">Next Payment</div>
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                        </td>
+                                        
+                                        <td class="px-4 py-3 font-medium">
+                                            <div>KES <?php echo e(number_format($amount, 0)); ?></div>
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$isPaid && $amount != $loan->monthly_payment): ?>
+                                            <div class="text-xs text-gray-500">
+                                                <span class="line-through">KES <?php echo e(number_format($loan->monthly_payment, 0)); ?></span>
+                                                <span class="text-green-600 ml-1">↓ Reduced</span>
+                                            </div>
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                        </td>
+                                        
+                                        <td class="px-4 py-3">
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($isPaid): ?>
+                                            <span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">✓ Paid</span>
+                                            <?php elseif($isNext): ?>
+                                            <span class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">Due</span>
+                                            <?php elseif($isPastDue): ?>
+                                            <span class="px-2 py-1 text-xs bg-red-100 text-red-700 rounded-full">Overdue</span>
+                                            <?php else: ?>
+                                            <span class="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full">Pending</span>
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                        </td>
+                                        
+                                        <td class="px-4 py-3 font-medium">
+                                            KES <?php echo e(number_format($balanceAfter, 0)); ?>
 
-                                    </td>
-                                </tr>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                        </td>
+                                    </tr>
+                                    
+                                    <?php
+                                        // Update running balance for next row
+                                        $remainingBalance = $balanceAfter;
+                                    ?>
+                                <?php endfor; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Simple Legend -->
+                    <div class="px-6 py-3 bg-gray-50 border-t text-sm text-gray-600">
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 bg-green-100 border border-green-300 rounded-full"></div>
+                                <span>Paid</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 bg-blue-100 border border-blue-300 rounded-full"></div>
+                                <span>Next Payment</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 bg-gray-100 border border-gray-300 rounded-full"></div>
+                                <span>Future Payments</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
             <!-- Sidebar -->
             <div class="space-y-6">

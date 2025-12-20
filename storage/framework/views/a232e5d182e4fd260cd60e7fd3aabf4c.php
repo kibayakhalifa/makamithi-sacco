@@ -137,7 +137,7 @@
                                 <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Department</th>
                                 <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Position</th>
                                 <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Submitted</th>
-                                <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Days Ago</th>
+                                <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Time</th>
                                 <th class="px-4 py-3 text-left text-gray-700 font-semibold border border-gray-300">Actions</th>
                             </tr>
                         </thead>
@@ -164,25 +164,26 @@
                                         <div class="text-gray-500 text-xs">By <?php echo e($member['submitted_by']); ?></div>
                                     </td>
                                     <td class="px-4 py-3 border border-gray-300">
-                                        <span class="px-2 py-1 bg-<?php echo e($member['days_pending'] > 7 ? 'red' : 'yellow'); ?>-100 text-<?php echo e($member['days_pending'] > 7 ? 'red' : 'yellow'); ?>-800 rounded text-xs whitespace-nowrap">
-                                            <?php echo e($member['days_pending']); ?> day<?php echo e($member['days_pending'] !== 1 ? 's' : ''); ?>
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($submittedDate->diffInDays() > 7): ?>
+                                            <span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs whitespace-nowrap">
+                                                <?php echo e($submittedAgo); ?>
 
-                                        </span>
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs whitespace-nowrap">
+                                                <?php echo e($submittedAgo); ?>
+
+                                            </span>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     </td>
+
                                     <td class="px-4 py-3 border border-gray-300">
                                         <div class="flex gap-1">
                                             <button onclick="viewMemberDetails(<?php echo e($member['id']); ?>)"
                                                 class="px-2 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded text-xs font-medium border border-blue-200 whitespace-nowrap">
                                                 View
                                             </button>
-                                            <button onclick="approveMember(<?php echo e($member['id']); ?>)"
-                                                class="px-2 py-1 bg-green-50 text-green-700 hover:bg-green-100 rounded text-xs font-medium border border-green-200 whitespace-nowrap">
-                                                Approve
-                                            </button>
-                                            <button onclick="rejectMember(<?php echo e($member['id']); ?>)"
-                                                class="px-2 py-1 bg-red-50 text-red-700 hover:bg-red-100 rounded text-xs font-medium border border-red-200 whitespace-nowrap">
-                                                Reject
-                                            </button>
+                                            
                                         </div>
                                     </td>
                                 </tr>
@@ -285,16 +286,7 @@
                                             class="px-2 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded text-xs font-medium border border-blue-200 whitespace-nowrap">
                                             View
                                         </button>
-                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($member['status'] === 'pending'): ?>
-                                            <button onclick="approveMember(<?php echo e($member['id']); ?>)"
-                                                class="px-2 py-1 bg-green-50 text-green-700 hover:bg-green-100 rounded text-xs font-medium border border-green-200 whitespace-nowrap">
-                                                Approve
-                                            </button>
-                                            <button onclick="rejectMember(<?php echo e($member['id']); ?>)"
-                                                class="px-2 py-1 bg-red-50 text-red-700 hover:bg-red-100 rounded text-xs font-medium border border-red-200 whitespace-nowrap">
-                                                Reject
-                                            </button>
-                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                        
                                     </div>
                                 </td>
                             </tr>

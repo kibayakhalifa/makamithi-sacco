@@ -71,7 +71,6 @@ class Loan extends Model
     {
         return $this->hasMany(Payment::class)->orderBy('payment_date', 'asc');
     }
-    
 
     public function approver()
     {
@@ -93,9 +92,40 @@ class Loan extends Model
         return $this->belongsTo(Loan::class, 'parent_loan_id');
     }
 
+    public function assistedBy()
+    {
+        return $this->belongsTo(User::class, 'assisted_by');
+    }
+
     public function childLoans()
     {
         return $this->hasMany(Loan::class, 'parent_loan_id');
+    }
+
+    // ==================== NEW: LOAN SCHEDULE RELATIONSHIPS ====================
+    public function schedules()
+    {
+        return $this->hasMany(LoanSchedule::class)->orderBy('installment_number');
+    }
+
+    public function nextSchedule()
+    {
+        return $this->hasOne(LoanSchedule::class)
+            ->where('status', 'pending')
+            ->orderBy('due_date');
+    }
+
+    public function overdueSchedules()
+    {
+        return $this->hasMany(LoanSchedule::class)
+            ->where('status', 'pending')
+            ->where('due_date', '<', now());
+    }
+
+    public function paidSchedules()
+    {
+        return $this->hasMany(LoanSchedule::class)
+            ->where('status', 'paid');
     }
 
     // ==================== SCOPES ====================
@@ -135,7 +165,7 @@ class Loan extends Model
     }
 
     // ==================== METHODS ====================
-    
+
     /**
      * Check if this is a first loan
      */
@@ -162,8 +192,26 @@ class Loan extends Model
             'second_loan' => 'Second Loan',
             'topup_loan' => 'Top-up Loan',
         ];
-        
+
         return $types[$this->loan_type] ?? ucfirst(str_replace('_', ' ', $this->loan_type));
+    }
+
+    /**
+     * Calculate loan details (interest, total repayable, monthly payments)
+     */
+    public static function calculateLoanDetails($amount, $periodMonths)
+    {
+        $interestRate = 0.05; // 5% fixed interest
+        $interestAmount = $amount * $interestRate * ($periodMonths / 12);
+        $totalRepayable = $amount + $interestAmount;
+        $monthlyPayment = $periodMonths > 0 ? $totalRepayable / $periodMonths : 0;
+
+        return [
+            'interest_rate' => $interestRate * 100, // 5%
+            'interest_amount' => $interestAmount,
+            'total_repayable' => $totalRepayable,
+            'monthly_payment' => $monthlyPayment,
+        ];
     }
 
     /**
@@ -175,7 +223,7 @@ class Loan extends Model
             // If not disbursed yet, calculate from today
             return now()->addMonths($installmentNumber);
         }
-        
+
         try {
             $disbursementDate = Carbon::parse($this->disbursed_date);
             return $disbursementDate->copy()->addMonths($installmentNumber);
@@ -195,7 +243,7 @@ class Loan extends Model
 
         $disbursementDate = Carbon::parse($this->disbursed_date);
         $paymentsCount = $this->payments()->where('type', '!=', 'disbursement')->count();
-        
+
         return $disbursementDate->copy()->addMonths($paymentsCount + 1);
     }
 
@@ -254,7 +302,7 @@ class Loan extends Model
     {
         $newRemainingBalance = $this->remaining_balance - $extraPayment;
         $monthsRemaining = $this->months_remaining - 1; // Reduce by one month
-        
+
         if ($monthsRemaining <= 0) {
             return [
                 'new_monthly_payment' => 0,
@@ -358,9 +406,9 @@ class Loan extends Model
         ];
 
         $color = $statusColors[$this->status] ?? 'bg-gray-100 text-gray-800';
-        
-        return '<span class="px-2 py-1 rounded-full text-xs font-medium ' . $color . '">' . 
-               ucfirst($this->status) . '</span>';
+
+        return '<span class="px-2 py-1 rounded-full text-xs font-medium ' . $color . '">' .
+            ucfirst($this->status) . '</span>';
     }
 
     /**
@@ -465,5 +513,244 @@ class Loan extends Model
     public function getFormattedAmountPaidAttribute()
     {
         return 'KES ' . number_format($this->amount_paid, 2);
+    }
+
+    // ==================== NEW: LOAN SCHEDULE METHODS ====================
+
+    /**
+     * Generate loan schedule when loan is disbursed
+     */
+    public function generateSchedule()
+    {
+        if ($this->schedules()->exists()) {
+            return $this->schedules;
+        }
+
+        $monthlyPayment = $this->monthly_payment;
+        $startDate = $this->disbursed_date ? \Carbon\Carbon::parse($this->disbursed_date) : now();
+
+        for ($i = 1; $i <= $this->period_months; $i++) {
+            LoanSchedule::create([
+                'loan_id' => $this->id,
+                'installment_number' => $i,
+                'due_date' => $startDate->copy()->addMonths($i),
+                'amount_due' => $monthlyPayment,
+                'status' => 'pending',
+            ]);
+        }
+
+        return $this->schedules;
+    }
+    public function recalculateAfterPayment($paymentAmount)
+    {
+        // If payment is exactly monthly or less, just mark as paid
+        if ($paymentAmount <= $this->monthly_payment) {
+            return false;
+        }
+
+        // Extra payment made
+        $extraAmount = $paymentAmount - $this->monthly_payment;
+        $this->remaining_balance -= $extraAmount;
+
+        // Recalculate new monthly payment
+        $remainingMonths = $this->period_months - $this->months_paid - 1; // -1 because we just paid current month
+
+        if ($remainingMonths > 0) {
+            $newMonthly = ceil($this->remaining_balance / $remainingMonths);
+
+            // Update all future schedules
+            $this->schedules()
+                ->where('status', 'pending')
+                ->where('installment_number', '>', $this->months_paid)
+                ->update(['amount_due' => $newMonthly]);
+
+            $this->monthly_payment = $newMonthly;
+        }
+
+        $this->save();
+        return true;
+    }
+
+    /**
+     * Get simple payment schedule for display
+     */
+    public function getSimpleSchedule()
+    {
+        $schedules = $this->schedules()->orderBy('installment_number')->get();
+        $payments = $this->payments()->where('status', 'completed')->get();
+
+        // Apply payments to schedules
+        foreach ($schedules as $schedule) {
+            $payment = $payments->firstWhere('installment_number', $schedule->installment_number);
+
+            if ($payment) {
+                $schedule->status = 'paid';
+                $schedule->amount_paid = $payment->amount;
+                $schedule->paid_date = $payment->payment_date;
+            } elseif ($schedule->due_date < now()) {
+                $schedule->status = 'overdue';
+            }
+        }
+
+        return $schedules;
+    }
+
+    /**
+     * Adjust schedule after extra/early payment - UPDATE DATABASE RECORDS
+     */
+    public function adjustScheduleAfterPayment($extraAmount, $paymentDate = null)
+    {
+        // Get pending schedules
+        $pendingSchedules = $this->schedules()->pending()->orderBy('installment_number')->get();
+
+        if ($pendingSchedules->isEmpty()) {
+            return false;
+        }
+
+        // Calculate new remaining balance after extra payment
+        $newRemainingBalance = $this->remaining_balance - $extraAmount;
+
+        if ($newRemainingBalance <= 0) {
+            // Loan fully paid - mark all as paid
+            foreach ($pendingSchedules as $schedule) {
+                $schedule->update([
+                    'status' => 'paid',
+                    'amount_paid' => 0,
+                    'paid_date' => $paymentDate ?? now(),
+                    'adjustment_notes' => 'Loan fully paid via early repayment',
+                ]);
+            }
+            return true;
+        }
+
+        // Calculate new monthly payment
+        $remainingMonths = $pendingSchedules->count();
+        $newMonthlyPayment = ceil($newRemainingBalance / $remainingMonths);
+
+        // Recalculate principal and interest proportionally
+        $principalRatio = $this->amount / $this->total_repayable;
+        $interestRatio = $this->interest_amount / $this->total_repayable;
+
+        $newPrincipalPerMonth = $newMonthlyPayment * $principalRatio;
+        $newInterestPerMonth = $newMonthlyPayment * $interestRatio;
+
+        // ACTUALLY UPDATE THE DATABASE RECORDS
+        $runningBalance = $newRemainingBalance;
+        foreach ($pendingSchedules as $schedule) {
+            $balanceAfter = max(0, $runningBalance - $newMonthlyPayment);
+
+            $schedule->update([
+                'amount_due' => $newMonthlyPayment,
+                'principal' => $newPrincipalPerMonth,
+                'interest' => $newInterestPerMonth,
+                'balance_before' => $runningBalance + $newMonthlyPayment,
+                'balance_after' => $balanceAfter,
+                'is_adjusted' => true,
+                'adjustment_notes' => 'Schedule adjusted after extra payment of KES ' .
+                    number_format($extraAmount, 2) . ' on ' . ($paymentDate ? $paymentDate->format('d M Y') : now()->format('d M Y')),
+            ]);
+
+            $runningBalance = $balanceAfter;
+        }
+
+        // Update loan's monthly payment in the database
+        $this->update([
+            'monthly_payment' => $newMonthlyPayment,
+            'remaining_balance' => $newRemainingBalance,
+        ]);
+
+        return true;
+    }
+    /**
+     * Get dynamic payment schedule considering payments made AND adjustments
+     */
+    public function getDynamicPaymentSchedule()
+    {
+        // Ensure schedule exists
+        if ($this->schedules->isEmpty() && $this->status === 'disbursed') {
+            $this->generateSchedule();
+        }
+
+        // Get all payments
+        $payments = $this->payments()
+            ->where('status', 'completed')
+            ->orderBy('payment_date')
+            ->get();
+
+        // Calculate adjusted monthly payment based on current state
+        $remainingBalance = $this->remaining_balance;
+        $remainingMonths = max(1, $this->period_months - $this->months_paid);
+        $adjustedMonthly = $remainingMonths > 0 ? ceil($remainingBalance / $remainingMonths) : 0;
+
+        // Update schedule based on payments AND adjustments
+        $updatedSchedules = [];
+        $runningBalance = $this->total_repayable;
+
+        foreach ($this->schedules()->orderBy('installment_number')->get() as $schedule) {
+            // Check if there's a payment for this installment
+            $payment = $payments->first(function ($payment) use ($schedule) {
+                return $payment->installment_number == $schedule->installment_number;
+            });
+
+            if ($payment) {
+                $schedule->status = 'paid';
+                $schedule->amount_paid = $payment->amount;
+                $schedule->paid_date = $payment->payment_date;
+                $schedule->payment_reference = $payment->payment_ref;
+                $runningBalance -= $payment->amount;
+
+                // Update schedule amount if it was adjusted
+                if ($schedule->is_adjusted) {
+                    $schedule->amount_due = $adjustedMonthly;
+                }
+            } elseif ($schedule->due_date < now() && $schedule->status == 'pending') {
+                $schedule->status = 'overdue';
+
+                // Update amount for pending schedules that need adjustment
+                if ($this->months_paid > 0 && $schedule->installment_number > $this->months_paid) {
+                    $schedule->amount_due = $adjustedMonthly;
+                }
+            } else {
+                // For future pending schedules, apply adjusted amount
+                if ($schedule->status == 'pending' && $schedule->installment_number > $this->months_paid) {
+                    $schedule->amount_due = $adjustedMonthly;
+                }
+            }
+
+            // Update balances
+            $schedule->balance_before = $runningBalance + $schedule->amount_due;
+            $schedule->balance_after = $runningBalance;
+
+            // Only decrement balance if this installment should have been paid
+            if ($schedule->installment_number <= $this->months_paid) {
+                $runningBalance -= $schedule->amount_due;
+            }
+
+            $updatedSchedules[] = $schedule;
+        }
+
+        return collect($updatedSchedules);
+    }
+
+    /**
+     * Get next due payment
+     */
+    public function getNextPayment()
+    {
+        return $this->schedules()
+            ->pending()
+            ->orderBy('due_date')
+            ->first();
+    }
+
+    /**
+     * Get overdue schedules
+     */
+    public function getOverdueSchedules()
+    {
+        return $this->schedules()
+            ->where('status', 'pending')
+            ->where('due_date', '<', now())
+            ->get();
     }
 }

@@ -48,9 +48,11 @@ class ChairmanController extends Controller
         // Pending Members for approval
         $pendingMembersList = User::where('role', 'member')
             ->where('sacco_status', 'pending')
-            ->with(['memberApproval' => function ($query) {
-                $query->with('submittedBy');
-            }])
+            ->with([
+                'memberApproval' => function ($query) {
+                    $query->with('submittedBy');
+                }
+            ])
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($member) {
@@ -141,6 +143,75 @@ class ChairmanController extends Controller
             'statusOverview'
         ));
     }
+    /**
+     * Show member details page
+     */
+    public function memberDetails($memberId)
+    {
+        $member = User::with([
+            'savings',
+            'loans' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            },
+            'nextOfKin'
+        ])->findOrFail($memberId);
+
+        $savings = $member->savings;
+        $loanEligibility = $savings ? $savings->available_savings * 1.5 : 0;
+
+        // Get active loan if exists
+        $activeLoan = $member->loans()
+            ->whereIn('status', ['active', 'disbursed'])
+            ->first();
+
+        // Check if defaulting
+        $defaultedLoan = $member->loans()
+            ->where('status', 'defaulted')
+            ->exists();
+
+        // Check if completed loan
+        $completedLoan = $member->loans()
+            ->where('status', 'paid')
+            ->exists();
+
+        $loanStatus = 'none';
+        $loanStatusText = 'No Active Loan';
+
+        if ($defaultedLoan) {
+            $loanStatus = 'default';
+            $loanStatusText = 'Defaulting';
+        } elseif ($activeLoan) {
+            $loanStatus = 'active';
+            $loanStatusText = 'Active Loan';
+        } elseif ($completedLoan) {
+            $loanStatus = 'completed';
+            $loanStatusText = 'Loan Completed';
+        }
+
+        $memberData = [
+            'id' => $member->id,
+            'employee_number' => $member->employee_number,
+            'name' => $member->name,
+            'email' => $member->email,
+            'phone' => $member->phone,
+            'department' => $member->department,
+            'position' => $member->position,
+            'salary' => $member->salary,
+            'date_joined' => $member->created_at->format('Y-m-d'),
+            'status' => $member->sacco_status,
+            'savings' => $savings ? $savings->available_savings : 0,
+            'loan_eligibility' => $loanEligibility,
+            'loan_status' => $loanStatus,
+            'loan_status_text' => $loanStatusText,
+            'active_loan' => $activeLoan,
+        ];
+
+        // Return a view for browser requests
+        return view('chairman.member-details', [
+            'success' => true,
+            'member' => $memberData
+        ]);
+    }
 
     /**
      * Approve or reject member registration
@@ -171,7 +242,7 @@ class ChairmanController extends Controller
                 ]);
 
                 // Create initial savings account if doesn't exist
-                if (! $member->savings) {
+                if (!$member->savings) {
                     Saving::create([
                         'user_id' => $member->id,
                         'available_savings' => 0,
@@ -223,7 +294,7 @@ class ChairmanController extends Controller
             DB::rollBack();
 
             return redirect()->back()
-                ->with('error', 'Action failed: '.$e->getMessage())
+                ->with('error', 'Action failed: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -233,9 +304,13 @@ class ChairmanController extends Controller
      */
     public function getMemberDetails($memberId)
     {
-        $member = User::with(['savings', 'loans' => function ($query) {
-            $query->orderBy('created_at', 'desc');
-        }, 'nextOfKin'])->findOrFail($memberId);
+        $member = User::with([
+            'savings',
+            'loans' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            },
+            'nextOfKin'
+        ])->findOrFail($memberId);
 
         $savings = $member->savings;
         $loanEligibility = $savings ? $savings->available_savings * 1.5 : 0;
@@ -384,7 +459,7 @@ class ChairmanController extends Controller
         ]);
     }
 
-        /**
+    /**
      * Dashboard statistics
      */
     public function dashboard()
@@ -418,9 +493,11 @@ class ChairmanController extends Controller
         // Get pending members for approval (limit 5)
         $pendingMembersList = User::where('role', 'member')
             ->where('sacco_status', 'pending')
-            ->with(['memberApproval' => function ($query) {
-                $query->with('submittedBy');
-            }])
+            ->with([
+                'memberApproval' => function ($query) {
+                    $query->with('submittedBy');
+                }
+            ])
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
@@ -443,7 +520,7 @@ class ChairmanController extends Controller
                 ->orderBy('approved_date', 'desc')
                 ->take(2)
                 ->get()
-                ->map(function($loan) {
+                ->map(function ($loan) {
                     return [
                         'type' => 'loan_approved',
                         'icon' => '✔️',
@@ -462,7 +539,7 @@ class ChairmanController extends Controller
                 ->orderBy('approved_at', 'desc')
                 ->take(2)
                 ->get()
-                ->map(function($member) {
+                ->map(function ($member) {
                     return [
                         'type' => 'member_approved',
                         'icon' => '👥',
@@ -481,7 +558,7 @@ class ChairmanController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->take(2)
                 ->get()
-                ->map(function($loan) {
+                ->map(function ($loan) {
                     return [
                         'type' => 'loan_applied',
                         'icon' => '📝',
@@ -499,7 +576,7 @@ class ChairmanController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->take(2)
                 ->get()
-                ->map(function($member) {
+                ->map(function ($member) {
                     return [
                         'type' => 'member_applied',
                         'icon' => '📋',
@@ -520,7 +597,7 @@ class ChairmanController extends Controller
             );
 
             // Sort by time (newest first)
-            usort($allActivities, function($a, $b) {
+            usort($allActivities, function ($a, $b) {
                 return strtotime($b['time']) - strtotime($a['time']);
             });
 
@@ -528,7 +605,7 @@ class ChairmanController extends Controller
             $recentActivities = array_slice($allActivities, 0, 6);
 
             // Convert to collection for easier handling in blade
-            $recentActivities = collect($recentActivities)->map(function($activity) {
+            $recentActivities = collect($recentActivities)->map(function ($activity) {
                 // Convert time strings to Carbon instances
                 $activity['time'] = \Carbon\Carbon::parse($activity['time']);
                 return (object) $activity; // Convert to object for easier access
@@ -611,11 +688,11 @@ class ChairmanController extends Controller
             DB::commit();
 
             return redirect()->route('chairman.loan-approvals')
-                ->with('success', 'Loan approved! Amount: KES '.number_format($loan->amount, 2));
+                ->with('success', 'Loan approved! Amount: KES ' . number_format($loan->amount, 2));
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return redirect()->back()->with('error', 'Failed to approve loan: '.$e->getMessage());
+            return redirect()->back()->with('error', 'Failed to approve loan: ' . $e->getMessage());
         }
     }
 
@@ -649,7 +726,7 @@ class ChairmanController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return redirect()->back()->with('error', 'Failed to reject loan: '.$e->getMessage());
+            return redirect()->back()->with('error', 'Failed to reject loan: ' . $e->getMessage());
         }
     }
 }
