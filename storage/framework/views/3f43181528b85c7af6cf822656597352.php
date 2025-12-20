@@ -236,7 +236,7 @@
                                             </span>
                                         <?php elseif($loan->status === 'disbursed' || $loan->status === 'active'): ?>
                                             <span class="inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-800 border border-green-300 rounded">
-                                                Disbursed
+                                                Active
                                             </span>
                                         <?php elseif($loan->status === 'completed'): ?>
                                             <span class="inline-block px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 border border-gray-300 rounded">

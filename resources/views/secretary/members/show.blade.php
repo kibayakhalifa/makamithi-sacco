@@ -43,10 +43,10 @@
                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                 <i class="fas fa-edit mr-2"></i> Edit
             </a>
-            <button type="button" onclick="confirmDelete()"
+            {{-- <button type="button" onclick="confirmDelete()"
                     class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                 <i class="fas fa-trash mr-2"></i> Delete
-            </button>
+            </button> --}}
         </div>
     </div>
 
@@ -268,7 +268,7 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
+{{-- <!-- Delete Confirmation Modal -->
 <div id="deleteModal" class="fixed z-10 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
@@ -305,7 +305,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> --}}
 
 <!-- Reject Member Modal -->
 <div id="rejectModal" class="fixed z-10 inset-0 overflow-y-auto hidden" aria-labelledby="reject-modal-title" role="dialog" aria-modal="true">

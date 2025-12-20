@@ -16,6 +16,7 @@ use App\Http\Controllers\CommunicationController;
 use App\Http\Controllers\MemberPaymentController;
 use App\Http\Controllers\MemberProfileController;
 use App\Http\Controllers\MemberSavingsController;
+use App\Http\Controllers\MemberDocumentController;
 
 // Home page - Show different content based on auth status
 Route::get('/', function () {
@@ -90,6 +91,17 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/profile', [MemberController::class, 'profile'])->name('profile');
         Route::patch('/profile', [MemberController::class, 'updateProfile'])->name('profile.update');
         Route::put('/profile/password', [MemberController::class, 'updatePassword'])->name('profile.password');
+        //profile view
+         Route::get('/profile', [MemberProfileController::class, 'index'])->name('profile');
+    
+        // Profile Update
+        Route::patch('/profile', [MemberProfileController::class, 'update'])->name('profile.update');
+        
+        // Profile Picture Update
+            Route::patch('/profile/picture', [MemberProfileController::class, 'updatePicture'])->name('profile.update-picture');
+            Route::post('/documents', [MemberDocumentController::class, 'store'])->name('documents.store');
+        Route::delete('/documents/{document}', [MemberDocumentController::class, 'destroy'])->name('documents.destroy');
+        Route::get('/documents/{document}', [MemberDocumentController::class, 'show'])->name('documents.show');
 
         // Savings
         Route::get('/savings', [MemberSavingsController::class, 'index'])->name('savings.index');
@@ -274,6 +286,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/loans/send-reminders', [TreasurerController::class, 'sendPaymentReminders'])->name('loans.send-reminders');
         Route::post('/loans/update-rates', [TreasurerController::class, 'updateInterestRates'])->name('loans.update-rates');
         Route::get('/loans/export', [TreasurerController::class, 'exportLoans'])->name('loans.export');
+
+        Route::post('/treasurer/loans/{loan}/record-payment', [App\Http\Controllers\TreasurerController::class, 'recordLoanPayment'])
+        ->name('treasurer.loans.record-payment')
+        ->middleware(['auth']);
 
         // 3. Savings Summary
         Route::get('/savings', [TreasurerController::class, 'savings'])->name('savings');

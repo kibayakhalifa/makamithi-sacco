@@ -15,6 +15,91 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+        
+        /* COLLAPSIBLE SIDEBAR STYLES - MODIFIED */
+        .sidebar-collapsed {
+            width: 5rem !important;
+        }
+
+        .sidebar-collapsed .nav-text,
+        .sidebar-collapsed h1,
+        .sidebar-collapsed p {
+            display: none;
+        }
+
+        .sidebar-collapsed nav a {
+            justify-content: center;
+            position: relative; /* For tooltip positioning */
+        }
+
+        /* Make icons bigger when sidebar is collapsed */
+        .sidebar-collapsed nav a {
+            font-size: 1.25rem; /* 20px */
+            padding: 0.75rem 0; /* More vertical padding */
+        }
+
+        /* Tooltip styles */
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-item::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #1f2937;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            z-index: 50;
+            margin-left: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            pointer-events: none;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: transparent #1f2937 transparent transparent;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            z-index: 50;
+            margin-left: -0.75rem;
+            pointer-events: none;
+        }
+
+        .sidebar-collapsed .nav-item:hover::after,
+        .sidebar-collapsed .nav-item:hover::before {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Specific styling for collapsed sidebar tooltips */
+        .sidebar-collapsed .nav-item::after {
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .sidebar-collapsed .nav-item::before {
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            border-color: transparent #1f2937 transparent transparent;
+        }
     </style>
 </head>
 
@@ -22,17 +107,19 @@
 
     <div class="flex h-screen">
 
-        <!-- SIDEBAR -->
-        <aside class="w-64 bg-white border-r hidden md:flex flex-col shadow-sm">
+        <!-- SIDEBAR - MODIFIED -->
+        <aside id="sidebar"
+               class="hidden md:flex flex-col bg-white border-r shadow-sm
+                      w-64 transition-all duration-300">  <!-- Added ID and transition classes -->
 
             <!-- Header -->
-            <div class="p-6 border-b bg-green-50">
-                <h1 class="text-2xl font-bold text-green-700 flex items-center gap-2">
-                    <span class="w-2 h-6 bg-orange-500 rounded"></span>
-                    Makamithi Sacco
+            <div class="p-4 border-b bg-green-50">
+                <h1 class="text-lg font-bold text-green-700 flex items-center gap-2">
+                    <span class="w-2 h-5 bg-orange-500 rounded"></span>
+                    <span class="nav-text">Makamithi Sacco</span>
                 </h1>
 
-                <p class="text-green-800 text-sm mt-1">
+                <p class="text-xs text-green-700 mt-1 nav-text">
                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->guard()->check()): ?>
                         <?php echo e(ucfirst(auth()->user()->role)); ?> Panel
                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
@@ -40,7 +127,7 @@
             </div>
 
             <!-- Navigation -->
-            <nav class="flex-1 p-4 space-y-1">
+            <nav class="flex-1 p-3 space-y-1 text-sm">
 
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->guard()->check()): ?>
                     <?php
@@ -50,7 +137,8 @@
 
                     
                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($userRole === 'member'): ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        <div class="nav-item" data-tooltip="Dashboard">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'member.dashboard','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -59,7 +147,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'member.dashboard','current' => ''.e($current).'']); ?>📊 Dashboard <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'member.dashboard','current' => ''.e($current).'']); ?>📊 <span class="nav-text">Dashboard</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -69,7 +157,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="My Savings">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'member.savings.index','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -78,7 +168,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'member.savings.index','current' => ''.e($current).'']); ?>💰 My Savings <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'member.savings.index','current' => ''.e($current).'']); ?>💰 <span class="nav-text">My Savings</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -88,7 +178,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Apply Loan">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'member.loans.apply','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -97,7 +189,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'member.loans.apply','current' => ''.e($current).'']); ?>📝 Apply Loan <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'member.loans.apply','current' => ''.e($current).'']); ?>📝 <span class="nav-text">Apply Loan</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -107,7 +199,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="My Profile">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'member.profile','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -116,7 +210,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'member.profile','current' => ''.e($current).'']); ?>👤 My Profile <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'member.profile','current' => ''.e($current).'']); ?>👤 <span class="nav-text">My Profile</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -126,7 +220,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="My Loans">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'member.loans.index','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -135,7 +231,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'member.loans.index','current' => ''.e($current).'']); ?>📜 My Loans <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'member.loans.index','current' => ''.e($current).'']); ?>📜 <span class="nav-text">My Loans</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -145,7 +241,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Documents">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'documents.index','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -154,7 +252,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'documents.index','current' => ''.e($current).'']); ?>📄 Documents <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'documents.index','current' => ''.e($current).'']); ?>📄 <span class="nav-text">Documents</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -164,7 +262,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Reports">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'member.reports.index','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -173,7 +273,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'member.reports.index','current' => ''.e($current).'']); ?>📈 Reports <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'member.reports.index','current' => ''.e($current).'']); ?>📈 <span class="nav-text">Reports</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -183,7 +283,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Communications">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'communications.index','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -192,7 +294,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'communications.index','current' => ''.e($current).'']); ?>📧 Communications <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'communications.index','current' => ''.e($current).'']); ?>📧 <span class="nav-text">Communications</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -202,12 +304,14 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
+                        </div>
                         
 
 
                         
                     <?php elseif($userRole === 'chairman'): ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        <div class="nav-item" data-tooltip="Dashboard">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'chairman.dashboard','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -216,7 +320,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'chairman.dashboard','current' => ''.e($current).'']); ?>📊 Dashboard <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'chairman.dashboard','current' => ''.e($current).'']); ?>📊 <span class="nav-text">Dashboard</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -226,7 +330,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Loan Approvals">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'chairman.loan-approvals','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -235,7 +341,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'chairman.loan-approvals','current' => ''.e($current).'']); ?>✅ Loan Approvals <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'chairman.loan-approvals','current' => ''.e($current).'']); ?>✅ <span class="nav-text">Loan Approvals</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -245,7 +351,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Reports">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'reports.index','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -254,7 +362,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'reports.index','current' => ''.e($current).'']); ?>📈 Reports <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'reports.index','current' => ''.e($current).'']); ?>📈 <span class="nav-text">Reports</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -264,7 +372,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Members">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'chairman.members','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -273,7 +383,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'chairman.members','current' => ''.e($current).'']); ?>👥 Members <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'chairman.members','current' => ''.e($current).'']); ?>👥 <span class="nav-text">Members</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -283,7 +393,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Documents">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'documents.index','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -292,7 +404,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'documents.index','current' => ''.e($current).'']); ?>📄 Documents <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'documents.index','current' => ''.e($current).'']); ?>📄 <span class="nav-text">Documents</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -302,7 +414,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Communications">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'communications.index','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -311,7 +425,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'communications.index','current' => ''.e($current).'']); ?>📧 Communications <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'communications.index','current' => ''.e($current).'']); ?>📧 <span class="nav-text">Communications</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -321,11 +435,13 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
+                        </div>
 
 
                         
                     <?php elseif($userRole === 'treasurer'): ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        <div class="nav-item" data-tooltip="Dashboard">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'treasurer.dashboard','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -334,7 +450,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'treasurer.dashboard','current' => ''.e($current).'']); ?>📊 Treasurer Dashboard <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'treasurer.dashboard','current' => ''.e($current).'']); ?>📊 <span class="nav-text">Treasurer Dashboard</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -344,7 +460,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Payment Processing">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'treasurer.payments','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -353,7 +471,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'treasurer.payments','current' => ''.e($current).'']); ?>💳 Payment Processing <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'treasurer.payments','current' => ''.e($current).'']); ?>💳 <span class="nav-text">Payment Processing</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -363,7 +481,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Loans Management">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'treasurer.loans','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -372,7 +492,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'treasurer.loans','current' => ''.e($current).'']); ?>📋 Loans Management <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'treasurer.loans','current' => ''.e($current).'']); ?>📋 <span class="nav-text">Loans Management</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -382,7 +502,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Savings Summary">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'treasurer.savings','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -391,7 +513,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'treasurer.savings','current' => ''.e($current).'']); ?>💰 Savings Summary <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'treasurer.savings','current' => ''.e($current).'']); ?>💰 <span class="nav-text">Savings Summary</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -401,7 +523,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Expenses Tracking">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'treasurer.expenses','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -410,7 +534,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'treasurer.expenses','current' => ''.e($current).'']); ?>📊 Expenses Tracking <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'treasurer.expenses','current' => ''.e($current).'']); ?>📊 <span class="nav-text">Expenses Tracking</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -420,7 +544,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Cheque Management">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'treasurer.cheques','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -429,7 +555,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'treasurer.cheques','current' => ''.e($current).'']); ?>🏦 Cheque Management <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'treasurer.cheques','current' => ''.e($current).'']); ?>🏦 <span class="nav-text">Cheque Management</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -439,27 +565,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'treasurer.reconciliation','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('nav.link'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['route' => 'treasurer.reconciliation','current' => ''.e($current).'']); ?>✔️ Bank
-                            Reconciliation <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
-<?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
-<?php unset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
-<?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
-<?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
-<?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Financial Reports">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'treasurer.financial-reports','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -468,8 +576,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'treasurer.financial-reports','current' => ''.e($current).'']); ?>📈 Financial
-                            Reports <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'treasurer.financial-reports','current' => ''.e($current).'']); ?>📈 <span class="nav-text">Financial Reports</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -479,7 +586,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Documents">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'documents.index','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -488,7 +597,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'documents.index','current' => ''.e($current).'']); ?>📄 Documents <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'documents.index','current' => ''.e($current).'']); ?>📄 <span class="nav-text">Documents</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -498,7 +607,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Communications">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'communications.index','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -507,7 +618,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'communications.index','current' => ''.e($current).'']); ?>📧 Communications <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'communications.index','current' => ''.e($current).'']); ?>📧 <span class="nav-text">Communications</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -517,11 +628,13 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
+                        </div>
 
 
                         
                     <?php elseif($userRole === 'secretary'): ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        <div class="nav-item" data-tooltip="Dashboard">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'secretary.dashboard','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -530,7 +643,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'secretary.dashboard','current' => ''.e($current).'']); ?>📊 Dashboard <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'secretary.dashboard','current' => ''.e($current).'']); ?>📊 <span class="nav-text">Dashboard</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -540,7 +653,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Loan Approvals">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'secretary.loan-approvals','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -549,7 +664,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'secretary.loan-approvals','current' => ''.e($current).'']); ?>✅ Loan Approvals <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'secretary.loan-approvals','current' => ''.e($current).'']); ?>✅ <span class="nav-text">Loan Approvals</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -559,7 +674,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Member Management">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'secretary.members','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -568,7 +685,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'secretary.members','current' => ''.e($current).'']); ?>👥 Member Management <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'secretary.members','current' => ''.e($current).'']); ?>👥 <span class="nav-text">Member Management</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -578,7 +695,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Communications">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'secretary.communications','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -587,7 +706,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'secretary.communications','current' => ''.e($current).'']); ?>📧 Communications <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'secretary.communications','current' => ''.e($current).'']); ?>📧 <span class="nav-text">Communications</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -597,7 +716,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Documents">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'secretary.documents','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -606,7 +727,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'secretary.documents','current' => ''.e($current).'']); ?>📄 Documents <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'secretary.documents','current' => ''.e($current).'']); ?>📄 <span class="nav-text">Documents</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -616,7 +737,9 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        </div>
+                        <div class="nav-item" data-tooltip="Reports">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'reports.index','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
@@ -625,7 +748,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'reports.index','current' => ''.e($current).'']); ?>📈 Reports <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'reports.index','current' => ''.e($current).'']); ?>📈 <span class="nav-text">Reports</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -635,22 +758,30 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
+                        </div>
 
                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
                     <!-- SETTINGS + LOGOUT -->
-                    <div class="pt-6 mt-6 border-t border-green-200">
-                        <a href="<?php echo e(route('settings')); ?>"
-                            class="w-full block text-left px-4 py-2 text-green-700 hover:bg-green-100 rounded-lg">
-                            ⚙️ Settings
-                        </a>
+                    <div class="pt-4 mt-4 border-t border-green-200">
+                        <div class="nav-item" data-tooltip="Settings">
+                            <a href="<?php echo e(route('settings')); ?>"
+                                class="flex items-center gap-3 px-3 py-2 rounded-md
+                                       text-green-700 hover:bg-green-100 text-sm">
+                                ⚙️ <span class="nav-text">Settings</span>
+                            </a>
+                        </div>
 
-                        <form method="POST" action="<?php echo e(route('logout')); ?>">
-                            <?php echo csrf_field(); ?>
-                            <button class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-100 rounded-lg">
-                                🚪 Logout
-                            </button>
-                        </form>
+                        <div class="nav-item" data-tooltip="Logout">
+                            <form method="POST" action="<?php echo e(route('logout')); ?>">
+                                <?php echo csrf_field(); ?>
+                                <button
+                                    class="w-full flex items-center gap-3 px-3 py-2
+                                           text-red-600 hover:bg-red-100 rounded-md text-sm">
+                                    🚪 <span class="nav-text">Logout</span>
+                                </button>
+                            </form>
+                        </div>
                     </div>
 
                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
@@ -662,11 +793,21 @@
         <!-- MAIN CONTENT -->
         <div class="flex-1 flex flex-col overflow-hidden">
 
-            <!-- Header -->
+            <!-- Header - MODIFIED -->
             <header class="bg-white border-b px-6 py-4 flex justify-between items-center shadow-sm">
 
-                <button id="menuToggle" class="md:hidden text-gray-700 text-2xl">☰</button>
+                <!-- LEFT SIDE: Mobile toggle + Desktop toggle -->
+                <div class="flex items-center gap-3">
+                    <!-- Mobile Toggle Button -->
+                    <button id="menuToggle" class="md:hidden text-gray-700 text-2xl">☰</button>
+                    
+                    <!-- Desktop Toggle Button - ADDED -->
+                    <button id="desktopToggle" class="hidden md:inline-flex text-lg text-gray-700">
+                        ⮜
+                    </button>
+                </div>
 
+                <!-- RIGHT SIDE: Notifications + User info -->
                 <div class="flex items-center space-x-4">
 
                     <!-- Notifications -->
@@ -694,7 +835,7 @@
                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
                     <div class="hidden md:block text-right">
-                        <p class="font-medium text-green-800"><?php echo e(auth()->user()->name); ?></p>
+                        <p class="text-sm font-medium text-green-800"><?php echo e(auth()->user()->name); ?></p>
                         <p class="text-xs text-green-600">
                             <?php echo e(ucfirst(auth()->user()->role)); ?> • <?php echo e(auth()->user()->employee_number ?? 'EMP001'); ?>
 
@@ -1203,26 +1344,6 @@
 <?php endif; ?>
                         <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'treasurer.reconciliation','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('nav.link'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['route' => 'treasurer.reconciliation','current' => ''.e($current).'']); ?>✔️ Bank
-                            Reconciliation <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
-<?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
-<?php unset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
-<?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
-<?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
-<?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'treasurer.financial-reports','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -1230,8 +1351,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'treasurer.financial-reports','current' => ''.e($current).'']); ?>📈 Financial
-                            Reports <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'treasurer.financial-reports','current' => ''.e($current).'']); ?>📈 Financial Reports <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -1422,10 +1542,27 @@
     </div>
 
     <script>
+        // Collapsing functionality - ADDED
+        const sidebar = document.getElementById('sidebar');
+        const desktopToggle = document.getElementById('desktopToggle');
         const menuToggle = document.getElementById('menuToggle');
         const mobileSidebar = document.getElementById('mobileSidebar');
         const closeMenu = document.getElementById('closeMenu');
 
+        // Restore sidebar state from localStorage
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            sidebar.classList.add('sidebar-collapsed');
+            desktopToggle.textContent = '⮞';
+        }
+
+        // Desktop toggle for collapsing
+        desktopToggle?.addEventListener('click', () => {
+            const collapsed = sidebar.classList.toggle('sidebar-collapsed');
+            localStorage.setItem('sidebarCollapsed', collapsed);
+            desktopToggle.textContent = collapsed ? '⮞' : '⮜';
+        });
+
+        // Mobile menu toggle
         if (menuToggle) menuToggle.onclick = () => mobileSidebar.classList.remove('hidden');
         if (closeMenu) closeMenu.onclick = () => mobileSidebar.classList.add('hidden');
 

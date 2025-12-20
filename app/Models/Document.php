@@ -21,7 +21,14 @@ class Document extends Model
         'allowed_roles',
         'specific_users',
         'uploaded_by',
-        'is_public'
+        'is_public',
+        'user_id',
+        'name',
+        'type',
+        'file_path',
+        'file_name',
+        'file_size',
+        'mime_type'
     ];
 
     protected $casts = [
@@ -29,7 +36,10 @@ class Document extends Model
         'specific_users' => 'array',
         'is_public' => 'boolean',
     ];
-
+     public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
     public function uploader()
     {
         return $this->belongsTo(User::class, 'uploaded_by');

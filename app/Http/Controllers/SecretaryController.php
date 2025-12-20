@@ -203,7 +203,7 @@ public function members()
             $user->employment_date = $validated['employment_date'];
             $user->monthly_salary = $validated['monthly_salary'];
             $user->monthly_savings = $validated['monthly_savings'];
-            $user->password = Hash::make($validated['employee_number']);
+            $user->password = Hash::make($validated['national_id']);
             $user->role = 'member';
             $user->sacco_status = 'pending';
             $user->sacco_join_date = now();

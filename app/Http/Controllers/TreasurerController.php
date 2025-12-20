@@ -180,61 +180,114 @@ class TreasurerController extends Controller
         ));
     }
 
-    // In App\Http\Controllers\TreasurerController.php
+
     public function recordLoanPayment(Request $request, $loanId)
-    {
-        // Validate the request
-        $request->validate([
-            'amount' => 'required|numeric|min:1',
-            'payment_date' => 'nullable|date',
-            'payment_method' => 'nullable|string|in:cash,mpesa,bank,cheque',
-            'notes' => 'nullable|string',
-        ]);
+{
+    // Validate the request
+    $validated = $request->validate([
+        'amount' => 'required|numeric|min:1',
+        'payment_date' => 'nullable|date',
+        'payment_method' => 'required|string|in:cash,mpesa,bank,cheque,payroll',
+        'cheque_number' => 'nullable|required_if:payment_method,cheque|string|unique:cheque_records,cheque_number',
+        'reference_number' => 'nullable|string|max:100',
+        'notes' => 'nullable|string',
+    ]);
 
-        try {
-            // Find the loan
-            $loan = Loan::findOrFail($loanId);
+    try {
+        DB::beginTransaction();
 
-            // Create payment record
-            $payment = new Payment([
-                'loan_id' => $loan->id,
-                'user_id' => $loan->user_id,
-                'amount' => $request->amount,
-                'payment_date' => $request->payment_date ?? now(),
-                'payment_method' => $request->payment_method ?? 'cash',
-                'reference_number' => 'PAY-' . time() . rand(100, 999),
-                'notes' => $request->notes,
-                'recorded_by' => auth()->id(),
-            ]);
+        // Find the loan
+        $loan = Loan::findOrFail($loanId);
 
-            $payment->save();
-
-            // Update loan balance
-            $loan->remaining_balance -= $request->amount;
-
-            // If loan is fully paid
-            if ($loan->remaining_balance <= 0) {
-                $loan->status = 'paid';
-                $loan->paid_date = now();
-            }
-
-            $loan->save();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Payment recorded successfully',
-                'payment' => $payment,
-                'new_balance' => $loan->remaining_balance,
-            ]);
-
-        } catch (\Exception $e) {
+        // Check if amount exceeds remaining balance
+        if ($request->amount > $loan->remaining_balance) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error recording payment: ' . $e->getMessage(),
-            ], 500);
+                'message' => 'Payment amount (KES ' . number_format($request->amount) . ') exceeds remaining balance (KES ' . number_format($loan->remaining_balance) . ')',
+            ], 400);
         }
-    }
 
+        // Create payment record
+        $payment = new Payment([
+            'loan_id' => $loan->id,
+            'user_id' => $loan->user_id,
+            'payment_ref' => 'PAY-' . time() . rand(100, 999),
+            'amount' => $request->amount,
+            'payment_date' => $request->payment_date ?? now(),
+            'payment_method' => $request->payment_method,
+            'reference_number' => $request->reference_number,
+            'notes' => $request->notes,
+            'status' => 'completed',
+            'posted_date' => now(),
+            'posted_by' => auth()->id(),
+        ]);
+
+        // Calculate principal and interest (5% interest already calculated)
+        $monthlyInterest = $loan->interest_amount / $loan->period_months;
+        $interestPortion = min($request->amount, $monthlyInterest);
+        $principalPortion = $request->amount - $interestPortion;
+
+        $payment->interest = $interestPortion;
+        $payment->principal = $principalPortion;
+        $payment->balance_before = $loan->remaining_balance;
+        
+        $payment->save();
+
+        // Update loan balance
+        $loan->remaining_balance -= $request->amount;
+        $loan->amount_paid += $request->amount;
+        $loan->percentage_paid = ($loan->amount_paid / $loan->total_repayable) * 100;
+
+        // If loan is fully paid
+        if ($loan->remaining_balance <= 0) {
+            $loan->status = 'paid';
+            $loan->paid_date = now();
+        }
+
+        $payment->balance_after = $loan->remaining_balance;
+        $payment->save();
+
+        $loan->save();
+
+        // Record cheque if payment method is cheque
+        if ($request->payment_method === 'cheque' && $request->filled('cheque_number')) {
+            ChequeRecord::create([
+                'payment_id' => $payment->id,
+                'loan_id' => $loan->id,
+                'user_id' => $loan->user_id,
+                'cheque_number' => $request->cheque_number,
+                'bank_name' => 'Not specified',
+                'bank_branch' => 'Not specified',
+                'account_number' => 'N/A',
+                'amount' => $request->amount,
+                'purpose' => 'loan_repayment',
+                'status' => 'issued',
+                'issue_date' => $request->payment_date ?? now(),
+                'issued_by' => auth()->id(),
+                'issue_notes' => 'Loan repayment - ' . ($request->notes ?? 'No notes'),
+            ]);
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payment recorded successfully',
+            'payment' => $payment,
+            'new_balance' => $loan->remaining_balance,
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        
+        \Log::error('Payment recording error: ' . $e->getMessage());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Error recording payment: ' . $e->getMessage(),
+        ], 500);
+    }
+}
     // ============ 4. EXPENSES TRACKING ============
     public function expenses()
     {

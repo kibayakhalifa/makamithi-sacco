@@ -426,4 +426,16 @@ class User extends Authenticatable
 
         return $this->date_of_birth->age;
     }
+    public function documents()
+    {
+        return $this->hasMany(Document::class);
+    }
+
+    // And make sure you're eager loading it in your controller:
+    public function profile()
+    {
+        $user = auth()->user()->load('documents', 'nextOfKin');
+        // ... rest of your code
+        return view('member.profile', compact('user', 'accountSummary', 'loanEligibility'));
+    }
 }

@@ -183,7 +183,7 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-900 mb-1">Support Document (optional)</label>
+                                <label class="block text-sm font-medium text-gray-900 mb-1">Loan Application Form</label>
                                 <div class="flex items-center gap-2">
                                     <input type="file" name="support_document" id="supportDocument" 
                                         accept=".pdf,.jpg,.jpeg,.png"

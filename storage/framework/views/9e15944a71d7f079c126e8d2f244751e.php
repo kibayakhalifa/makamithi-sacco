@@ -628,63 +628,248 @@
         document.getElementById(tabName + 'Tab').classList.remove('text-gray-500');
     }
 
-    // Action functions
-    function recordPayment(loanId) {
-        const amount = prompt('Enter payment amount (KES):');
-        if (amount && !isNaN(amount)) {
-            // Show loading
-            const button = event.target;
-            const originalText = button.innerHTML;
-            button.innerHTML = 'Processing...';
-            button.disabled = true;
+    // Updated recordPayment function with cheque number
+function recordPayment(loanId) {
+    // Create a custom modal for payment input
+    const modalHtml = `
+        <div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-xl w-full max-w-md">
+                <div class="p-4 border-b border-gray-300">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-900">Record Loan Payment</h3>
+                        <button onclick="closePaymentModal()" class="text-gray-500 hover:text-gray-700 text-lg">
+                            ✕
+                        </button>
+                    </div>
+                </div>
+                
+                <form id="paymentForm" class="p-4 space-y-4">
+                    <input type="hidden" name="loan_id" value="${loanId}">
+                    <input type="hidden" name="_token" value="<?php echo e(csrf_token()); ?>">
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Amount (KES)*</label>
+                        <input type="number" name="amount" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Enter amount">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Payment Date*</label>
+                        <input type="date" name="payment_date" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value="${new Date().toISOString().split('T')[0]}">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Payment Method*</label>
+                        <select name="payment_method" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            onchange="toggleChequeNumber(this.value)">
+                            <option value="">Select method</option>
+                            <option value="cash">Cash</option>
+                            <option value="mpesa">M-Pesa</option>
+                            <option value="bank">Bank Transfer</option>
+                            <option value="cheque">Cheque</option>
+                            <option value="payroll">Payroll Deduction</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Cheque Number Field (initially hidden) -->
+                    <div id="chequeNumberField" class="hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Cheque Number*</label>
+                        <input type="text" name="cheque_number"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Enter cheque number">
+                    </div>
+                    
+                    <!-- Reference Number Field (for other methods) -->
+                    <div id="referenceNumberField">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Reference Number</label>
+                        <input type="text" name="reference_number"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="M-Pesa code, bank ref, etc.">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                        <textarea name="notes" rows="2"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Payment notes..."></textarea>
+                    </div>
+                    
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="closePaymentModal()"
+                            class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+                            Cancel
+                        </button>
+                        <button type="submit" id="submitPaymentBtn"
+                            class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition">
+                            Record Payment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
 
-            // Use the correct route - match what's in your route list
-            fetch(`/treasurer/loans/${loanId}/payment`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    amount: parseFloat(amount),
-                    payment_date: new Date().toISOString().split('T')[0],
-                    payment_method: 'cash',
-                    notes: 'Payment recorded via treasurer dashboard'
-                })
-            })
-                .then(response => {
-                    // Check if response is OK
-                    if (response.status === 422) {
-                        return response.json().then(data => {
-                            throw new Error(data.message || 'Validation error');
-                        });
-                    }
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        alert('✅ Payment recorded successfully!');
-                        // Reload the page to see updated balance
-                        location.reload();
-                    } else {
-                        alert('❌ Error: ' + (data.message || 'Unknown error'));
-                        button.innerHTML = originalText;
-                        button.disabled = false;
-                    }
-                })
-                .catch(error => {
-                    alert('❌ Error: ' + error.message);
-                    console.error('Payment error:', error);
-                    button.innerHTML = originalText;
-                    button.disabled = false;
-                });
-        }
+    // Remove existing modal if any
+    const existingModal = document.getElementById('paymentModal');
+    if (existingModal) {
+        existingModal.remove();
     }
 
+    // Add new modal
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    // Handle form submission
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        submitPayment(this, loanId);
+    });
+}
+
+// Toggle cheque number field
+function toggleChequeNumber(paymentMethod) {
+    const chequeField = document.getElementById('chequeNumberField');
+    const referenceField = document.getElementById('referenceNumberField');
+    
+    if (paymentMethod === 'cheque') {
+        chequeField.classList.remove('hidden');
+        // Make cheque number required
+        chequeField.querySelector('input').required = true;
+        // Hide reference number field
+        referenceField.classList.add('hidden');
+        // Clear reference number
+        document.querySelector('input[name="reference_number"]').value = '';
+    } else {
+        chequeField.classList.add('hidden');
+        // Remove required from cheque number
+        chequeField.querySelector('input').required = false;
+        // Clear cheque number
+        document.querySelector('input[name="cheque_number"]').value = '';
+        // Show reference number field
+        referenceField.classList.remove('hidden');
+        // Make reference optional for cash
+        document.querySelector('input[name="reference_number"]').required = paymentMethod !== 'cash';
+    }
+}
+
+// Close modal
+function closePaymentModal() {
+    const modal = document.getElementById('paymentModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Submit payment
+// Submit payment
+async function submitPayment(form, loanId) {
+    const submitBtn = document.getElementById('submitPaymentBtn');
+    const originalText = submitBtn.innerHTML;
+    
+    // Disable button and show loading
+    submitBtn.innerHTML = '<span class="animate-spin">⏳</span> Processing...';
+    submitBtn.disabled = true;
+
+    try {
+        const formData = new FormData(form);
+        
+        // Check if cheque payment requires cheque number
+        const paymentMethod = formData.get('payment_method');
+        if (paymentMethod === 'cheque') {
+            const chequeNumber = formData.get('cheque_number');
+            if (!chequeNumber || chequeNumber.trim() === '') {
+                alert('Please enter cheque number for cheque payments');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+        }
+
+        // Prepare data for controller
+        const data = {
+            _token: formData.get('_token'),
+            amount: parseFloat(formData.get('amount')),
+            payment_date: formData.get('payment_date'),
+            payment_method: paymentMethod,
+            notes: formData.get('notes'),
+            cheque_number: formData.get('cheque_number'),
+            reference_number: formData.get('reference_number')
+        };
+
+        // Remove empty values
+        Object.keys(data).forEach(key => {
+            if (data[key] === null || data[key] === undefined || data[key] === '') {
+                delete data[key];
+            }
+        });
+
+        console.log('Submitting payment:', data);
+
+        // Use the correct route - match your Laravel route pattern
+        // OPTION 1: Using the route name (requires meta tag for base URL)
+        const baseUrl = document.querySelector('meta[name="base-url"]')?.content || '';
+        const url = `${baseUrl}/treasurer/loans/${loanId}/record-payment`;
+        
+        // OPTION 2: Hardcode with CSRF token from meta tag
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        
+        // Send to controller
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken || data._token,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        const responseData = await response.json();
+
+        if (!response.ok) {
+            // Handle validation errors (422)
+            if (response.status === 422 && responseData.errors) {
+                const errors = Object.values(responseData.errors).flat().join('\n');
+                throw new Error(errors);
+            }
+            throw new Error(responseData.message || `HTTP error! status: ${response.status}`);
+        }
+
+        if (responseData.success) {
+            // Show success message
+            alert(`✅ Payment recorded successfully!\nAmount: KES ${data.amount.toLocaleString()}\nNew Balance: KES ${responseData.new_balance?.toLocaleString() || 'N/A'}`);
+            
+            // Close modal
+            closePaymentModal();
+            
+            // Reload page to show updated data
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+            
+        } else {
+            throw new Error(responseData.message || 'Payment failed');
+        }
+
+    } catch (error) {
+        console.error('Payment error:', error);
+        
+        // Show specific error messages
+        let errorMessage = error.message;
+        if (error.message.includes('cheque_records.cheque_number')) {
+            errorMessage = 'Cheque number already exists. Please use a unique cheque number.';
+        } else if (error.message.includes('validation')) {
+            errorMessage = 'Please check your input fields and try again.';
+        }
+        
+        alert(`❌ Error: ${errorMessage}`);
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }
+}
     function contactMember(userId) {
         if (confirm('Open contact options for this member?')) {
             // Open contact modal or redirect

@@ -136,7 +136,7 @@ class MemberLoanController extends Controller
             'purpose' => ['required', 'string', 'max:500'],
             'period_months' => ['required', 'integer', 'min:6', 'max:60'],
             'agree_terms' => ['required', 'accepted'],
-            'support_document' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+            'support_document' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
         ];
 
         // Check loan type and eligibility
