@@ -66,71 +66,7 @@
             </div>
         </div>
 
-        <!-- Pending Member Registrations -->
-        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
-                <div>
-                    <h2 class="text-lg font-semibold text-gray-900">Pending Member Approvals</h2>
-                    <p class="text-gray-500 text-xs mt-1">{{ $pendingMembersList->count() }} pending</p>
-                </div>
-                <a href="{{ route('chairman.members') }}"
-                    class="px-3 py-1.5 rounded-lg bg-gray-900 text-white text-xs font-medium hover:bg-gray-800 transition">
-                    View All
-                </a>
-            </div>
-
-            @if($pendingMembersList->count() > 0)
-                <div class="overflow-x-auto border border-gray-300 rounded-lg">
-                    <table class="w-full text-xs border-collapse">
-                        <thead>
-                            <tr class="bg-gray-50">
-                                <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">#</th>
-                                <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">Emp No</th>
-                                <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">Name</th>
-                                <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">Dept</th>
-                                <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">Submitted By</th>
-                                <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">Date</th>
-                                <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($pendingMembersList as $index => $member)
-                                <tr class="border-t border-gray-300 hover:bg-gray-50">
-                                    <td class="px-3 py-2 text-gray-900 font-medium border border-gray-300 text-center">{{ $index + 1 }}</td>
-                                    <td class="px-3 py-2 font-mono text-gray-900 border border-gray-300">{{ $member->employee_number ?? 'N/A' }}</td>
-                                    <td class="px-3 py-2 border border-gray-300">
-                                        <p class="font-medium text-gray-900">{{ $member->name }}</p>
-                                    </td>
-                                    <td class="px-3 py-2 text-gray-700 border border-gray-300">{{ $member->department ?? 'N/A' }}</td>
-                                    <td class="px-3 py-2 text-gray-700 border border-gray-300">
-                                        {{ $member->memberApproval?->submittedBy?->name ?? 'System' }}
-                                    </td>
-                                    <td class="px-3 py-2 border border-gray-300">
-                                        <div class="text-gray-700">{{ $member->created_at->format('d/m/Y') }}</div>
-                                    </td>
-                                    <td class="px-3 py-2 border border-gray-300">
-                                        <div class="flex gap-1">
-                                            <a href="{{ route('chairman.member.details', $member->id) }}" 
-                                                class="px-2 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded text-xs font-medium border border-blue-200">
-                                                View
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @else
-                <div class="text-center py-6 border border-gray-300 rounded-lg">
-                    <div class="text-3xl mb-2">✅</div>
-                    <h3 class="text-base font-medium text-gray-900">No pending approvals</h3>
-                    <p class="text-gray-500 text-xs mt-1">All members have been approved</p>
-                </div>
-            @endif
-        </div>
-
-        <!-- Pending Loans -->
+        <!-- PENDING LOANS FIRST - UPDATED to show latest on top -->
         <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
                 <div>
@@ -156,15 +92,21 @@
                                 <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">Savings (KES)</th>
                                 <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">Period</th>
                                 <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">Monthly (KES)</th>
-                                <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">Applied</th>
+                                <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">Applied Date</th>
+                                <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">Applied Time</th>
                                 <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($pendingLoans as $index => $loan)
+                            @php
+                                // Sort loans by created_at (latest first) and re-index
+                                $sortedLoans = $pendingLoans->sortByDesc('created_at')->values();
+                            @endphp
+                            @foreach($sortedLoans as $index => $loan)
                                 @php
                                     $userSavings = $loan->user->savings?->available_savings ?? 0;
                                     $loanEligibility = $userSavings * 1.5;
+                                    $appliedDate = $loan->applied_date ?? $loan->created_at;
                                 @endphp
                                 <tr class="border-t border-gray-300 hover:bg-gray-50">
                                     <td class="px-3 py-2 text-gray-900 font-medium border border-gray-300 text-center">{{ $index + 1 }}</td>
@@ -189,7 +131,10 @@
                                         {{ number_format($loan->monthly_payment) }}
                                     </td>
                                     <td class="px-3 py-2 border border-gray-300 text-center text-gray-700">
-                                        {{ $loan->applied_date->format('d/m/y') ?? $loan->created_at->format('d/m/y') }}
+                                        {{ $appliedDate->format('d/m/Y') }}
+                                    </td>
+                                    <td class="px-3 py-2 border border-gray-300 text-center text-gray-700">
+                                        {{ $appliedDate->format('h:i A') }}
                                     </td>
                                     <td class="px-3 py-2 border border-gray-300">
                                         <div class="flex gap-1">
@@ -209,6 +154,78 @@
                     <div class="text-3xl mb-2">✅</div>
                     <h3 class="text-base font-medium text-gray-900">No pending loan approvals</h3>
                     <p class="text-gray-500 text-xs mt-1">All loan applications have been reviewed</p>
+                </div>
+            @endif
+        </div>
+
+        <!-- PENDING MEMBER REGISTRATIONS SECOND - UPDATED to show latest on top -->
+        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900">Pending Member Approvals</h2>
+                    <p class="text-gray-500 text-xs mt-1">{{ $pendingMembersList->count() }} pending</p>
+                </div>
+                <a href="{{ route('chairman.members') }}"
+                    class="px-3 py-1.5 rounded-lg bg-gray-900 text-white text-xs font-medium hover:bg-gray-800 transition">
+                    View All
+                </a>
+            </div>
+
+            @if($pendingMembersList->count() > 0)
+                <div class="overflow-x-auto border border-gray-300 rounded-lg">
+                    <table class="w-full text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">#</th>
+                                <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">Emp No</th>
+                                <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">Name</th>
+                                <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">Dept</th>
+                                <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">Submitted By</th>
+                                <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">Applied Date</th>
+                                <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">Applied Time</th>
+                                <th class="px-3 py-2 text-left text-gray-700 font-semibold border border-gray-300">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                // Sort members by created_at (latest first) and re-index
+                                $sortedMembers = $pendingMembersList->sortByDesc('created_at')->values();
+                            @endphp
+                            @foreach($sortedMembers as $index => $member)
+                                <tr class="border-t border-gray-300 hover:bg-gray-50">
+                                    <td class="px-3 py-2 text-gray-900 font-medium border border-gray-300 text-center">{{ $index + 1 }}</td>
+                                    <td class="px-3 py-2 font-mono text-gray-900 border border-gray-300">{{ $member->employee_number ?? 'N/A' }}</td>
+                                    <td class="px-3 py-2 border border-gray-300">
+                                        <p class="font-medium text-gray-900">{{ $member->name }}</p>
+                                    </td>
+                                    <td class="px-3 py-2 text-gray-700 border border-gray-300">{{ $member->department ?? 'N/A' }}</td>
+                                    <td class="px-3 py-2 text-gray-700 border border-gray-300">
+                                        {{ $member->memberApproval?->submittedBy?->name ?? 'System' }}
+                                    </td>
+                                    <td class="px-3 py-2 border border-gray-300 text-center text-gray-700">
+                                        {{ $member->created_at->format('d/m/Y') }}
+                                    </td>
+                                    <td class="px-3 py-2 border border-gray-300 text-center text-gray-700">
+                                        {{ $member->created_at->format('h:i A') }}
+                                    </td>
+                                    <td class="px-3 py-2 border border-gray-300">
+                                        <div class="flex gap-1">
+                                            <a href="{{ route('chairman.member.details', $member->id) }}" 
+                                                class="px-2 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded text-xs font-medium border border-blue-200">
+                                                View
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="text-center py-6 border border-gray-300 rounded-lg">
+                    <div class="text-3xl mb-2">✅</div>
+                    <h3 class="text-base font-medium text-gray-900">No pending approvals</h3>
+                    <p class="text-gray-500 text-xs mt-1">All members have been approved</p>
                 </div>
             @endif
         </div>
@@ -246,7 +263,7 @@
                                     @endif
                                 </p>
                                 <p class="text-gray-400 text-xs mt-0.5">
-                                    {{ $activity->time->diffForHumans() }}
+                                    {{ $activity->time->format('d/m/Y h:i A') }}
                                 </p>
                             </div>
                             @if($activity->type === 'loan_approved' || $activity->type === 'member_approved')

@@ -17,8 +17,9 @@ use App\Http\Controllers\MemberPaymentController;
 use App\Http\Controllers\MemberProfileController;
 use App\Http\Controllers\MemberSavingsController;
 use App\Http\Controllers\MemberDocumentController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
-// Home page - Show different content based on auth status
+// Main welcome page with login form - ONLY FOR GUESTS
 Route::get('/', function () {
     if (auth()->check()) {
         // Redirect to appropriate dashboard
@@ -40,10 +41,20 @@ Route::get('/', function () {
 
     // Show welcome page for non-authenticated users
     return view('welcome');
-});
+})->name('welcome');
 
-// Include Breeze authentication routes
+// POST route for login form submission
+Route::post('/login', [AuthenticatedSessionController::class, 'store'])
+    ->middleware('guest')
+    ->name('login');
+
+// Include Breeze authentication routes (excluding GET /login)
 require __DIR__ . '/auth.php';
+
+// Redirect GET /login to welcome page
+Route::get('/login', function () {
+    return redirect('/');
+})->name('login.get');
 
 Route::middleware(['auth'])->group(function () {
 
