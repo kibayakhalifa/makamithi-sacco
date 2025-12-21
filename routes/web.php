@@ -288,7 +288,8 @@ Route::middleware(['auth'])->group(function () {
 
         // Dashboard
         Route::get('/dashboard', [TreasurerController::class, 'dashboard'])->name('dashboard');
-
+        Route::get('/savings-deductions', [TreasurerController::class, 'savingsWithDeductions'])
+        ->name('treasurer.savings.deductions');
         // 1. Payment Processing
         Route::get('/payments', [TreasurerController::class, 'payments'])->name('payments');
         Route::post('/loans/{loan}/process-payment', [TreasurerController::class, 'processLoanPayment'])->name('loans.process-payment');
@@ -347,6 +348,15 @@ Route::middleware(['auth'])->group(function () {
         // 7. Financial Reports
         Route::get('/financial-reports', [TreasurerController::class, 'financialReports'])->name('financial-reports');
         Route::post('/financial-reports/export', [TreasurerController::class, 'exportReport'])->name('financial-reports.export');
+        Route::get('/savings-deductions', [TreasurerController::class, 'savingsWithDeductions'])
+        ->name('treasurer.savings.deductions');
+        Route::get('/savings-deductions', [TreasurerController::class, 'savingsWithDeductions'])->name('treasurer.savings.deductions');
+        Route::post('/members/{user}/update-savings-rate', [TreasurerController::class, 'updateSavingsRate'])->name('treasurer.members.update-savings-rate');
+        Route::post('/process-monthly-deductions', [TreasurerController::class, 'processMonthlyDeductions'])->name('treasurer.process-monthly-deductions');
+        Route::get('/export-payroll-deductions', [TreasurerController::class, 'exportPayrollDeductions'])->name('treasurer.export-payroll-deductions');
+        Route::post('/bulk-update-savings-rates', [TreasurerController::class, 'bulkUpdateSavingsRates'])->name('treasurer.bulk-update-savings-rates');
+        Route::get('/members/{user}/deductions', [TreasurerController::class, 'viewMemberDeductions'])->name('treasurer.members.deductions');
+        Route::post('/import-payroll-data', [TreasurerController::class, 'importPayrollData'])->name('treasurer.import-payroll-data');
 
         // Report Routes by Type
         Route::prefix('reports')->name('reports.')->group(function () {

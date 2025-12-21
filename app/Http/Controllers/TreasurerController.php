@@ -182,112 +182,112 @@ class TreasurerController extends Controller
 
 
     public function recordLoanPayment(Request $request, $loanId)
-{
-    // Validate the request
-    $validated = $request->validate([
-        'amount' => 'required|numeric|min:1',
-        'payment_date' => 'nullable|date',
-        'payment_method' => 'required|string|in:cash,mpesa,bank,cheque,payroll',
-        'cheque_number' => 'nullable|required_if:payment_method,cheque|string|unique:cheque_records,cheque_number',
-        'reference_number' => 'nullable|string|max:100',
-        'notes' => 'nullable|string',
-    ]);
-
-    try {
-        DB::beginTransaction();
-
-        // Find the loan
-        $loan = Loan::findOrFail($loanId);
-
-        // Check if amount exceeds remaining balance
-        if ($request->amount > $loan->remaining_balance) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Payment amount (KES ' . number_format($request->amount) . ') exceeds remaining balance (KES ' . number_format($loan->remaining_balance) . ')',
-            ], 400);
-        }
-
-        // Create payment record
-        $payment = new Payment([
-            'loan_id' => $loan->id,
-            'user_id' => $loan->user_id,
-            'payment_ref' => 'PAY-' . time() . rand(100, 999),
-            'amount' => $request->amount,
-            'payment_date' => $request->payment_date ?? now(),
-            'payment_method' => $request->payment_method,
-            'reference_number' => $request->reference_number,
-            'notes' => $request->notes,
-            'status' => 'completed',
-            'posted_date' => now(),
-            'posted_by' => auth()->id(),
+    {
+        // Validate the request
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'payment_date' => 'nullable|date',
+            'payment_method' => 'required|string|in:cash,mpesa,bank,cheque,payroll',
+            'cheque_number' => 'nullable|required_if:payment_method,cheque|string|unique:cheque_records,cheque_number',
+            'reference_number' => 'nullable|string|max:100',
+            'notes' => 'nullable|string',
         ]);
 
-        // Calculate principal and interest (5% interest already calculated)
-        $monthlyInterest = $loan->interest_amount / $loan->period_months;
-        $interestPortion = min($request->amount, $monthlyInterest);
-        $principalPortion = $request->amount - $interestPortion;
+        try {
+            DB::beginTransaction();
 
-        $payment->interest = $interestPortion;
-        $payment->principal = $principalPortion;
-        $payment->balance_before = $loan->remaining_balance;
-        
-        $payment->save();
+            // Find the loan
+            $loan = Loan::findOrFail($loanId);
 
-        // Update loan balance
-        $loan->remaining_balance -= $request->amount;
-        $loan->amount_paid += $request->amount;
-        $loan->percentage_paid = ($loan->amount_paid / $loan->total_repayable) * 100;
+            // Check if amount exceeds remaining balance
+            if ($request->amount > $loan->remaining_balance) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Payment amount (KES ' . number_format($request->amount) . ') exceeds remaining balance (KES ' . number_format($loan->remaining_balance) . ')',
+                ], 400);
+            }
 
-        // If loan is fully paid
-        if ($loan->remaining_balance <= 0) {
-            $loan->status = 'paid';
-            $loan->paid_date = now();
-        }
-
-        $payment->balance_after = $loan->remaining_balance;
-        $payment->save();
-
-        $loan->save();
-
-        // Record cheque if payment method is cheque
-        if ($request->payment_method === 'cheque' && $request->filled('cheque_number')) {
-            ChequeRecord::create([
-                'payment_id' => $payment->id,
+            // Create payment record
+            $payment = new Payment([
                 'loan_id' => $loan->id,
                 'user_id' => $loan->user_id,
-                'cheque_number' => $request->cheque_number,
-                'bank_name' => 'Not specified',
-                'bank_branch' => 'Not specified',
-                'account_number' => 'N/A',
+                'payment_ref' => 'PAY-' . time() . rand(100, 999),
                 'amount' => $request->amount,
-                'purpose' => 'loan_repayment',
-                'status' => 'issued',
-                'issue_date' => $request->payment_date ?? now(),
-                'issued_by' => auth()->id(),
-                'issue_notes' => 'Loan repayment - ' . ($request->notes ?? 'No notes'),
+                'payment_date' => $request->payment_date ?? now(),
+                'payment_method' => $request->payment_method,
+                'reference_number' => $request->reference_number,
+                'notes' => $request->notes,
+                'status' => 'completed',
+                'posted_date' => now(),
+                'posted_by' => auth()->id(),
             ]);
+
+            // Calculate principal and interest (5% interest already calculated)
+            $monthlyInterest = $loan->interest_amount / $loan->period_months;
+            $interestPortion = min($request->amount, $monthlyInterest);
+            $principalPortion = $request->amount - $interestPortion;
+
+            $payment->interest = $interestPortion;
+            $payment->principal = $principalPortion;
+            $payment->balance_before = $loan->remaining_balance;
+
+            $payment->save();
+
+            // Update loan balance
+            $loan->remaining_balance -= $request->amount;
+            $loan->amount_paid += $request->amount;
+            $loan->percentage_paid = ($loan->amount_paid / $loan->total_repayable) * 100;
+
+            // If loan is fully paid
+            if ($loan->remaining_balance <= 0) {
+                $loan->status = 'paid';
+                $loan->paid_date = now();
+            }
+
+            $payment->balance_after = $loan->remaining_balance;
+            $payment->save();
+
+            $loan->save();
+
+            // Record cheque if payment method is cheque
+            if ($request->payment_method === 'cheque' && $request->filled('cheque_number')) {
+                ChequeRecord::create([
+                    'payment_id' => $payment->id,
+                    'loan_id' => $loan->id,
+                    'user_id' => $loan->user_id,
+                    'cheque_number' => $request->cheque_number,
+                    'bank_name' => 'Not specified',
+                    'bank_branch' => 'Not specified',
+                    'account_number' => 'N/A',
+                    'amount' => $request->amount,
+                    'purpose' => 'loan_repayment',
+                    'status' => 'issued',
+                    'issue_date' => $request->payment_date ?? now(),
+                    'issued_by' => auth()->id(),
+                    'issue_notes' => 'Loan repayment - ' . ($request->notes ?? 'No notes'),
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment recorded successfully',
+                'payment' => $payment,
+                'new_balance' => $loan->remaining_balance,
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            \Log::error('Payment recording error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error recording payment: ' . $e->getMessage(),
+            ], 500);
         }
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Payment recorded successfully',
-            'payment' => $payment,
-            'new_balance' => $loan->remaining_balance,
-        ]);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        
-        \Log::error('Payment recording error: ' . $e->getMessage());
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'Error recording payment: ' . $e->getMessage(),
-        ], 500);
     }
-}
     // ============ 4. EXPENSES TRACKING ============
     public function expenses()
     {
@@ -609,163 +609,163 @@ class TreasurerController extends Controller
      * Disburse an approved loan directly
      */
     public function disburseLoan(Request $request, $loanId)
-{
-    \Log::info('=== DISBURSEMENT STARTED ===');
-    \Log::info('Loan ID: ' . $loanId);
-    \Log::info('Payment Method: ' . $request->payment_method);
+    {
+        \Log::info('=== DISBURSEMENT STARTED ===');
+        \Log::info('Loan ID: ' . $loanId);
+        \Log::info('Payment Method: ' . $request->payment_method);
 
-    try {
-        // Debug: Log all request data
-        \Log::info('Request Data:', $request->all());
+        try {
+            // Debug: Log all request data
+            \Log::info('Request Data:', $request->all());
 
-        $validated = $request->validate([
-            'payment_method' => 'required|in:cheque,bank_transfer,rtgs,cash,mobile_money',
-            'disbursement_date' => 'required|date',
-            'cheque_number' => 'nullable|required_if:payment_method,cheque|string|max:255|unique:cheque_records,cheque_number',
-            
-            // Bank name ONLY required for bank_transfer, NOT for cheque
-            'bank_name' => 'nullable|required_if:payment_method,bank_transfer|string|max:255',
-            
-            'account_number' => 'nullable|required_if:payment_method,bank_transfer|string|max:255',
-            'branch_code' => 'nullable|string|max:255',
-            'reference_number' => 'nullable|string|max:100',
-            'swift_code' => 'nullable|string|max:20',
-            'notes' => 'nullable|string|max:500',
-        ]);
+            $validated = $request->validate([
+                'payment_method' => 'required|in:cheque,bank_transfer,rtgs,cash,mobile_money',
+                'disbursement_date' => 'required|date',
+                'cheque_number' => 'nullable|required_if:payment_method,cheque|string|max:255|unique:cheque_records,cheque_number',
 
-        \Log::info('Validation passed');
+                // Bank name ONLY required for bank_transfer, NOT for cheque
+                'bank_name' => 'nullable|required_if:payment_method,bank_transfer|string|max:255',
 
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        \Log::error('Validation failed: ', $e->errors());
-        return redirect()->back()
-            ->withErrors($e->validator)
-            ->withInput();
-    }
+                'account_number' => 'nullable|required_if:payment_method,bank_transfer|string|max:255',
+                'branch_code' => 'nullable|string|max:255',
+                'reference_number' => 'nullable|string|max:100',
+                'swift_code' => 'nullable|string|max:20',
+                'notes' => 'nullable|string|max:500',
+            ]);
 
-    $loan = Loan::with('user')->findOrFail($loanId);
+            \Log::info('Validation passed');
 
-    \Log::info('Loan found: ' . $loan->loan_number . ' - Status: ' . $loan->status);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation failed: ', $e->errors());
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->withInput();
+        }
 
-    if ($loan->status !== 'approved') {
-        \Log::warning('Loan not approved. Status: ' . $loan->status);
-        return redirect()->back()
-            ->with('error', 'Loan must be approved before disbursement. Current status: ' . $loan->status);
-    }
+        $loan = Loan::with('user')->findOrFail($loanId);
 
-    // Generate reference
-    if ($request->payment_method === 'cheque') {
-        $reference = $request->cheque_number;
-        \Log::info('Cheque reference: ' . $reference);
-    } else {
-        $reference = $request->reference_number ?? strtoupper($request->payment_method) . '-' . date('YmdHis');
-        \Log::info('Other payment reference: ' . $reference);
-    }
+        \Log::info('Loan found: ' . $loan->loan_number . ' - Status: ' . $loan->status);
 
-    DB::beginTransaction();
-    try {
-        \Log::info('Updating loan status to disbursed...');
+        if ($loan->status !== 'approved') {
+            \Log::warning('Loan not approved. Status: ' . $loan->status);
+            return redirect()->back()
+                ->with('error', 'Loan must be approved before disbursement. Current status: ' . $loan->status);
+        }
 
-        // Update loan
-        $loan->update([
-            'status' => 'disbursed',
-            'disbursed_by' => auth()->id(),
-            'disbursed_date' => $request->disbursement_date,
-            'next_payment_date' => \Carbon\Carbon::parse($request->disbursement_date)->addMonth(),
-        ]);
-
-        \Log::info('Loan updated successfully');
-
-        // Create payment WITHOUT triggering events
-        \Log::info('Creating payment record...');
-        $payment = new Payment();
-        $payment->loan_id = $loan->id;
-        $payment->user_id = $loan->user_id;
-        $payment->payment_ref = $reference;
-        $payment->amount = $loan->amount;
-        $payment->payment_method = $request->payment_method;
-        $payment->reference_number = $reference;
-        $payment->status = 'completed';
-        $payment->payment_date = $request->disbursement_date;
-        $payment->posted_date = now();
-        $payment->posted_by = auth()->id();
-        $payment->notes = $request->notes ?? 'Loan disbursement';
-
-        // Save without events
-        $payment->saveQuietly();
-        \Log::info('Payment created: ID ' . $payment->id);
-
-        // Create cheque record if needed
+        // Generate reference
         if ($request->payment_method === 'cheque') {
-            \Log::info('Creating cheque record...');
-            \Log::info('Cheque data:', [
-                'cheque_number' => $request->cheque_number,
-                'bank_name' => $request->bank_name,
-                'branch_code' => $request->branch_code,
-                'account_number' => $request->account_number,
-            ]);
-
-            // Check if cheque already exists
-            $existingCheque = ChequeRecord::where('cheque_number', $request->cheque_number)->first();
-            if ($existingCheque) {
-                throw new \Exception('Cheque number ' . $request->cheque_number . ' already exists');
-            }
-
-            // REMOVED: Bank name validation for cheque (not required anymore)
-            // if (empty($request->bank_name)) {
-            //     throw new \Exception('Bank name is required for cheque disbursement');
-            // }
-
-            $bankBranch = $request->branch_code;
-            if (empty($bankBranch)) {
-                $bankBranch = 'Main Branch'; // Default value
-                \Log::warning('Branch code empty, using default: ' . $bankBranch);
-            }
-
-            $cheque = ChequeRecord::create([
-                'loan_id' => $loan->id,
-                'user_id' => $loan->user_id,
-                'cheque_number' => $request->cheque_number,
-                'bank_name' => $request->bank_name ?? 'Not Specified', // Use default if empty
-                'bank_branch' => $bankBranch,
-                'account_number' => $request->account_number ?? 'N/A',
-                'amount' => $loan->amount,
-                'purpose' => 'loan_disbursement',
-                'status' => 'issued',
-                'issue_date' => $request->disbursement_date,
-                'issued_by' => auth()->id(),
-                'issue_notes' => $request->notes,
-            ]);
-
-            \Log::info('Cheque created successfully: ID ' . $cheque->id);
+            $reference = $request->cheque_number;
+            \Log::info('Cheque reference: ' . $reference);
+        } else {
+            $reference = $request->reference_number ?? strtoupper($request->payment_method) . '-' . date('YmdHis');
+            \Log::info('Other payment reference: ' . $reference);
         }
 
-        DB::commit();
-        \Log::info('=== DISBURSEMENT COMPLETED SUCCESSFULLY ===');
+        DB::beginTransaction();
+        try {
+            \Log::info('Updating loan status to disbursed...');
 
-        return redirect()->route('treasurer.payments')
-            ->with('success', 'Loan ' . $loan->loan_number . ' disbursed successfully!')
-            ->with('disbursement_ref', $reference);
+            // Update loan
+            $loan->update([
+                'status' => 'disbursed',
+                'disbursed_by' => auth()->id(),
+                'disbursed_date' => $request->disbursement_date,
+                'next_payment_date' => \Carbon\Carbon::parse($request->disbursement_date)->addMonth(),
+            ]);
 
-    } catch (\Exception $e) {
-        DB::rollBack();
+            \Log::info('Loan updated successfully');
 
-        \Log::error('Disbursement failed: ' . $e->getMessage());
-        \Log::error('Stack trace: ' . $e->getTraceAsString());
+            // Create payment WITHOUT triggering events
+            \Log::info('Creating payment record...');
+            $payment = new Payment();
+            $payment->loan_id = $loan->id;
+            $payment->user_id = $loan->user_id;
+            $payment->payment_ref = $reference;
+            $payment->amount = $loan->amount;
+            $payment->payment_method = $request->payment_method;
+            $payment->reference_number = $reference;
+            $payment->status = 'completed';
+            $payment->payment_date = $request->disbursement_date;
+            $payment->posted_date = now();
+            $payment->posted_by = auth()->id();
+            $payment->notes = $request->notes ?? 'Loan disbursement';
 
-        $errorMessage = 'Loan disbursement failed: ' . $e->getMessage();
+            // Save without events
+            $payment->saveQuietly();
+            \Log::info('Payment created: ID ' . $payment->id);
 
-        // Provide more specific error messages
-        if (str_contains($e->getMessage(), 'cheque_records.cheque_number')) {
-            $errorMessage = 'Cheque number already exists. Please use a unique cheque number.';
-        } elseif (str_contains($e->getMessage(), 'Column cannot be null')) {
-            $errorMessage = 'Missing required information. Please fill all required fields.';
+            // Create cheque record if needed
+            if ($request->payment_method === 'cheque') {
+                \Log::info('Creating cheque record...');
+                \Log::info('Cheque data:', [
+                    'cheque_number' => $request->cheque_number,
+                    'bank_name' => $request->bank_name,
+                    'branch_code' => $request->branch_code,
+                    'account_number' => $request->account_number,
+                ]);
+
+                // Check if cheque already exists
+                $existingCheque = ChequeRecord::where('cheque_number', $request->cheque_number)->first();
+                if ($existingCheque) {
+                    throw new \Exception('Cheque number ' . $request->cheque_number . ' already exists');
+                }
+
+                // REMOVED: Bank name validation for cheque (not required anymore)
+                // if (empty($request->bank_name)) {
+                //     throw new \Exception('Bank name is required for cheque disbursement');
+                // }
+
+                $bankBranch = $request->branch_code;
+                if (empty($bankBranch)) {
+                    $bankBranch = 'Main Branch'; // Default value
+                    \Log::warning('Branch code empty, using default: ' . $bankBranch);
+                }
+
+                $cheque = ChequeRecord::create([
+                    'loan_id' => $loan->id,
+                    'user_id' => $loan->user_id,
+                    'cheque_number' => $request->cheque_number,
+                    'bank_name' => $request->bank_name ?? 'Not Specified', // Use default if empty
+                    'bank_branch' => $bankBranch,
+                    'account_number' => $request->account_number ?? 'N/A',
+                    'amount' => $loan->amount,
+                    'purpose' => 'loan_disbursement',
+                    'status' => 'issued',
+                    'issue_date' => $request->disbursement_date,
+                    'issued_by' => auth()->id(),
+                    'issue_notes' => $request->notes,
+                ]);
+
+                \Log::info('Cheque created successfully: ID ' . $cheque->id);
+            }
+
+            DB::commit();
+            \Log::info('=== DISBURSEMENT COMPLETED SUCCESSFULLY ===');
+
+            return redirect()->route('treasurer.payments')
+                ->with('success', 'Loan ' . $loan->loan_number . ' disbursed successfully!')
+                ->with('disbursement_ref', $reference);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            \Log::error('Disbursement failed: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+
+            $errorMessage = 'Loan disbursement failed: ' . $e->getMessage();
+
+            // Provide more specific error messages
+            if (str_contains($e->getMessage(), 'cheque_records.cheque_number')) {
+                $errorMessage = 'Cheque number already exists. Please use a unique cheque number.';
+            } elseif (str_contains($e->getMessage(), 'Column cannot be null')) {
+                $errorMessage = 'Missing required information. Please fill all required fields.';
+            }
+
+            return redirect()->back()
+                ->with('error', $errorMessage)
+                ->withInput();
         }
-
-        return redirect()->back()
-            ->with('error', $errorMessage)
-            ->withInput();
     }
-}
     /**
      * Process payroll deductions
      * From requirements: "Savings are deducted from the payroll... deposited cumulatively"
@@ -1153,6 +1153,751 @@ class TreasurerController extends Controller
             ],
         ];
     }
+
+    // Add these methods to your existing TreasurerController class
+
+    // ============ PAYROLL DEDUCTION MANAGEMENT ============
+    public function savingsWithDeductions()
+{
+    // Calculate real statistics for the simple view
+    
+    // 1. Member statistics
+    $totalMembers = User::where('role', 'member')->count();
+    $activeMembers = User::where('role', 'member')->where('sacco_status', 'active')->count();
+    
+    // 2. Calculate average deduction rate
+    $usersWithSalary = User::where('role', 'member')
+        ->where('monthly_salary', '>', 0)
+        ->where('monthly_savings', '>', 0)
+        ->get();
+    
+    $avgDeductionRate = 0;
+    $totalRate = 0;
+    $countWithRates = 0;
+    
+    foreach ($usersWithSalary as $user) {
+        if ($user->monthly_salary > 0) {
+            $rate = ($user->monthly_savings / $user->monthly_salary) * 100;
+            $totalRate += $rate;
+            $countWithRates++;
+        }
+    }
+    
+    if ($countWithRates > 0) {
+        $avgDeductionRate = $totalRate / $countWithRates;
+    }
+    
+    // 3. Withdrawal statistics
+    $pendingWithdrawalsAmount = SavingsTransaction::where('type', 'withdrawal')
+        ->where('status', 'pending')
+        ->sum('amount');
+    
+    // 4. Monthly deduction statistics
+    $currentMonth = Carbon::now()->month;
+    $currentYear = Carbon::now()->year;
+    
+    $currentMonthDeductions = SavingsTransaction::where('type', 'payroll_deduction')
+        ->whereMonth('transaction_date', $currentMonth)
+        ->whereYear('transaction_date', $currentYear)
+        ->sum('amount');
+    
+    // 5. Compile all statistics for the simple view
+    $savingsStats = [
+        'total_savings' => Saving::sum('available_savings'),
+        'total_members' => $totalMembers,
+        'active_members' => $activeMembers,
+        'average_savings' => Saving::avg('available_savings') ?? 0,
+        'pending_withdrawals' => SavingsTransaction::where('type', 'withdrawal')
+            ->where('status', 'pending')
+            ->count(),
+        'pending_withdrawals_amount' => $pendingWithdrawalsAmount,
+        'monthly_deductions' => $currentMonthDeductions,
+        'avg_deduction_rate' => round($avgDeductionRate, 1),
+    ];
+
+    // Get all members with their deduction details
+    $payrollDeductions = User::with([
+        'savings',
+        'loans' => function ($q) {
+            $q->whereIn('status', ['active', 'disbursed']);
+        }
+    ])->where('role', 'member')->get()->map(function ($user) {
+        // Calculate total loan deductions
+        $activeLoans = $user->loans->whereIn('status', ['active', 'disbursed']);
+        $totalLoanDeduction = $activeLoans->sum('monthly_payment');
+
+        // Use correct columns: monthly_salary and monthly_savings
+        $monthlySalary = $user->monthly_salary ?? 0;
+        $monthlySavings = $user->monthly_savings ?? 0;
+        
+        // Calculate savings deduction rate (percentage)
+        $savingsRate = 0;
+        if ($monthlySalary > 0 && $monthlySavings > 0) {
+            $savingsRate = ($monthlySavings / $monthlySalary) * 100;
+        }
+
+        $totalDeduction = $monthlySavings + $totalLoanDeduction;
+
+        return [
+            'member' => $user,
+            'savings_deduction' => $monthlySavings,
+            'savings_rate' => $savingsRate,
+            'loan_deduction' => $totalLoanDeduction,
+            'active_loans' => $activeLoans->count(),
+            'total_monthly_deduction' => $totalDeduction,
+            'status' => ($monthlySavings > 0 || $totalLoanDeduction > 0) ? 'active' : 'inactive',
+            'basic_salary' => $monthlySalary,
+        ];
+    });
+
+    // Payroll Summary
+    $payrollSummary = [
+        'total_deductions' => $payrollDeductions->sum('total_monthly_deduction'),
+        'total_members' => $payrollDeductions->count(),
+        'savings_deductions' => $payrollDeductions->sum('savings_deduction'),
+        'savings_members' => $payrollDeductions->where('savings_deduction', '>', 0)->count(),
+        'loan_deductions' => $payrollDeductions->sum('loan_deduction'),
+        'loan_members' => $payrollDeductions->where('loan_deduction', '>', 0)->count(),
+    ];
+
+    // Monthly summaries for dropdown
+    $monthlySummaries = collect();
+    for ($i = 0; $i < 6; $i++) {
+        $month = now()->subMonths($i);
+        $monthlySummaries->push([
+            'month' => $month->format('Y-m'),
+            'label' => $month->format('F Y'),
+            'is_current' => $i === 0
+        ]);
+    }
+    
+    $payrollMonths = collect();
+    for ($i = 0; $i < 12; $i++) {
+        $month = now()->subMonths($i);
+        $payrollMonths->push([
+            'value' => $month->format('Y-m'),
+            'label' => $month->format('F Y'),
+        ]);
+    }
+    
+    // Savings Deductions for the table
+    $savingsDeductions = User::where('role', 'member')
+        ->with(['savings'])
+        ->get()
+        ->map(function ($user) {
+            $monthlySalary = $user->monthly_salary ?? 0;
+            $monthlySavings = $user->monthly_savings ?? 0;
+            
+            // Calculate savings rate percentage
+            $savingsRate = 0;
+            if ($monthlySalary > 0 && $monthlySavings > 0) {
+                $savingsRate = ($monthlySavings / $monthlySalary) * 100;
+            }
+
+            // Calculate total deducted to date
+            $totalDeducted = SavingsTransaction::where('user_id', $user->id)
+                ->where('type', 'payroll_deduction')
+                ->sum('amount');
+
+            return (object) [
+                'id' => $user->id,
+                'user' => $user,
+                'deduction_rate' => $savingsRate,
+                'basic_salary' => $monthlySalary,
+                'monthly_amount' => $monthlySavings,
+                'total_deducted' => $totalDeducted,
+                'deduction_day' => 25,
+                'start_date' => $user->created_at,
+                'is_active' => ($monthlySavings > 0),
+                'updated_at' => $user->updated_at,
+                'updatedBy' => $user->approved_by ? User::find($user->approved_by) : null,
+            ];
+        });
+
+    // Current month summary
+    $currentMonth = now()->format('Y-m');
+    $currentMonthSummary = [
+        'total_deductions' => $payrollDeductions->sum('total_monthly_deduction'),
+        'savings_amount' => $payrollDeductions->sum('savings_deduction'),
+        'loan_amount' => $payrollDeductions->sum('loan_deduction'),
+        'members_count' => $payrollDeductions->count(),
+        'processed_count' => 0,
+        'pending_count' => $payrollDeductions->count(),
+        'ready_amount' => $payrollDeductions->sum('total_monthly_deduction'),
+    ];
+
+    // Monthly trends - using actual transaction data
+    $monthlyTrends = collect();
+    for ($i = 5; $i >= 0; $i--) {
+        $month = now()->subMonths($i);
+        $monthDeductions = SavingsTransaction::where('type', 'payroll_deduction')
+            ->whereMonth('transaction_date', $month->month)
+            ->whereYear('transaction_date', $month->year)
+            ->sum('amount');
+            
+        $monthlyTrends->push([
+            'month' => $month->format('M Y'),
+            'short_label' => $month->format('M'),
+            'total' => $monthDeductions
+        ]);
+    }
+
+    $maxMonthlyTotal = $monthlyTrends->max('total') ?: 1;
+
+    // Loan Repayments
+    $loanRepayments = [
+        'total_amount' => Loan::whereIn('status', ['active', 'disbursed'])->sum('monthly_payment'),
+        'total_loans' => Loan::whereIn('status', ['active', 'disbursed'])->count(),
+        'total_members' => Loan::whereIn('status', ['active', 'disbursed'])->distinct('user_id')->count(),
+        'defaulted_count' => Loan::where('status', 'defaulted')->count(),
+        'breakdown' => Loan::whereIn('status', ['active', 'disbursed'])
+            ->with('user')
+            ->take(5)
+            ->get()
+            ->map(function ($loan) {
+                return [
+                    'loan_number' => $loan->loan_number,
+                    'purpose' => $loan->purpose,
+                    'member_name' => $loan->user->name,
+                    'monthly_payment' => $loan->monthly_payment
+                ];
+            })
+    ];
+
+    // Active Loan Deductions
+    $activeLoanDeductions = Loan::whereIn('status', ['active', 'disbursed'])
+        ->with('user')
+        ->get()
+        ->map(function ($loan) {
+            $loan->percentage_paid = $loan->remaining_balance > 0
+                ? (($loan->amount_paid ?? 0) / $loan->amount) * 100
+                : 100;
+            $loan->days_late = $loan->next_payment_date
+                ? max(0, now()->diffInDays(Carbon::parse($loan->next_payment_date)))
+                : 0;
+            $loan->is_defaulted = $loan->days_late > 30;
+            $loan->deduction_day = 25;
+            return $loan;
+        });
+
+    // All members for bulk operations
+    $allMembers = User::where('role', 'member')->get();
+
+    // Your existing data
+    $savingsAccounts = Saving::with('user')->orderBy('available_savings', 'desc')->paginate(15);
+    $recentTransactions = SavingsTransaction::with('user')
+        ->orderBy('transaction_date', 'desc')
+        ->take(20)
+        ->get();
+    $withdrawalRequests = SavingsTransaction::where('type', 'withdrawal')
+        ->where('status', 'pending')
+        ->with('user')
+        ->get();
+    $topSavers = Saving::with('user')
+        ->orderBy('available_savings', 'desc')
+        ->take(10)
+        ->get();
+
+    return view('treasurer.savings-with-deductions', compact(
+        'savingsStats',
+        'payrollSummary',
+        'payrollDeductions',
+        'monthlySummaries',
+        'payrollMonths',
+        'currentMonthSummary',
+        'monthlyTrends',
+        'maxMonthlyTotal',
+        'savingsDeductions',
+        'loanRepayments',
+        'activeLoanDeductions',
+        'allMembers',
+        'savingsAccounts',
+        'recentTransactions',
+        'withdrawalRequests',
+        'topSavers'
+    ));
+}
+
+    /**
+     * Update member's savings deduction rate
+     */
+    public function updateSavingsRate(Request $request, $userId)
+    {
+        $validated = $request->validate([
+            'savings_rate' => 'required|numeric|min:0|max:20',
+            'notes' => 'nullable|string',
+        ]);
+
+        try {
+            $user = User::findOrFail($userId);
+            $oldRate = $user->savings_deduction_rate ?? 0;
+
+            $user->update([
+                'savings_deduction_rate' => $validated['savings_rate'],
+                'savings_deduction_updated_at' => now(),
+                'savings_deduction_updated_by' => auth()->id(),
+            ]);
+
+            // Log the change
+            \Log::info('Savings rate updated', [
+                'user_id' => $userId,
+                'old_rate' => $oldRate,
+                'new_rate' => $validated['savings_rate'],
+                'updated_by' => auth()->id(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Savings deduction rate updated to ' . $validated['savings_rate'] . '%',
+                'new_rate' => $validated['savings_rate'],
+                'monthly_amount' => $user->basic_salary ? ($user->basic_salary * $validated['savings_rate'] / 100) : 0,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating rate: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Process monthly payroll deductions
+     */
+    public function processMonthlyDeductions(Request $request)
+    {
+        $validated = $request->validate([
+            'deduction_month' => 'required|date_format:Y-m',
+            'force_process' => 'boolean',
+        ]);
+
+        $deductionMonth = Carbon::parse($validated['deduction_month']);
+        $alreadyProcessed = SavingsTransaction::where('type', 'payroll_deduction')
+            ->whereMonth('transaction_date', $deductionMonth->month)
+            ->whereYear('transaction_date', $deductionMonth->year)
+            ->exists();
+
+        if ($alreadyProcessed && !($validated['force_process'] ?? false)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Deductions for ' . $deductionMonth->format('F Y') . ' have already been processed.',
+            ], 400);
+        }
+
+        DB::beginTransaction();
+        try {
+            $members = User::where('role', 'member')->get();
+            $processedCount = 0;
+            $totalAmount = 0;
+
+            foreach ($members as $member) {
+                // Calculate savings deduction
+                $savingsRate = $member->savings_deduction_rate ?? 5;
+                $basicSalary = $member->basic_salary ?? 50000;
+                $savingsAmount = ($basicSalary * $savingsRate) / 100;
+
+                if ($savingsAmount > 0) {
+                    // Record savings transaction
+                    $transaction = SavingsTransaction::create([
+                        'user_id' => $member->id,
+                        'saving_id' => $member->savings->id ?? null,
+                        'type' => 'payroll_deduction',
+                        'transaction_ref' => 'PAYROLL-' . $deductionMonth->format('Ym') . '-' . str_pad($processedCount + 1, 4, '0', STR_PAD_LEFT),
+                        'amount' => $savingsAmount,
+                        'balance_before' => $member->savings->available_savings ?? 0,
+                        'balance_after' => ($member->savings->available_savings ?? 0) + $savingsAmount,
+                        'transaction_date' => $deductionMonth->endOfMonth(),
+                        'status' => 'completed',
+                        'description' => 'Payroll deduction for ' . $deductionMonth->format('F Y'),
+                        'processed_by' => auth()->id(),
+                    ]);
+
+                    // Update savings account
+                    if ($member->savings) {
+                        $member->savings->increment('available_savings', $savingsAmount);
+                        $member->savings->increment('total_deposits', $savingsAmount);
+                    }
+
+                    $processedCount++;
+                    $totalAmount += $savingsAmount;
+                }
+
+                // Process loan deductions
+                $activeLoans = Loan::where('user_id', $member->id)
+                    ->whereIn('status', ['active', 'disbursed'])
+                    ->get();
+
+                foreach ($activeLoans as $loan) {
+                    // Record loan payment via payroll deduction
+                    $payment = Payment::create([
+                        'loan_id' => $loan->id,
+                        'user_id' => $member->id,
+                        'payment_ref' => 'PAYROLL-LN-' . $deductionMonth->format('Ym') . '-' . $loan->id,
+                        'amount' => $loan->monthly_payment,
+                        'principal' => $loan->monthly_payment * 0.95, // 95% principal, 5% interest
+                        'interest' => $loan->monthly_payment * 0.05,
+                        'balance_before' => $loan->remaining_balance,
+                        'balance_after' => $loan->remaining_balance - $loan->monthly_payment,
+                        'payment_method' => 'payroll',
+                        'reference_number' => 'PAYROLL-' . $deductionMonth->format('Y-m'),
+                        'status' => 'completed',
+                        'payment_date' => $deductionMonth->endOfMonth(),
+                        'posted_date' => now(),
+                        'posted_by' => auth()->id(),
+                        'notes' => 'Payroll deduction for ' . $deductionMonth->format('F Y'),
+                    ]);
+
+                    // Update loan
+                    $loan->update([
+                        'amount_paid' => $loan->amount_paid + $loan->monthly_payment,
+                        'remaining_balance' => $loan->remaining_balance - $loan->monthly_payment,
+                        'months_paid' => $loan->months_paid + 1,
+                        'percentage_paid' => ($loan->amount_paid + $loan->monthly_payment) / $loan->total_repayable * 100,
+                        'next_payment_date' => $deductionMonth->addMonth(),
+                    ]);
+
+                    // Check if loan is paid off
+                    if ($loan->remaining_balance <= 0) {
+                        $loan->update([
+                            'status' => 'paid',
+                            'paid_date' => now(),
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Payroll deductions processed successfully',
+                'processed_count' => $processedCount,
+                'total_amount' => $totalAmount,
+                'deduction_month' => $deductionMonth->format('F Y'),
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            \Log::error('Payroll processing error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error processing payroll deductions: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Export payroll deductions for a specific month
+     */
+    public function exportPayrollDeductions(Request $request)
+    {
+        $validated = $request->validate([
+            'month' => 'required|date_format:Y-m',
+        ]);
+
+        $month = Carbon::parse($validated['month']);
+        $members = User::where('role', 'member')->get();
+
+        $csvData = [];
+        $csvData[] = [
+            'Employee Number',
+            'Name',
+            'Department',
+            'Basic Salary',
+            'Savings Rate %',
+            'Savings Amount',
+            'Loan Deduction',
+            'Total Deduction',
+            'Net Salary'
+        ];
+
+        $totalSavings = 0;
+        $totalLoans = 0;
+        $totalDeductions = 0;
+
+        foreach ($members as $member) {
+            // Calculate savings deduction
+            $savingsRate = $member->savings_deduction_rate ?? 5;
+            $basicSalary = $member->basic_salary ?? 50000;
+            $savingsAmount = ($basicSalary * $savingsRate) / 100;
+
+            // Calculate loan deduction
+            $loanDeduction = Loan::where('user_id', $member->id)
+                ->whereIn('status', ['active', 'disbursed'])
+                ->sum('monthly_payment');
+
+            $totalDeduction = $savingsAmount + $loanDeduction;
+            $netSalary = $basicSalary - $totalDeduction;
+
+            $csvData[] = [
+                $member->employee_number,
+                $member->name,
+                $member->department ?? 'N/A',
+                number_format($basicSalary, 2),
+                $savingsRate,
+                number_format($savingsAmount, 2),
+                number_format($loanDeduction, 2),
+                number_format($totalDeduction, 2),
+                number_format($netSalary, 2),
+            ];
+
+            $totalSavings += $savingsAmount;
+            $totalLoans += $loanDeduction;
+            $totalDeductions += $totalDeduction;
+        }
+
+        // Add summary row
+        $csvData[] = [];
+        $csvData[] = [
+            'TOTALS',
+            '',
+            '',
+            '',
+            '',
+            number_format($totalSavings, 2),
+            number_format($totalLoans, 2),
+            number_format($totalDeductions, 2),
+            ''
+        ];
+
+        $filename = 'payroll-deductions-' . $month->format('Y-m') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function () use ($csvData) {
+            $file = fopen('php://output', 'w');
+            foreach ($csvData as $row) {
+                fputcsv($file, $row);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Bulk update savings rates for multiple members
+     */
+    public function bulkUpdateSavingsRates(Request $request)
+    {
+        $validated = $request->validate([
+            'member_ids' => 'required|array',
+            'member_ids.*' => 'exists:users,id',
+            'savings_rate' => 'required|numeric|min:0|max:20',
+            'notes' => 'nullable|string',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $updatedCount = 0;
+            $failedCount = 0;
+            $errors = [];
+
+            foreach ($validated['member_ids'] as $memberId) {
+                try {
+                    $user = User::find($memberId);
+                    if ($user && $user->role === 'member') {
+                        $user->update([
+                            'savings_deduction_rate' => $validated['savings_rate'],
+                            'savings_deduction_updated_at' => now(),
+                            'savings_deduction_updated_by' => auth()->id(),
+                        ]);
+                        $updatedCount++;
+                    }
+                } catch (\Exception $e) {
+                    $failedCount++;
+                    $errors[] = "Member ID {$memberId}: " . $e->getMessage();
+                }
+            }
+
+            DB::commit();
+
+            $response = [
+                'success' => true,
+                'message' => "Updated {$updatedCount} members, {$failedCount} failed",
+                'updated_count' => $updatedCount,
+                'failed_count' => $failedCount,
+            ];
+
+            if ($failedCount > 0) {
+                $response['errors'] = $errors;
+            }
+
+            return response()->json($response);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Bulk update failed: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * View individual member's deduction details
+     */
+    public function viewMemberDeductions($userId)
+    {
+        $member = User::with([
+            'savings',
+            'loans' => function ($q) {
+                $q->whereIn('status', ['active', 'disbursed']);
+            }
+        ])->findOrFail($userId);
+
+        // Calculate deductions
+        $savingsRate = $member->savings_deduction_rate ?? 5;
+        $basicSalary = $member->basic_salary ?? 50000;
+        $savingsAmount = ($basicSalary * $savingsRate) / 100;
+
+        $loanDeduction = $member->loans->sum('monthly_payment');
+        $totalDeduction = $savingsAmount + $loanDeduction;
+        $netSalary = $basicSalary - $totalDeduction;
+
+        // Get deduction history
+        $deductionHistory = SavingsTransaction::where('user_id', $userId)
+            ->where('type', 'payroll_deduction')
+            ->orderBy('transaction_date', 'desc')
+            ->get();
+
+        // Get loan payment history via payroll
+        $loanPayments = Payment::where('user_id', $userId)
+            ->where('payment_method', 'payroll')
+            ->orderBy('payment_date', 'desc')
+            ->get();
+
+        return view('treasurer.member-deductions', compact(
+            'member',
+            'savingsRate',
+            'savingsAmount',
+            'loanDeduction',
+            'totalDeduction',
+            'netSalary',
+            'basicSalary',
+            'deductionHistory',
+            'loanPayments'
+        ));
+    }
+
+    /**
+     * Import payroll data from Excel/CSV
+     */
+    public function importPayrollData(Request $request)
+    {
+        $validated = $request->validate([
+            'payroll_file' => 'required|file|mimes:csv,xlsx,xls',
+            'import_type' => 'required|in:salary_update,deduction_update',
+            'month' => 'required|date_format:Y-m',
+        ]);
+
+        try {
+            $file = $request->file('payroll_file');
+            $extension = $file->getClientOriginalExtension();
+
+            if ($extension === 'csv') {
+                $data = $this->processCSV($file);
+            } else {
+                $data = $this->processExcel($file);
+            }
+
+            DB::beginTransaction();
+            $importedCount = 0;
+            $errors = [];
+
+            foreach ($data as $row) {
+                try {
+                    $employeeNumber = $row['employee_number'] ?? null;
+
+                    if (!$employeeNumber) {
+                        $errors[] = 'Row missing employee number: ' . json_encode($row);
+                        continue;
+                    }
+
+                    $member = User::where('employee_number', $employeeNumber)
+                        ->where('role', 'member')
+                        ->first();
+
+                    if (!$member) {
+                        $errors[] = "Member not found: {$employeeNumber}";
+                        continue;
+                    }
+
+                    if ($validated['import_type'] === 'salary_update') {
+                        // Update basic salary
+                        if (isset($row['basic_salary'])) {
+                            $member->update([
+                                'basic_salary' => $row['basic_salary'],
+                                'salary_updated_at' => now(),
+                                'salary_updated_by' => auth()->id(),
+                            ]);
+                            $importedCount++;
+                        }
+                    } else {
+                        // Update deduction rate
+                        if (isset($row['savings_rate'])) {
+                            $member->update([
+                                'savings_deduction_rate' => $row['savings_rate'],
+                                'savings_deduction_updated_at' => now(),
+                                'savings_deduction_updated_by' => auth()->id(),
+                            ]);
+                            $importedCount++;
+                        }
+                    }
+                } catch (\Exception $e) {
+                    $errors[] = "Error processing {$employeeNumber}: " . $e->getMessage();
+                }
+            }
+
+            DB::commit();
+
+            $response = [
+                'success' => true,
+                'message' => "Imported {$importedCount} records successfully",
+                'imported_count' => $importedCount,
+                'error_count' => count($errors),
+            ];
+
+            if (count($errors) > 0) {
+                $response['errors'] = array_slice($errors, 0, 10); // Show first 10 errors
+            }
+
+            return response()->json($response);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Import failed: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    // Helper methods for file processing
+    private function processCSV($file)
+    {
+        $data = [];
+        $handle = fopen($file->path(), 'r');
+        $headers = fgetcsv($handle);
+
+        while (($row = fgetcsv($handle)) !== false) {
+            $data[] = array_combine($headers, $row);
+        }
+
+        fclose($handle);
+        return $data;
+    }
+
+    private function processExcel($file)
+    {
+        // You'll need to install maatwebsite/excel package for this
+        // For now, return empty array
+        return [];
+    }
+
 
     private function generateSavingsSummary($startDate, $endDate)
     {

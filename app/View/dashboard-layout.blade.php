@@ -37,6 +37,61 @@
                             class="block py-3 px-6 hover:bg-blue-800 {{ str_starts_with($currentRoute, 'member.profile') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
                             👤 My Profile
                         </a>
+                    
+                    @elseif(auth()->user()->role === 'treasurer')
+                        <!-- TREASURER NAVIGATION -->
+                        <a href="{{ route('treasurer.dashboard') }}"
+                            class="block py-3 px-6 hover:bg-blue-800 {{ request()->routeIs('treasurer.dashboard') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
+                            📊 Treasurer Dashboard
+                        </a>
+                        
+                        <a href="{{ route('treasurer.treasurer.savings.deductions') }}"
+                            class="block py-3 px-6 hover:bg-blue-800 {{ request()->routeIs('treasurer.treasurer.savings.deductions') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
+                            💵 Payroll Deductions
+                        </a>
+                        
+                        <!-- EXISTING PAYMENTS LINK -->
+                        <a href="{{ route('treasurer.payments') }}"
+                            class="block py-3 px-6 hover:bg-blue-800 {{ request()->routeIs('treasurer.payments') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
+                            💳 Process Payments
+                        </a>
+                        
+                        <!-- LOANS LINK -->
+                        <a href="{{ route('treasurer.loans') }}"
+                            class="block py-3 px-6 hover:bg-blue-800 {{ request()->routeIs('treasurer.loans') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
+                            📋 Loans Management
+                        </a>
+                        
+                        <!-- SAVINGS SUMMARY LINK -->
+                        <a href="{{ route('treasurer.savings') }}"
+                            class="block py-3 px-6 hover:bg-blue-800 {{ request()->routeIs('treasurer.savings') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
+                            💰 Savings Summary
+                        </a>
+                        
+                        <!-- EXPENSES LINK -->
+                        <a href="{{ route('treasurer.expenses') }}"
+                            class="block py-3 px-6 hover:bg-blue-800 {{ request()->routeIs('treasurer.expenses') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
+                            💸 Expenses Tracking
+                        </a>
+                        
+                        <!-- CHEQUES LINK -->
+                        <a href="{{ route('treasurer.cheques') }}"
+                            class="block py-3 px-6 hover:bg-blue-800 {{ request()->routeIs('treasurer.cheques') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
+                            🏦 Cheque Management
+                        </a>
+                        
+                        <!-- RECONCILIATION LINK -->
+                        <a href="{{ route('treasurer.reconciliation') }}"
+                            class="block py-3 px-6 hover:bg-blue-800 {{ request()->routeIs('treasurer.reconciliation') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
+                            🔄 Bank Reconciliation
+                        </a>
+                        
+                        <!-- REPORTS LINK -->
+                        <a href="{{ route('treasurer.financial-reports') }}"
+                            class="block py-3 px-6 hover:bg-blue-800 {{ request()->routeIs('treasurer.financial-reports') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
+                            📈 Financial Reports
+                        </a>
+
                     @elseif(auth()->user()->role === 'chairman')
                         <a href="{{ route('chairman.dashboard') }}"
                             class="block py-3 px-6 hover:bg-blue-800 {{ request()->routeIs('chairman.dashboard') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
@@ -47,18 +102,6 @@
                         </a>
                         <a href="#" class="block py-3 px-6 hover:bg-blue-800">
                             📈 Reports
-                        </a>
-
-                    @elseif(auth()->user()->role === 'treasurer')
-                        <a href="{{ route('treasurer.dashboard') }}"
-                            class="block py-3 px-6 hover:bg-blue-800 {{ request()->routeIs('treasurer.dashboard') ? 'bg-blue-800 border-r-4 border-yellow-400' : '' }}">
-                            📊 Treasurer Dashboard
-                        </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            💳 Process Payments
-                        </a>
-                        <a href="#" class="block py-3 px-6 hover:bg-blue-800">
-                            💸 Expenses
                         </a>
 
                     @elseif(auth()->user()->role === 'secretary')
@@ -108,5 +151,4 @@
         </div>
     @endif
 </body>
-
 </html>

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Schedule - <?php echo e($loan->loan_number); ?> - <?php echo e(auth()->user()->role); ?></title>
     <title>Loan Repayment Schedule - <?php echo e($loan->loan_number); ?></title>
     <style>
         @page {
@@ -317,7 +318,6 @@
             <h4 style="margin: 0 0 10px 0; color: #333;">IMPORTANT NOTES:</h4>
             <ol style="margin: 0; padding-left: 20px;">
                 <li>This schedule is subject to change based on early or extra payments.</li>
-                <li>Late payments attract a penalty of 1% per month on overdue amount.</li>
                 <li>Payments should be made by the due date to avoid penalties.</li>
                 <li>For any discrepancies, contact the SACCO treasurer immediately.</li>
                 <li>Keep this document for your records.</li>

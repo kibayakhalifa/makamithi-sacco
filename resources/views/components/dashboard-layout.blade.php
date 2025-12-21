@@ -16,9 +16,20 @@
             font-family: 'Inter', sans-serif;
         }
         
+        /* Base font sizes for mobile */
+        html {
+            font-size: 14px;
+        }
+        
+        @media (min-width: 768px) {
+            html {
+                font-size: 16px;
+            }
+        }
+        
         /* COLLAPSIBLE SIDEBAR STYLES - MODIFIED */
         .sidebar-collapsed {
-            width: 5rem !important;
+            width: 4rem !important; /* Smaller on mobile */
         }
 
         .sidebar-collapsed .nav-text,
@@ -32,10 +43,20 @@
             position: relative; /* For tooltip positioning */
         }
 
-        /* Make icons bigger when sidebar is collapsed */
+        /* Make icons slightly smaller when sidebar is collapsed on mobile */
         .sidebar-collapsed nav a {
-            font-size: 1.25rem; /* 20px */
-            padding: 0.75rem 0; /* More vertical padding */
+            font-size: 1rem; /* Smaller on mobile */
+            padding: 0.5rem 0;
+        }
+
+        @media (min-width: 768px) {
+            .sidebar-collapsed nav a {
+                font-size: 1.125rem; /* Slightly larger on desktop */
+                padding: 0.75rem 0;
+            }
+            .sidebar-collapsed {
+                width: 5rem !important;
+            }
         }
 
         /* Tooltip styles */
@@ -51,16 +72,16 @@
             transform: translateY(-50%);
             background-color: #1f2937;
             color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
-            font-size: 0.875rem;
+            padding: 0.375rem 0.75rem; /* Smaller padding */
+            border-radius: 0.25rem;
+            font-size: 0.75rem; /* Smaller font */
             white-space: nowrap;
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.2s ease, visibility 0.2s ease;
             z-index: 50;
-            margin-left: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-left: 0.5rem;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
             pointer-events: none;
         }
 
@@ -70,14 +91,14 @@
             left: 100%;
             top: 50%;
             transform: translateY(-50%);
-            border-width: 6px;
+            border-width: 5px; /* Smaller arrow */
             border-style: solid;
             border-color: transparent #1f2937 transparent transparent;
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.2s ease, visibility 0.2s ease;
             z-index: 50;
-            margin-left: -0.75rem;
+            margin-left: -0.5rem;
             pointer-events: none;
         }
 
@@ -100,6 +121,25 @@
             transform: translateY(-50%);
             border-color: transparent #1f2937 transparent transparent;
         }
+        
+        /* Mobile optimization */
+        @media (max-width: 640px) {
+            .text-sm-mobile {
+                font-size: 0.75rem !important;
+            }
+            .text-xs-mobile {
+                font-size: 0.65rem !important;
+            }
+            .p-2-mobile {
+                padding: 0.5rem !important;
+            }
+            .text-lg-mobile {
+                font-size: 1rem !important;
+            }
+            .text-xl-mobile {
+                font-size: 1.125rem !important;
+            }
+        }
     </style>
 </head>
 
@@ -112,10 +152,10 @@
                class="hidden md:flex flex-col bg-white border-r shadow-sm
                       w-64 transition-all duration-300">  <!-- Added ID and transition classes -->
 
-            <!-- Header -->
-            <div class="p-4 border-b bg-green-50">
-                <h1 class="text-lg font-bold text-green-700 flex items-center gap-2">
-                    <span class="w-2 h-5 bg-orange-500 rounded"></span>
+            <!-- Header - Smaller on mobile -->
+            <div class="p-3 border-b bg-green-50">
+                <h1 class="text-base font-bold text-green-700 flex items-center gap-2">
+                    <span class="w-2 h-4 bg-orange-500 rounded"></span>
                     <span class="nav-text">Makamithi Sacco</span>
                 </h1>
 
@@ -126,8 +166,8 @@
                 </p>
             </div>
 
-            <!-- Navigation -->
-            <nav class="flex-1 p-3 space-y-1 text-sm">
+            <!-- Navigation - Smaller font -->
+            <nav class="flex-1 p-2 space-y-1 text-xs">
 
                 @auth
                     @php
@@ -191,6 +231,10 @@
                         <div class="nav-item" data-tooltip="Dashboard">
                             <x-nav.link route="treasurer.dashboard" current="{{ $current }}">📊 <span class="nav-text">Treasurer Dashboard</span></x-nav.link>
                         </div>
+                        
+                        <!-- PAYROLL DEDUCTIONS LINK - ADDED -->
+                        
+                        
                         <div class="nav-item" data-tooltip="Payment Processing">
                             <x-nav.link route="treasurer.payments" current="{{ $current }}">💳 <span class="nav-text">Payment Processing</span></x-nav.link>
                         </div>
@@ -199,6 +243,11 @@
                         </div>
                         <div class="nav-item" data-tooltip="Savings Summary">
                             <x-nav.link route="treasurer.savings" current="{{ $current }}">💰 <span class="nav-text">Savings Summary</span></x-nav.link>
+                        </div>
+                        <div class="nav-item" data-tooltip="Payroll Deductions">
+                            <x-nav.link route="treasurer.treasurer.savings.deductions" current="{{ $current }}">
+                                💵 <span class="nav-text">Payroll Deductions</span>
+                            </x-nav.link>
                         </div>
                         <div class="nav-item" data-tooltip="Expenses Tracking">
                             <x-nav.link route="treasurer.expenses" current="{{ $current }}">📊 <span class="nav-text">Expenses Tracking</span></x-nav.link>
@@ -240,12 +289,12 @@
 
                     @endif
 
-                    <!-- SETTINGS + LOGOUT -->
-                    <div class="pt-4 mt-4 border-t border-green-200">
+                    <!-- SETTINGS + LOGOUT - Smaller -->
+                    <div class="pt-3 mt-3 border-t border-green-200">
                         <div class="nav-item" data-tooltip="Settings">
                             <a href="{{ route('settings') }}"
-                                class="flex items-center gap-3 px-3 py-2 rounded-md
-                                       text-green-700 hover:bg-green-100 text-sm">
+                                class="flex items-center gap-2 px-2 py-1.5 rounded-md
+                                       text-green-700 hover:bg-green-100 text-xs">
                                 ⚙️ <span class="nav-text">Settings</span>
                             </a>
                         </div>
@@ -254,8 +303,8 @@
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button
-                                    class="w-full flex items-center gap-3 px-3 py-2
-                                           text-red-600 hover:bg-red-100 rounded-md text-sm">
+                                    class="w-full flex items-center gap-2 px-2 py-1.5
+                                           text-red-600 hover:bg-red-100 rounded-md text-xs">
                                     🚪 <span class="nav-text">Logout</span>
                                 </button>
                             </form>
@@ -271,28 +320,28 @@
         <!-- MAIN CONTENT -->
         <div class="flex-1 flex flex-col overflow-hidden">
 
-            <!-- Header - MODIFIED -->
-            <header class="bg-white border-b px-6 py-4 flex justify-between items-center shadow-sm">
+            <!-- Header - Smaller on mobile -->
+            <header class="bg-white border-b px-4 py-3 flex justify-between items-center shadow-sm">
 
                 <!-- LEFT SIDE: Mobile toggle + Desktop toggle -->
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
                     <!-- Mobile Toggle Button -->
-                    <button id="menuToggle" class="md:hidden text-gray-700 text-2xl">☰</button>
+                    <button id="menuToggle" class="md:hidden text-gray-700 text-xl">☰</button>
                     
-                    <!-- Desktop Toggle Button - ADDED -->
-                    <button id="desktopToggle" class="hidden md:inline-flex text-lg text-gray-700">
+                    <!-- Desktop Toggle Button -->
+                    <button id="desktopToggle" class="hidden md:inline-flex text-base text-gray-700">
                         ⮜
                     </button>
                 </div>
 
-                <!-- RIGHT SIDE: Notifications + User info -->
-                <div class="flex items-center space-x-4">
+                <!-- RIGHT SIDE: Notifications + User info - Smaller -->
+                <div class="flex items-center space-x-3">
 
                     <!-- Notifications -->
                     @auth
                         <div class="relative">
                             <a href="{{ route('communications.index') }}"
-                                class="relative text-gray-600 hover:text-green-700">
+                                class="relative text-gray-600 hover:text-green-700 text-sm">
                                 🔔
                                 @php
                                     $unreadCount = auth()->user()
@@ -303,7 +352,7 @@
 
 
                                 @if($unreadCount > 0)
-                                    <span class="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-1.5 rounded-full">
+                                    <span class="absolute -top-1 -right-1 bg-red-600 text-white text-2xs px-1 rounded-full">
                                         {{ $unreadCount }}
                                     </span>
                                 @endif
@@ -312,61 +361,61 @@
                     @endauth
 
                     <div class="hidden md:block text-right">
-                        <p class="text-sm font-medium text-green-800">{{ auth()->user()->name }}</p>
-                        <p class="text-xs text-green-600">
+                        <p class="text-xs font-medium text-green-800">{{ auth()->user()->name }}</p>
+                        <p class="text-2xs text-green-600">
                             {{ ucfirst(auth()->user()->role) }} • {{ auth()->user()->employee_number ?? 'EMP001' }}
                         </p>
                     </div>
 
                     <div
-                        class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-700 font-bold">
+                        class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-700 font-bold text-sm">
                         {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                     </div>
                 </div>
 
             </header>
 
-            <!-- Page Body -->
-            <main class="flex-1 overflow-y-auto p-4 md:p-6">
+            <!-- Page Body - Smaller padding on mobile -->
+            <main class="flex-1 overflow-y-auto p-3 md:p-6">
 
                 @if(session('success'))
-                    <x-alert.success>{{ session('success') }}</x-alert.success>
+                    <x-alert.success class="text-sm">{{ session('success') }}</x-alert.success>
                 @endif
 
                 @if(session('error'))
-                    <x-alert.error>{{ session('error') }}</x-alert.error>
+                    <x-alert.error class="text-sm">{{ session('error') }}</x-alert.error>
                 @endif
 
                 @if(session('warning'))
-                    <x-alert.warning>{{ session('warning') }}</x-alert.warning>
+                    <x-alert.warning class="text-sm">{{ session('warning') }}</x-alert.warning>
                 @endif
 
                 @yield('content')
 
             </main>
 
-            <!-- Footer -->
-            <footer class="bg-white border-t py-4 px-6 text-center text-sm text-gray-500">
+            <!-- Footer - Smaller -->
+            <footer class="bg-white border-t py-3 px-4 text-center text-xs text-gray-500">
                 © {{ date('Y') }} Makamithi Sacco • Employee Savings & Credit Cooperative Society
             </footer>
         </div>
 
     </div>
 
-    <!-- MOBILE SIDEBAR -->
+    <!-- MOBILE SIDEBAR - Smaller fonts -->
     <div id="mobileSidebar" class="fixed inset-0 bg-black bg-opacity-40 z-50 hidden">
-        <div class="w-64 bg-white h-full shadow-xl p-6 overflow-y-auto">
+        <div class="w-64 bg-white h-full shadow-xl p-4 overflow-y-auto">
 
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-xl font-semibold text-green-700">Makamithi Sacco</h1>
-                <button id="closeMenu" class="text-red-600 text-xl">✖</button>
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-lg font-semibold text-green-700">Makamithi Sacco</h1>
+                <button id="closeMenu" class="text-red-600 text-lg">✖</button>
             </div>
 
-            <p class="text-green-700 text-sm mb-6">
+            <p class="text-green-700 text-xs mb-4">
                 {{ ucfirst(auth()->user()->role) }} Panel
             </p>
 
-            <nav class="space-y-2">
+            <nav class="space-y-1">
                 @auth
                     @php
                         $userRole = auth()->user()->role;
@@ -398,9 +447,12 @@
                         {{-- TREASURER --}}
                     @elseif($userRole === 'treasurer')
                         <x-nav.link route="treasurer.dashboard" current="{{ $current }}">📊 Treasurer Dashboard</x-nav.link>
+                        <!-- ADDED FOR MOBILE -->
+                        
                         <x-nav.link route="treasurer.payments" current="{{ $current }}">💳 Payment Processing</x-nav.link>
                         <x-nav.link route="treasurer.loans" current="{{ $current }}">📋 Loans Management</x-nav.link>
                         <x-nav.link route="treasurer.savings" current="{{ $current }}">💰 Savings Summary</x-nav.link>
+                        <x-nav.link route="treasurer.treasurer.savings.deductions" current="{{ $current }}">💵 Payroll Deductions</x-nav.link>
                         <x-nav.link route="treasurer.expenses" current="{{ $current }}">📊 Expenses Tracking</x-nav.link>
                         <x-nav.link route="treasurer.cheques" current="{{ $current }}">🏦 Cheque Management</x-nav.link>
                         <x-nav.link route="treasurer.financial-reports" current="{{ $current }}">📈 Financial Reports</x-nav.link>
@@ -420,15 +472,15 @@
                     @endif
 
                     <!-- SETTINGS + LOGOUT -->
-                    <div class="pt-6 mt-6 border-t border-green-200">
+                    <div class="pt-4 mt-4 border-t border-green-200">
                         <a href="{{ route('settings') }}"
-                            class="w-full block text-left px-4 py-2 text-green-700 hover:bg-green-100 rounded-lg">
+                            class="w-full block text-left px-3 py-1.5 text-green-700 hover:bg-green-100 rounded-lg text-sm">
                             ⚙️ Settings
                         </a>
 
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-100 rounded-lg">
+                            <button class="w-full text-left px-3 py-1.5 text-red-600 hover:bg-red-100 rounded-lg text-sm">
                                 🚪 Logout
                             </button>
                         </form>
@@ -441,7 +493,7 @@
     </div>
 
     <script>
-        // Collapsing functionality - ADDED
+        // Collapsing functionality
         const sidebar = document.getElementById('sidebar');
         const desktopToggle = document.getElementById('desktopToggle');
         const menuToggle = document.getElementById('menuToggle');
@@ -474,6 +526,20 @@
                 }, 5000);
             });
         });
+        
+        // Add text-2xs utility class if not exists
+        const style = document.createElement('style');
+        style.textContent = `
+            .text-2xs { font-size: 0.625rem; line-height: 0.75rem; }
+            @media (max-width: 640px) {
+                .text-sm { font-size: 0.75rem; }
+                .text-xs { font-size: 0.65rem; }
+                h1, .text-lg { font-size: 1rem; }
+                h2, .text-xl { font-size: 1.125rem; }
+                h3, .text-2xl { font-size: 1.25rem; }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 
 </body>

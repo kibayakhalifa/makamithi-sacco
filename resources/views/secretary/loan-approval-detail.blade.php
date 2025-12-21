@@ -12,7 +12,7 @@
                     <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">
                         Loan Approval: {{ $loan->loan_number }}
                     </h1>
-                    <p class="text-gray-500 mt-1">Review applicant details and approve or reject</p>
+                    <p class="text-gray-500 mt-1">Review applicant details </p>
                 </div>
                 <div class="text-right">
                     <p class="text-sm text-gray-500">Applied</p>
@@ -130,41 +130,7 @@
                     </div>
                 </div>
 
-                <!-- Approval Form -->
-                <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Decision</h3>
-
-                    <div class="space-y-4">
-
-                        <!-- Approve Button -->
-                        <form method="POST" action="{{ route('secretary.loans.approve', $loan->id) }}"
-                            onsubmit="return confirm('Approve this loan application?');">
-                            @csrf
-                            <button type="submit"
-                                class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition">
-                                ✅ Approve Loan
-                            </button>
-                        </form>
-
-                        <!-- Reject Form -->
-                        <form method="POST" action="{{ route('secretary.loans.reject', $loan->id) }}" id="rejectForm">
-                            @csrf
-                            <div class="space-y-3">
-                                <textarea name="rejection_reason"
-                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500"
-                                    rows="3" placeholder="Explain why this loan is being rejected..." required></textarea>
-
-                                <button type="submit"
-                                    class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition"
-                                    onclick="return confirm('Reject this loan application?');">
-                                    ❌ Reject Loan
-                                </button>
-                            </div>
-                        </form>
-
-                    </div>
-                </div>
-
+               
                 <!-- Back Button -->
                 <a href="{{ route('secretary.loan-approvals') }}"
                     class="block text-center px-4 py-3 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition">
