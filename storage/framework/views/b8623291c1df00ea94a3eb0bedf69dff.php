@@ -10,9 +10,12 @@
                     <h1 class="text-2xl font-bold text-gray-900">Apply for a Loan</h1>
                     <p class="text-blue-800 text-sm mt-1">Get quick access to funds based on your savings</p>
                 </div>
-                <div class="bg-white rounded-lg px-4 py-3 shadow-sm">
-                    <p class="text-gray-600 text-xs">Your Loan Eligibility</p>
-                    <p class="text-xl font-bold text-blue-600">KES <?php echo e(number_format($eligibility, 2)); ?></p>
+                <div class="space-y-2">
+                    <div class="bg-white rounded-lg px-4 py-3 shadow-sm">
+                        <p class="text-gray-600 text-xs">You can borrow now</p>
+                        <p class="text-2xl font-bold text-green-600">KES <?php echo e(number_format($available_eligibility, 0)); ?></p>
+                        <p class="text-xs text-gray-500 mt-1">of KES <?php echo e(number_format($total_eligibility, 0)); ?> total eligibility</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -135,7 +138,7 @@
                                     <span class="absolute left-3 top-3 text-gray-500 text-sm">KES</span>
                                     <input type="number" name="amount" id="loanAmount" required 
                                         min="5000" 
-                                        max="<?php echo e($hasActiveFirstLoan && $isEligibleForSecondLoan ? ($secondLoanEligibility ?? $eligibility) : $eligibility); ?>" 
+                                        max="<?php echo e($available_eligibility); ?>" 
                                         step="1000"
                                         value="<?php echo e(old('amount')); ?>"
                                         class="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
@@ -143,7 +146,7 @@
                                         oninput="updateRepaymentSchedule()">
                                 </div>
                                 <p class="text-xs text-gray-500 mt-1">
-                                    Max: KES <?php echo e(number_format($hasActiveFirstLoan && $isEligibleForSecondLoan ? ($secondLoanEligibility ?? $eligibility) : $eligibility, 2)); ?>
+                                    Max: KES <?php echo e(number_format($available_eligibility, 2)); ?>
 
                                 </p>
                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['amount'];
@@ -306,6 +309,32 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
 
             <!-- Sidebar -->
             <div class="space-y-5">
+
+                <!-- Eligibility Breakdown -->
+                <div class="bg-gradient-to-br from-blue-50 to-green-50 rounded-xl border border-gray-200 shadow-sm p-5">
+                    <h3 class="font-bold text-gray-900 mb-3">📊 Your Borrowing Capacity</h3>
+
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                            <span class="text-gray-600">Total Eligibility</span>
+                            <span class="font-bold text-blue-900">KES <?php echo e(number_format($total_eligibility, 0)); ?></span>
+                        </div>
+                        <div class="text-center text-gray-500 text-xs">–</div>
+                        <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                            <span class="text-gray-600">Current Loans</span>
+                            <span class="font-bold text-amber-900">KES <?php echo e(number_format($current_loan_balance, 0)); ?></span>
+                        </div>
+                        <div class="border-t border-gray-300 pt-3"></div>
+                        <div class="flex justify-between items-center p-3 bg-green-100 rounded-lg">
+                            <span class="text-gray-700 font-semibold">Available Now</span>
+                            <span class="font-bold text-green-700 text-lg">KES <?php echo e(number_format($available_eligibility, 0)); ?></span>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-gray-600 mt-3 p-2 bg-white rounded border border-gray-200">
+                        ✓ Your available funds = (Savings × 1.5) − Current loan balance
+                    </p>
+                </div>
 
                 <!-- Calculator -->
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">

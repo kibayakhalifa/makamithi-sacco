@@ -18,6 +18,32 @@ class MemberLoanController extends Controller
     }
 
     /**
+     * Calculate actual available loan eligibility
+     * Returns array with:
+     * - total_eligibility: savings × 1.5
+     * - current_loan_balance: sum of all active loan remaining balances
+     * - available_eligibility: total eligibility - current loan balance
+     */
+    private function calculateAvailableEligibility($user)
+    {
+        $totalEligibility = $user->loan_eligibility;
+        
+        // Calculate current active loan balance
+        $currentLoanBalance = $user->loans()
+            ->whereIn('status', ['active', 'disbursed', 'approved'])
+            ->sum('remaining_balance');
+        
+        // Available eligibility = total eligibility minus current loans
+        $availableEligibility = max(0, $totalEligibility - $currentLoanBalance);
+        
+        return [
+            'total_eligibility' => $totalEligibility,
+            'current_loan_balance' => $currentLoanBalance,
+            'available_eligibility' => $availableEligibility,
+        ];
+    }
+
+    /**
      * Display member loans
      */
     public function index()
@@ -33,7 +59,9 @@ class MemberLoanController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        $eligibility = $user->loan_eligibility;
+        // Calculate eligibility breakdown
+        $eligibilityData = $this->calculateAvailableEligibility($user);
+        
         $activeLoans = $loans->whereIn('status', ['active', 'disbursed']);
 
         // Add these lines to calculate first and second loans
@@ -49,13 +77,15 @@ class MemberLoanController extends Controller
 
         $canApplySecond = $firstLoan && $firstLoan->percentage_paid >= 50 && !$secondLoan;
 
-        return view('member.loans.index', compact(
-            'loans',
-            'eligibility',
-            'activeLoans',
-            'firstLoan',
-            'secondLoan',
-            'canApplySecond'
+        return view('member.loans.index', array_merge(
+            compact(
+                'loans',
+                'activeLoans',
+                'firstLoan',
+                'secondLoan',
+                'canApplySecond'
+            ),
+            $eligibilityData
         ));
     }
 
@@ -72,7 +102,8 @@ class MemberLoanController extends Controller
                 ->with('error', 'You need a savings account to apply for a loan.');
         }
 
-        $eligibility = $user->loan_eligibility;
+        // Calculate eligibility breakdown
+        $eligibilityData = $this->calculateAvailableEligibility($user);
 
         // Check for active first loan
         $firstLoan = $user->loans()
@@ -96,24 +127,21 @@ class MemberLoanController extends Controller
             $isEligibleForSecondLoan = $firstLoan->percentage_paid >= 50;
 
             if ($isEligibleForSecondLoan) {
-                // Calculate second loan eligibility
-                // Sum of all active loans
-                $totalActiveLoans = $user->loans()
-                    ->whereIn('status', ['active', 'disbursed', 'approved'])
-                    ->whereIn('loan_type', ['first_loan', 'second_loan'])
-                    ->sum('remaining_balance');
-                $secondLoanEligibility = max(0, $eligibility - $totalActiveLoans);
+                // Calculate second loan eligibility based on available funds
+                $secondLoanEligibility = $eligibilityData['available_eligibility'];
                 $secondLoanEligibility = max(5000, $secondLoanEligibility); // Minimum 5,000
             }
         }
 
-        return view('member.loans.apply', compact(
-            'eligibility',
-            'hasActiveFirstLoan',
-            'hasActiveSecondLoan',
-            'firstLoan',
-            'isEligibleForSecondLoan',
-            'secondLoanEligibility'
+        return view('member.loans.apply', array_merge(
+            compact(
+                'hasActiveFirstLoan',
+                'hasActiveSecondLoan',
+                'firstLoan',
+                'isEligibleForSecondLoan',
+                'secondLoanEligibility'
+            ),
+            $eligibilityData
         ));
     }
 
@@ -129,7 +157,8 @@ class MemberLoanController extends Controller
             return redirect()->back()->with('error', 'No savings account found.');
         }
 
-        $eligibility = $user->loan_eligibility;
+        // Calculate eligibility breakdown
+        $eligibilityData = $this->calculateAvailableEligibility($user);
         $loanType = $request->input('loan_type', 'first'); // 'first' or 'second'
 
         // Common validation rules
@@ -156,12 +185,12 @@ class MemberLoanController extends Controller
                 );
             }
 
-            // First loan: Max is min(eligibility, 1,000,000)
-            $maxAmount = min($eligibility, 1000000);
+            // First loan: use available eligibility
+            $maxAmount = min($eligibilityData['available_eligibility'], 1000000);
             $commonRules['amount'][] = 'max:' . $maxAmount;
 
             $customMessages = [
-                'amount.max' => 'Loan amount cannot exceed your eligibility of KES ' . number_format($maxAmount, 2),
+                'amount.max' => 'Loan amount cannot exceed your available eligibility of KES ' . number_format($maxAmount, 2),
             ];
 
         } else { // loan_type === 'second'
@@ -183,7 +212,7 @@ class MemberLoanController extends Controller
                 return redirect()->back()->with(
                     'error',
                     'You need to repay 50% of your first loan to qualify for a second loan. ' .
-                    'Currently at ' . number_format($firstLoan->percentage_paid, 1) . '% repaid.'
+                    'Currently at ' . number_format((float)$firstLoan->percentage_paid, 1) . '% repaid.'
                 );
             }
 
@@ -200,22 +229,15 @@ class MemberLoanController extends Controller
                 );
             }
 
-            // Calculate second loan eligibility
-            // Total of all active loans cannot exceed eligibility
-            $totalActiveLoans = $user->loans()
-                ->whereIn('status', ['active', 'disbursed', 'approved'])
-                ->whereIn('loan_type', ['first_loan', 'second_loan'])
-                ->sum('remaining_balance');
-
-            $secondLoanEligibility = max(0, $eligibility - $totalActiveLoans);
-            $maxAmount = min($secondLoanEligibility, 1000000);
+            // Use available eligibility for second loan
+            $maxAmount = min($eligibilityData['available_eligibility'], 1000000);
 
             if ($maxAmount < 5000) {
                 return redirect()->back()->with(
                     'error',
                     'You have reached your maximum loan limit. ' .
-                    'Your total loan balance (KES ' . number_format($totalActiveLoans, 2) . ') ' .
-                    'exceeds your eligibility (KES ' . number_format($eligibility, 2) . ').'
+                    'Your current loan balance (KES ' . number_format($eligibilityData['current_loan_balance'], 2) . ') ' .
+                    'exceeds your eligibility (KES ' . number_format($eligibilityData['total_eligibility'], 2) . ').'
                 );
             }
 
@@ -519,19 +541,20 @@ class MemberLoanController extends Controller
         }
 
         $user = Auth::user();
-        $eligibility = $user->loan_eligibility;
-        $totalActiveLoans = $user->loans()
-            ->whereIn('status', ['active', 'disbursed'])
-            ->sum('remaining_balance');
+        $eligibilityData = $this->calculateAvailableEligibility($user);
 
-        $availableForTopup = $eligibility - $totalActiveLoans;
+        // For top-up, only use available eligibility (excluding current loan balance since we're working on existing loan)
+        $availableForTopup = $eligibilityData['available_eligibility'];
 
         if ($availableForTopup <= 0) {
             return redirect()->route('member.loans.show', $loan)
                 ->with('error', 'You have reached your maximum loan limit. Increase your savings to qualify for more loans.');
         }
 
-        return view('member.loans.topup', compact('loan', 'availableForTopup'));
+        return view('member.loans.topup', array_merge(
+            compact('loan', 'availableForTopup'),
+            $eligibilityData
+        ));
     }
 
     /**
@@ -547,13 +570,8 @@ class MemberLoanController extends Controller
         }
 
         $user = Auth::user();
-        $eligibility = $user->loan_eligibility;
-        $totalActiveLoans = $user->loans()
-            ->whereIn('status', ['active', 'disbursed'])
-            ->where('id', '!=', $loan->id)
-            ->sum('remaining_balance');
-
-        $availableForTopup = $eligibility - $totalActiveLoans;
+        $eligibilityData = $this->calculateAvailableEligibility($user);
+        $availableForTopup = $eligibilityData['available_eligibility'];
 
         $validator = Validator::make($request->all(), [
             'amount' => [
