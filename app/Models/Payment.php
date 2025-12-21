@@ -39,9 +39,9 @@ class Payment extends Model
         'is_early_repayment',
         'remarks',
         'month_covered',
-        'penalty_amount',
-        'penalty_waived',
-        'waiver_reason',
+        // 'penalty_amount',
+        // 'penalty_waived',
+        // 'waiver_reason',
         'covers_installments', // JSON array of installment numbers covered
         'is_schedule_adjusted', // Flag if schedule was adjusted after this payment
     ];
@@ -80,6 +80,10 @@ class Payment extends Model
     public function expense()
     {
         return $this->belongsTo(Expense::class);
+    }
+    public function chequeRecord()
+    {
+        return $this->hasOne(ChequeRecord::class, 'payment_id');
     }
 
     public function user()
@@ -227,17 +231,17 @@ class Payment extends Model
     {
         if ($this->loan && $this->loan_id && $this->status === 'completed') {
             $loan = $this->loan;
-            
+
             // Calculate principal and interest if not set
             if (!$this->principal || !$this->interest) {
                 $this->calculatePrincipalInterest();
             }
-            
+
             // Update loan amounts
             $loan->amount_paid += $this->amount;
             $loan->remaining_balance = max(0, $loan->total_repayable - $loan->amount_paid);
             $loan->percentage_paid = ($loan->amount_paid / $loan->total_repayable) * 100;
-            
+
             // Update months paid if this is a regular payment
             if ($this->installment_number && !$this->is_early_repayment) {
                 $loan->months_paid = $loan->payments()
@@ -246,9 +250,9 @@ class Payment extends Model
                     ->count();
                 $loan->months_remaining = max(0, $loan->period_months - $loan->months_paid);
             }
-            
+
             $loan->save();
-            
+
             // Update payment balances
             $this->balance_before = $loan->remaining_balance + $this->amount;
             $this->balance_after = $loan->remaining_balance;
@@ -262,14 +266,14 @@ class Payment extends Model
         if (!$this->loan) {
             return;
         }
-        
+
         $loan = $this->loan;
         $totalRepayable = $loan->total_repayable;
-        
+
         // Calculate proportions
         $principalRatio = $loan->amount / $totalRepayable;
         $interestRatio = $loan->interest_amount / $totalRepayable;
-        
+
         $this->principal = $this->amount * $principalRatio;
         $this->interest = $this->amount * $interestRatio;
         $this->save();
@@ -278,37 +282,37 @@ class Payment extends Model
     // NEW: Update loan schedule after payment
     // In your Payment model, update the updateLoanSchedule method:
 
-public function updateLoanSchedule()
-{
-    if (!$this->loan || $this->status !== 'completed') {
-        return;
-    }
-    
-    $loan = $this->loan;
-    
-    // If this is a regular installment payment
-    if ($this->installment_number && !$this->is_early_repayment) {
-        $schedule = LoanSchedule::where('loan_id', $loan->id)
-            ->where('installment_number', $this->installment_number)
-            ->first();
-            
-        if ($schedule && $schedule->status === 'pending') {
-            $schedule->markAsPaid([
-                'amount_paid' => $this->amount,
-                'paid_date' => $this->payment_date,
-                'payment_reference' => $this->payment_ref,
-                'notes' => 'Paid via ' . $this->payment_method . ' - Ref: ' . $this->payment_ref,
-            ]);
-            
-            // Update covered installments if payment covers multiple months
-            $this->updateCoveredInstallments();
+    public function updateLoanSchedule()
+    {
+        if (!$this->loan || $this->status !== 'completed') {
+            return;
         }
-    } 
-    // If this is an early/extra repayment
-    elseif ($this->is_early_repayment || $this->amount > $loan->monthly_payment) {
-        $this->adjustScheduleForExtraPayment();
+
+        $loan = $this->loan;
+
+        // If this is a regular installment payment
+        if ($this->installment_number && !$this->is_early_repayment) {
+            $schedule = LoanSchedule::where('loan_id', $loan->id)
+                ->where('installment_number', $this->installment_number)
+                ->first();
+
+            if ($schedule && $schedule->status === 'pending') {
+                $schedule->markAsPaid([
+                    'amount_paid' => $this->amount,
+                    'paid_date' => $this->payment_date,
+                    'payment_reference' => $this->payment_ref,
+                    'notes' => 'Paid via ' . $this->payment_method . ' - Ref: ' . $this->payment_ref,
+                ]);
+
+                // Update covered installments if payment covers multiple months
+                $this->updateCoveredInstallments();
+            }
+        }
+        // If this is an early/extra repayment
+        elseif ($this->is_early_repayment || $this->amount > $loan->monthly_payment) {
+            $this->adjustScheduleForExtraPayment();
+        }
     }
-}
 
     // NEW: Handle payments covering multiple installments
     private function updateCoveredInstallments()
@@ -316,24 +320,24 @@ public function updateLoanSchedule()
         if (!$this->loan || $this->amount <= $this->loan->monthly_payment) {
             return;
         }
-        
+
         $loan = $this->loan;
         $monthlyPayment = $loan->monthly_payment;
-        
+
         // Calculate how many months this payment covers
         $monthsCovered = floor($this->amount / $monthlyPayment);
-        
+
         if ($monthsCovered > 1) {
             $coveredInstallments = [];
             $currentInstallment = $this->installment_number;
-            
+
             // Mark next installments as paid
             for ($i = 0; $i < $monthsCovered; $i++) {
                 $installmentNum = $currentInstallment + $i;
                 $schedule = LoanSchedule::where('loan_id', $loan->id)
                     ->where('installment_number', $installmentNum)
                     ->first();
-                    
+
                 if ($schedule && $schedule->status === 'pending') {
                     $schedule->markAsPaid([
                         'amount_paid' => $monthlyPayment,
@@ -343,11 +347,11 @@ public function updateLoanSchedule()
                     $coveredInstallments[] = $installmentNum;
                 }
             }
-            
+
             // Update payment with covered installments
             $this->covers_installments = $coveredInstallments;
             $this->save();
-            
+
             // If there's excess amount, it's an early repayment
             $excessAmount = $this->amount - ($monthlyPayment * $monthsCovered);
             if ($excessAmount > 0) {
@@ -364,27 +368,27 @@ public function updateLoanSchedule()
         if (!$this->loan) {
             return;
         }
-        
+
         $loan = $this->loan;
         $extraAmount = $this->amount;
-        
+
         // If this payment has an installment number, subtract that month's payment first
         if ($this->installment_number) {
             $schedule = LoanSchedule::where('loan_id', $loan->id)
                 ->where('installment_number', $this->installment_number)
                 ->first();
-                
+
             if ($schedule && $schedule->status === 'pending') {
                 $schedule->markAsPaid([
                     'amount_paid' => min($this->amount, $schedule->amount_due),
                     'paid_date' => $this->payment_date,
                     'notes' => 'Paid via ' . $this->payment_method,
                 ]);
-                
+
                 $extraAmount -= $schedule->amount_due;
             }
         }
-        
+
         // If there's still extra amount, adjust the schedule
         if ($extraAmount > 0) {
             $loan->adjustScheduleAfterPayment($extraAmount, $this->payment_date);
@@ -411,42 +415,42 @@ public function updateLoanSchedule()
 
         $paymentDate = Carbon::parse($this->payment_date);
         $dueDate = Carbon::parse($schedule->due_date);
-        
+
         return $paymentDate->lte($dueDate);
     }
 
-    // NEW: Calculate penalty if any
-    public function calculatePenalty()
-    {
-        // Only calculate penalty for loan payments
-        if (!$this->loan || !$this->loan_id || !$this->installment_number) {
-            return 0;
-        }
+    // // NEW: Calculate penalty if any
+    // public function calculatePenalty()
+    // {
+    //     // Only calculate penalty for loan payments
+    //     if (!$this->loan || !$this->loan_id || !$this->installment_number) {
+    //         return 0;
+    //     }
 
-        $schedule = LoanSchedule::where('loan_id', $this->loan_id)
-            ->where('installment_number', $this->installment_number)
-            ->first();
+    //     $schedule = LoanSchedule::where('loan_id', $this->loan_id)
+    //         ->where('installment_number', $this->installment_number)
+    //         ->first();
 
-        if (!$schedule || !$this->payment_date) {
-            return 0;
-        }
+    //     if (!$schedule || !$this->payment_date) {
+    //         return 0;
+    //     }
 
-        $paymentDate = Carbon::parse($this->payment_date);
-        $dueDate = Carbon::parse($schedule->due_date);
+    //     $paymentDate = Carbon::parse($this->payment_date);
+    //     $dueDate = Carbon::parse($schedule->due_date);
 
-        // Check if payment is late
-        if ($paymentDate->greaterThan($dueDate)) {
-            $daysLate = $dueDate->diffInDays($paymentDate);
-            
-            // Penalty: 1% per month or ~0.033% per day
-            $dailyPenaltyRate = 0.00033;
-            $penalty = $this->amount * $dailyPenaltyRate * $daysLate;
-            
-            return max(0, $penalty);
-        }
+    //     // Check if payment is late
+    //     if ($paymentDate->greaterThan($dueDate)) {
+    //         $daysLate = $dueDate->diffInDays($paymentDate);
 
-        return 0;
-    }
+    //         // Penalty: 1% per month or ~0.033% per day
+    //         $dailyPenaltyRate = 0.00033;
+    //         $penalty = $this->amount * $dailyPenaltyRate * $daysLate;
+
+    //         return max(0, $penalty);
+    //     }
+
+    //     return 0;
+    // }
 
     // NEW: Get payment type (with early repayment detection)
     public function getTypeAttribute()
@@ -498,7 +502,7 @@ public function updateLoanSchedule()
             if ($this->is_early_repayment) {
                 $beneficiary .= " [Early Repayment]";
             }
-            
+
             if ($this->covers_installments && count($this->covers_installments) > 1) {
                 $beneficiary .= " [Covers installments: " . implode(', ', $this->covers_installments) . "]";
             }
@@ -517,21 +521,21 @@ public function updateLoanSchedule()
     }
 
     // NEW: Get formatted amount with penalty
-    public function getTotalAmountAttribute()
-    {
-        $total = $this->amount;
+    // public function getTotalAmountAttribute()
+    // {
+    //     $total = $this->amount;
 
-        if ($this->penalty_amount && !$this->penalty_waived) {
-            $total += $this->penalty_amount;
-        }
+    //     if ($this->penalty_amount && !$this->penalty_waived) {
+    //         $total += $this->penalty_amount;
+    //     }
 
-        return $total;
-    }
+    //     return $total;
+    // }
 
-    public function getFormattedTotalAmountAttribute()
-    {
-        return 'KES ' . number_format($this->total_amount, 2);
-    }
+    // public function getFormattedTotalAmountAttribute()
+    // {
+    //     return 'KES ' . number_format($this->total_amount, 2);
+    // }
 
     // NEW: Check if payment covers multiple installments
     public function coversMultipleMonths()
@@ -603,18 +607,10 @@ public function updateLoanSchedule()
                 $payment->status = 'pending';
             }
 
-            // Calculate penalty if not set
-            if ($payment->loan_id && empty($payment->penalty_amount)) {
-                $payment->penalty_amount = $payment->calculatePenalty();
-            }
-        });
-
-        static::created(function ($payment) {
-            // Update loan balance and schedule if payment is completed
-            if ($payment->loan && $payment->status === 'completed') {
-                $payment->updateLoanBalance();
-                $payment->updateLoanSchedule();
-            }
+            // REMOVE PENALTY CALCULATION:
+            // if ($payment->loan_id && empty($payment->penalty_amount)) {
+            //     $payment->penalty_amount = $payment->calculatePenalty();
+            // }
         });
 
         static::updated(function ($payment) {
@@ -623,12 +619,12 @@ public function updateLoanSchedule()
                 $payment->updateLoanBalance();
                 $payment->updateLoanSchedule();
             }
-            
-            // If amount changed, recalculate penalty
-            if ($payment->loan_id && $payment->wasChanged('amount')) {
-                $payment->penalty_amount = $payment->calculatePenalty();
-                $payment->saveQuietly(); // Use quietly to avoid recursion
-            }
+
+            // REMOVE PENALTY RECALCULATION:
+            // if ($payment->loan_id && $payment->wasChanged('amount')) {
+            //     $payment->penalty_amount = $payment->calculatePenalty();
+            //     $payment->saveQuietly();
+            // }
         });
     }
 }

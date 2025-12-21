@@ -45,6 +45,7 @@ class Loan extends Model
     ];
 
     protected $casts = [
+        'paid_date' => 'datetime',
         'applied_date' => 'date',
         'approved_date' => 'date',
         'disbursed_date' => 'date',
@@ -594,7 +595,11 @@ class Loan extends Model
 
         return $schedules;
     }
-
+    // In LoanSchedule model
+    public function adjustedBy()
+    {
+        return $this->belongsTo(User::class, 'adjusted_by');
+    }
     /**
      * Adjust schedule after extra/early payment - UPDATE DATABASE RECORDS
      */

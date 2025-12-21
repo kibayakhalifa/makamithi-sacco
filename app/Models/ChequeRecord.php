@@ -10,6 +10,7 @@ class ChequeRecord extends Model
     use HasFactory;
 
     protected $fillable = [
+        'payment_id',
         'cheque_number',
         'loan_id',
         'savings_withdrawal_id',
@@ -40,11 +41,15 @@ class ChequeRecord extends Model
     ];
 
     // Relationships
+    public function payment()
+    {
+        return $this->belongsTo(Payment::class, 'payment_id');
+    }
     public function loan()
     {
         return $this->belongsTo(Loan::class);
     }
-
+    
     public function savingsTransaction()
     {
         return $this->belongsTo(SavingsTransaction::class, 'savings_withdrawal_id');

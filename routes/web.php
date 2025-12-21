@@ -128,6 +128,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/loans/{loan}/topup', [MemberLoanController::class, 'storeTopup'])->name('loans.topup.store');
         Route::get('/member/loans/{loan}', [MemberLoanController::class, 'show'])->name('member.loans.show');
 
+        // Payments & Disbursements
+        Route::get('/payments/disbursed', [MemberPaymentController::class, 'disbursedPayments'])
+            ->name('payments.disbursed');
+        
+        Route::get('/payment/{payment}', [MemberPaymentController::class, 'showPayment'])
+            ->name('payment.show');
         // Reports
         Route::get('/reports', [MemberReportController::class, 'index'])->name('reports.index');
         Route::post('/reports/generate', [MemberReportController::class, 'generate'])->name('reports.generate');

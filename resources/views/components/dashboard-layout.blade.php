@@ -192,6 +192,11 @@
                         <div class="nav-item" data-tooltip="My Loans">
                             <x-nav.link route="member.loans.index" current="{{ $current }}">📜 <span class="nav-text">My Loans</span></x-nav.link>
                         </div>
+                         <div class="nav-item" data-tooltip="Payments & Disbursements">
+                            <x-nav.link route="member.payments.disbursed" current="{{ $current }}">
+                                💳 <span class="nav-text">Payments & Disbursements</span>
+                            </x-nav.link>
+                        </div>
                         <div class="nav-item" data-tooltip="Documents">
                             <x-nav.link route="documents.index" current="{{ $current }}">📄 <span class="nav-text">Documents</span></x-nav.link>
                         </div>
@@ -427,6 +432,7 @@
                         <x-nav.link route="member.dashboard" current="{{ $current }}">📊 Dashboard</x-nav.link>
                         <x-nav.link route="member.savings.index" current="{{ $current }}">💰 My Savings</x-nav.link>
                         <x-nav.link route="member.loans.apply" current="{{ $current }}">📝 Apply Loan</x-nav.link>
+                        <x-nav.link route="member.payments.disbursed" current="{{ $current }}">💳 Payments & Disbursements</x-nav.link>
                         <x-nav.link route="member.profile" current="{{ $current }}">👤 My Profile</x-nav.link>
                         <x-nav.link route="member.loans.index" current="{{ $current }}">📜 My Loans</x-nav.link>
                         <x-nav.link route="documents.index" current="{{ $current }}">📄 Documents</x-nav.link>

@@ -282,6 +282,29 @@
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
                         </div>
+                         <div class="nav-item" data-tooltip="Payments & Disbursements">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'member.payments.disbursed','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('nav.link'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['route' => 'member.payments.disbursed','current' => ''.e($current).'']); ?>
+                                💳 <span class="nav-text">Payments & Disbursements</span>
+                             <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+                        </div>
                         <div class="nav-item" data-tooltip="Documents">
                             <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
@@ -1069,6 +1092,25 @@
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['route' => 'member.loans.apply','current' => ''.e($current).'']); ?>📝 Apply Loan <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'member.payments.disbursed','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('nav.link'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['route' => 'member.payments.disbursed','current' => ''.e($current).'']); ?>💳 Payments & Disbursements <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
