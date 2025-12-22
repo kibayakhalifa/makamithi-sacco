@@ -129,13 +129,19 @@
                                         <?php echo e(number_format($loan->monthly_payment)); ?>
 
                                     </td>
+                                    </td>
                                     <td class="px-3 py-2 border border-gray-300 text-center text-gray-700">
                                         <?php echo e($appliedDate->format('d/m/Y')); ?>
 
                                     </td>
                                     <td class="px-3 py-2 border border-gray-300 text-center text-gray-700">
-                                        <?php echo e($appliedDate->format('h:i A')); ?>
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($loan->created_at && $loan->created_at != $loan->applied_date): ?>
+                                            <?php echo e($loan->created_at->format('h:i A')); ?>
 
+                                        <?php else: ?>
+                                            <?php echo e($appliedDate->format('h:i A')); ?>
+
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     </td>
                                     <td class="px-3 py-2 border border-gray-300">
                                         <div class="flex gap-1">

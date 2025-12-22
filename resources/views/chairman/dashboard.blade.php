@@ -125,11 +125,16 @@
                                     <td class="px-3 py-2 border border-gray-300 text-right font-medium text-gray-900 whitespace-nowrap">
                                         {{ number_format($loan->monthly_payment) }}
                                     </td>
+                                    </td>
                                     <td class="px-3 py-2 border border-gray-300 text-center text-gray-700">
                                         {{ $appliedDate->format('d/m/Y') }}
                                     </td>
                                     <td class="px-3 py-2 border border-gray-300 text-center text-gray-700">
-                                        {{ $appliedDate->format('h:i A') }}
+                                        @if($loan->created_at && $loan->created_at != $loan->applied_date)
+                                            {{ $loan->created_at->format('h:i A') }}
+                                        @else
+                                            {{ $appliedDate->format('h:i A') }}
+                                        @endif
                                     </td>
                                     <td class="px-3 py-2 border border-gray-300">
                                         <div class="flex gap-1">

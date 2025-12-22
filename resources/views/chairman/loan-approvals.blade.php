@@ -48,13 +48,18 @@
             </div>
         </div>
 
-        <!-- Pending Applications -->
+        <!-- Pending Applications - Sorted from latest -->
         <div class="bg-white rounded-2xl border border-gray-200 shadow-sm mt-8 overflow-hidden p-8">
             <h2 class="text-lg font-bold text-gray-900 mb-6">Pending Applications ({{ $pendingLoans->count() }})</h2>
 
             @if($pendingLoans->count() > 0)
                 <div class="space-y-4">
-                    @foreach($pendingLoans as $loan)
+                    @php
+                        // Sort from most recent to oldest
+                        $sortedPendingLoans = $pendingLoans->sortByDesc('created_at')->values();
+                    @endphp
+                    
+                    @foreach($sortedPendingLoans as $loan)
                         <div class="border border-gray-200 rounded-lg p-5 hover:bg-gray-50 transition">
                             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                 <!-- Loan Info -->
@@ -69,7 +74,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 text-sm">
+                                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-4 text-sm">
                                         <div class="p-3 border border-gray-200 rounded bg-gray-50">
                                             <p class="text-gray-600">Amount</p>
                                             <p class="font-bold text-green-600">KES {{ number_format($loan->amount, 2) }}</p>
@@ -86,11 +91,15 @@
                                             <p class="text-gray-600">Applied</p>
                                             <p class="font-bold text-gray-900">{{ $loan->created_at->diffForHumans() }}</p>
                                         </div>
+                                        <!-- Review & Decide Button moved here -->
+                                        <div class="p-3 border border-gray-200 rounded bg-gray-50 flex items-center justify-center">
+                                            <a href="{{ route('chairman.loans.approve-view', $loan->id) }}" 
+                                               class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition text-center">
+                                                Review & Decide
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
-
-                                <!-- Action Button -->
-                                <a href="{{ route('chairman.loans.approve-view', $loan->id) }}" class="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition text-center min-w-max">Review & Decide</a>
                             </div>
                         </div>
                     @endforeach

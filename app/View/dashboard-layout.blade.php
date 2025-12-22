@@ -118,14 +118,18 @@
                     @endif
 
                     <!-- Common logout -->
-                    <div class="mt-8 border-t border-blue-800 pt-4">
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="block w-full text-left py-3 px-6 hover:bg-blue-800">
-                                🚪 Logout
-                            </button>
-                        </form>
-                    </div>
+            <div class="mt-8 border-t border-blue-800 pt-4">
+                <a href="{{ route('logout') }}"
+                class="block py-3 px-6 hover:bg-blue-800"
+                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    🚪 Logout
+                </a>
+
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
+                    @csrf
+                </form>
+            </div>
+
                 @endauth
             </nav>
         </div>

@@ -46,7 +46,7 @@ class Loan extends Model
 
     protected $casts = [
         'paid_date' => 'datetime',
-        'applied_date' => 'date',
+        'applied_date' => 'datetime',
         'approved_date' => 'date',
         'disbursed_date' => 'date',
         'next_payment_date' => 'date',
