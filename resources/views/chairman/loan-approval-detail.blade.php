@@ -153,62 +153,75 @@
                             class="block text-xs uppercase tracking-wider font-semibold text-gray-600 mb-2">Purpose</label>
                         <p class="text-gray-900 bg-gray-50 rounded-lg p-3">{{ $loan->purpose ?? 'Not specified' }}</p>
                     </div>
-                    <!-- Add this to your loan details section -->
+                    
+                    <!-- Supporting Document Section -->
                     @if($loan->support_document)
+                        @php
+                            $fileExt = strtolower(pathinfo($loan->support_document, PATHINFO_EXTENSION));
+                            $fileName = basename($loan->support_document);
+                            $filePath = asset('storage/' . $loan->support_document);
+                            
+                            // Determine file type and icon
+                            $icon = 'fa-file';
+                            $iconColor = 'text-blue-500';
+                            $bgColor = 'bg-blue-50';
+                            $previewable = in_array($fileExt, ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']);
+                            
+                            if ($fileExt === 'pdf') {
+                                $icon = 'fa-file-pdf';
+                                $iconColor = 'text-red-500';
+                                $bgColor = 'bg-red-50';
+                            } elseif (in_array($fileExt, ['doc', 'docx'])) {
+                                $icon = 'fa-file-word';
+                                $iconColor = 'text-blue-600';
+                                $bgColor = 'bg-blue-50';
+                            } elseif (in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'])) {
+                                $icon = 'fa-file-image';
+                                $iconColor = 'text-green-500';
+                                $bgColor = 'bg-green-50';
+                            }
+                        @endphp
+                        
                         <div class="mt-6 border-t border-gray-200 pt-6">
                             <h4 class="font-medium text-gray-900 mb-4">Supporting Document</h4>
                             
-                            <div class="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                <div class="flex items-center">
-                                    @php
-                                        $fileExt = pathinfo($loan->support_document, PATHINFO_EXTENSION);
-                                        $icon = 'fa-file';
-                                        $color = 'text-blue-500';
+                            <div class="{{ $bgColor }} border rounded-lg p-4 mb-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="flex items-center justify-center w-12 h-12 bg-white rounded-lg border mr-4">
+                                            <i class="fas {{ $icon }} {{ $iconColor }} text-xl"></i>
+                                        </div>
                                         
-                                        if (in_array($fileExt, ['pdf'])) {
-                                            $icon = 'fa-file-pdf';
-                                            $color = 'text-red-500';
-                                        } elseif (in_array($fileExt, ['doc', 'docx'])) {
-                                            $icon = 'fa-file-word';
-                                            $color = 'text-blue-600';
-                                        } elseif (in_array($fileExt, ['jpg', 'jpeg', 'png'])) {
-                                            $icon = 'fa-file-image';
-                                            $color = 'text-green-500';
-                                        }
-                                    @endphp
-                                    
-                                    <div class="flex items-center justify-center w-12 h-12 bg-white rounded-lg border border-gray-200 mr-4">
-                                        <i class="fas {{ $icon }} {{ $color }} text-xl"></i>
+                                        <div>
+                                            <p class="font-medium text-gray-900">
+                                                Loan Application Form
+                                            </p>
+                                            <p class="text-sm text-gray-500 mt-1">
+                                                {{ $fileName }}
+                                            </p>
+                                        </div>
                                     </div>
                                     
-                                    <div>
-                                        <p class="font-medium text-gray-900">
-                                            Loan Application Form
-                                        </p>
-                                        <p class="text-sm text-gray-500 mt-1">
-                                            Uploaded by: {{ $loan->application_type === 'assisted' ? 'Secretary' : 'Member' }}
-                                        </p>
-                                    </div>
-                                </div>
-                                
-                                <div class="flex space-x-2">
-                                    @if(in_array($fileExt, ['jpg', 'jpeg', 'png']))
-                                        <a href="{{ asset('storage/' . $loan->support_document) }}" 
-                                        target="_blank"
-                                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium flex items-center">
-                                            <i class="fas fa-eye mr-2"></i> View
+                                    <div class="flex flex-col sm:flex-row gap-2">
+                                        @if($previewable)
+                                            <!-- Simple Preview Button -->
+                                            <a href="javascript:void(0)" 
+                                               onclick="openDocumentPreview('{{ $filePath }}', '{{ $fileExt }}')"
+                                               class="preview-btn px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium flex items-center justify-center cursor-pointer">
+                                                <i class="fas fa-eye mr-2"></i> Preview
+                                            </a>
+                                        @endif
+                                        
+                                        <a href="{{ $filePath }}" 
+                                           download="{{ $fileName }}"
+                                           class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium flex items-center justify-center">
+                                            <i class="fas fa-download mr-2"></i> Download
                                         </a>
-                                    @endif
-                                    
-                                    <a href="{{ asset('storage/' . $loan->support_document) }}" 
-                                    download
-                                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium flex items-center">
-                                        <i class="fas fa-download mr-2"></i> Download
-                                    </a>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <p class="text-xs text-gray-500 mt-3">
+                            <p class="text-xs text-gray-500">
                                 @if($loan->application_type === 'assisted')
                                     <i class="fas fa-user-tie mr-1"></i> Assisted by Secretary: 
                                     {{ $loan->assistedBy->name ?? 'Unknown' }}
@@ -349,4 +362,113 @@
         </div>
 
     </div>
+
+    <!-- Simple Preview Modal -->
+    <div id="documentPreviewModal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+            <div class="flex justify-between items-center p-4 border-b bg-gray-50">
+                <h3 class="text-lg font-medium text-gray-900" id="previewTitle">Document Preview</h3>
+                <div class="flex items-center space-x-2">
+                    <button type="button" onclick="downloadPreview()" 
+                            class="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button type="button" onclick="closePreview()" 
+                            class="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-4 overflow-auto max-h-[70vh]">
+                <iframe id="previewIframe" class="w-full h-[500px] border-0 rounded-lg hidden"></iframe>
+                <img id="previewImage" class="max-w-full h-auto mx-auto rounded-lg shadow-lg hidden" />
+                <div id="unsupportedPreview" class="text-center p-8 hidden">
+                    <i class="fas fa-file text-5xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-700 font-medium">Preview not available in browser</p>
+                    <p class="text-sm text-gray-500 mt-2">Please download the file to view it.</p>
+                    <button type="button" onclick="downloadPreview()" 
+                            class="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+                        <i class="fas fa-download mr-2"></i>Download File
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INLINE JAVASCRIPT FOR TESTING -->
+    <script>
+        let currentPreviewFile = null;
+        
+        function openDocumentPreview(filePath, fileType) {
+            console.log('Opening preview:', filePath, fileType);
+            
+            currentPreviewFile = filePath;
+            
+            const modal = document.getElementById('documentPreviewModal');
+            const iframe = document.getElementById('previewIframe');
+            const image = document.getElementById('previewImage');
+            const unsupported = document.getElementById('unsupportedPreview');
+            const title = document.getElementById('previewTitle');
+            
+            // Hide all
+            iframe.classList.add('hidden');
+            image.classList.add('hidden');
+            unsupported.classList.add('hidden');
+            
+            // Set title
+            const fileName = filePath.split('/').pop();
+            title.textContent = 'Preview: ' + fileName;
+            
+            // Show appropriate preview
+            if (fileType === 'pdf') {
+                iframe.src = filePath;
+                iframe.classList.remove('hidden');
+            } else if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(fileType)) {
+                image.src = filePath;
+                image.alt = 'Preview: ' + fileName;
+                image.classList.remove('hidden');
+            } else {
+                unsupported.classList.remove('hidden');
+            }
+            
+            // Show modal
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closePreview() {
+            const modal = document.getElementById('documentPreviewModal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            document.getElementById('previewIframe').src = '';
+        }
+        
+        function downloadPreview() {
+            if (currentPreviewFile) {
+                const a = document.createElement('a');
+                a.href = currentPreviewFile;
+                a.download = currentPreviewFile.split('/').pop();
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+        }
+        
+        // Close with ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closePreview();
+            }
+        });
+        
+        // Close when clicking outside
+        document.getElementById('documentPreviewModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePreview();
+            }
+        });
+        
+        // Test that function exists
+        console.log('Document preview functions loaded');
+    </script>
 @endsection

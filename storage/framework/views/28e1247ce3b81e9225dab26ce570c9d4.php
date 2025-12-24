@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Loan Assistance'); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -162,43 +160,117 @@
                 </div>
             </div>
 
-            <!-- Document Upload -->
+            <!-- Document Upload - SIMPLIFIED FIXED VERSION -->
             <div class="mb-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">3. Upload Loan Application Form</h3>
                 
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition">
-                    <div class="mb-4">
-                        <i class="fas fa-file-upload text-3xl text-gray-400"></i>
+                <!-- Simple file input with custom styling -->
+                <div class="mb-4">
+                    <label for="loan_document" class="block text-sm font-medium text-gray-700 mb-2">
+                        Loan Document *
+                    </label>
+                    <div class="relative">
+                        <input type="file" 
+                               name="loan_document" 
+                               id="loan_document" 
+                               class="w-full text-gray-500 file:mr-4 file:py-3 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-900 file:text-white hover:file:bg-gray-800 cursor-pointer border border-gray-300 rounded-lg"
+                               accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                               onchange="handleFileSelect(this)">
                     </div>
-                    <div class="mb-4">
-                        <label for="loan_document" class="cursor-pointer">
-                            <span class="text-gray-700 font-medium">Click to upload</span>
-                            <p class="text-sm text-gray-500 mt-1">Upload the filled loan application form (PDF, DOC, JPEG, PNG)</p>
-                        </label>
-                        <input type="file" name="loan_document" id="loan_document" 
-                               class="hidden" 
-                               accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                    <p class="text-xs text-gray-500 mt-2">Supported: PDF, DOC, JPEG, PNG (Max: 5MB)</p>
+                </div>
+                
+                <!-- Upload Progress Bar -->
+                <div id="uploadProgress" class="hidden mt-4">
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
                     </div>
-                    
-                    <!-- File Preview -->
-                    <div id="filePreview" class="hidden mt-4">
-                        <div class="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p id="progressText" class="text-xs text-gray-600 mt-2">Uploading...</p>
+                </div>
+                
+                <!-- File Preview -->
+                <div id="filePreview" class="hidden mt-6">
+                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                        <div class="flex items-center justify-between p-5">
                             <div class="flex items-center">
-                                <i class="fas fa-file text-blue-500 mr-3"></i>
-                                <div>
-                                    <p id="fileName" class="font-medium text-sm text-gray-900"></p>
-                                    <p id="fileSize" class="text-xs text-gray-500"></p>
+                                <div class="flex-shrink-0 mr-4">
+                                    <div id="fileIcon" class="w-12 h-12 flex items-center justify-center rounded-lg">
+                                        <!-- Icon will be set dynamically -->
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <p id="fileName" class="font-medium text-gray-900 truncate"></p>
+                                    <div class="flex items-center mt-1">
+                                        <span id="fileSize" class="text-sm text-gray-500 mr-3"></span>
+                                        <span id="fileType" class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full"></span>
+                                    </div>
                                 </div>
                             </div>
-                            <button type="button" onclick="removeFile()" class="text-red-500 hover:text-red-700">
-                                <i class="fas fa-times"></i>
-                            </button>
+                            <div class="flex items-center space-x-3">
+                                <button type="button" onclick="previewFile()" 
+                                        class="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition">
+                                    <i class="fas fa-eye mr-2"></i>Preview
+                                </button>
+                                <button type="button" onclick="removeFile()" 
+                                        class="flex items-center text-red-600 hover:text-red-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-red-50 transition">
+                                    <i class="fas fa-times mr-2"></i>Remove
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    
-                    <p class="text-xs text-gray-500 mt-4">
-                        Max file size: 5MB. Required for record keeping.
-                    </p>
+                </div>
+                
+                <!-- Preview Modal -->
+                <div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+                    <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+                        <div class="flex justify-between items-center p-4 border-b bg-gray-50">
+                            <h3 class="text-lg font-medium text-gray-900" id="previewTitle"></h3>
+                            <div class="flex items-center space-x-2">
+                                <button type="button" onclick="downloadFile()" 
+                                        class="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button type="button" onclick="closePreview()" 
+                                        class="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition">
+                                    <i class="fas fa-times text-xl"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-4 overflow-auto max-h-[70vh]">
+                            <iframe id="previewFrame" class="w-full h-[500px] border-0 rounded-lg" style="display: none;"></iframe>
+                            <img id="imagePreview" class="max-w-full h-auto mx-auto rounded-lg shadow-lg" style="display: none;" />
+                            <div id="unsupportedPreview" class="text-center p-8" style="display: none;">
+                                <i class="fas fa-file text-5xl text-gray-400 mb-4"></i>
+                                <p class="text-gray-700 font-medium">Preview not available</p>
+                                <p class="text-sm text-gray-500 mt-2">This file type cannot be previewed in the browser.</p>
+                                <button type="button" onclick="downloadFile()" 
+                                        class="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+                                    <i class="fas fa-download mr-2"></i>Download File
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upload Requirements -->
+                <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                    <h4 class="text-sm font-medium text-blue-900 mb-3 flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i>Upload Requirements:
+                    </h4>
+                    <ul class="text-sm text-blue-700 space-y-2">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-0.5 mr-2 flex-shrink-0"></i>
+                            <span>Signed loan application form (required for approval)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-0.5 mr-2 flex-shrink-0"></i>
+                            <span>Clear scan or photo of the document</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-0.5 mr-2 flex-shrink-0"></i>
+                            <span>All text should be readable</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
 
@@ -229,10 +301,18 @@
 
             <!-- Submit -->
             <div class="pt-6 border-t border-gray-200">
-                <div class="flex justify-end">
-                    <button type="submit" class="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition">
-                        <i class="fas fa-paper-plane mr-2"></i>Submit to Chairman
-                    </button>
+                <div class="flex justify-between items-center">
+                    <div class="text-sm text-gray-600">
+                        <span id="uploadStatus" class="hidden">
+                            <i class="fas fa-check-circle text-green-500 mr-1"></i>
+                            <span class="font-medium">Document uploaded</span>
+                        </span>
+                    </div>
+                    <div>
+                        <button type="submit" id="submitBtn" class="px-8 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center">
+                            <i class="fas fa-paper-plane mr-2"></i>Submit to Chairman
+                        </button>
+                    </div>
                 </div>
             </div>
         </form>
@@ -241,22 +321,52 @@
 
 <!-- Toasts -->
 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
-<div id="successToast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50">
-    <?php echo e(session('success')); ?>
-
+<div id="successToast" class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 flex items-center">
+    <i class="fas fa-check-circle mr-3"></i>
+    <span><?php echo e(session('success')); ?></span>
 </div>
 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('error')): ?>
-<div id="errorToast" class="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg z-50">
-    <?php echo e(session('error')); ?>
-
+<div id="errorToast" class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 flex items-center">
+    <i class="fas fa-exclamation-circle mr-3"></i>
+    <span><?php echo e(session('error')); ?></span>
 </div>
 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 <?php $__env->stopSection(); ?>
 
+<?php $__env->startPush('styles'); ?>
+<style>
+    /* Custom file input styling */
+    input[type="file"]::file-selector-button {
+        margin-right: 1rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        background-color: #111827;
+        color: white;
+        font-weight: 600;
+        font-size: 0.875rem;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    input[type="file"]::file-selector-button:hover {
+        background-color: #1f2937;
+    }
+    
+    .file-icon-pdf { background-color: #FEE2E2; color: #DC2626; }
+    .file-icon-doc { background-color: #DBEAFE; color: #1D4ED8; }
+    .file-icon-img { background-color: #DCFCE7; color: #16A34A; }
+    .file-icon-other { background-color: #F3E8FF; color: #7C3AED; }
+</style>
+<?php $__env->stopPush(); ?>
+
 <?php $__env->startPush('scripts'); ?>
 <script>
+    let currentFile = null;
+    let fileUrl = null;
+    
     // Show/hide member info
     document.getElementById('member_id').addEventListener('change', function() {
         const memberId = this.value;
@@ -333,41 +443,216 @@
         }
     }
     
-    // File upload handling
-    document.getElementById('loan_document').addEventListener('change', function(e) {
-        const file = e.target.files[0];
+    // File upload handling - SIMPLIFIED
+    function handleFileSelect(input) {
+        const file = input.files[0];
+        if (file) {
+            handleFileUpload(file);
+        }
+    }
+    
+    function handleFileUpload(file) {
+        if (!file) return;
+        
+        // Check file size (5MB limit)
+        if (file.size > 5 * 1024 * 1024) {
+            showToast('File size must be less than 5MB', 'error');
+            document.getElementById('loan_document').value = '';
+            return;
+        }
+        
+        // Check file type
+        const validTypes = ['application/pdf', 'application/msword', 
+                          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                          'image/jpeg', 'image/jpg', 'image/png'];
+        if (!validTypes.includes(file.type)) {
+            showToast('Please upload PDF, DOC, or image files only', 'error');
+            document.getElementById('loan_document').value = '';
+            return;
+        }
+        
+        currentFile = file;
+        
+        // Show upload progress
+        const progressDiv = document.getElementById('uploadProgress');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        
+        progressDiv.classList.remove('hidden');
+        progressBar.style.width = '0%';
+        progressText.textContent = 'Starting upload...';
+        
+        // Simulate upload progress
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 20;
+            if (progress > 100) progress = 100;
+            
+            progressBar.style.width = progress + '%';
+            progressText.textContent = progress === 100 ? 'Processing file...' : `Uploading... ${Math.round(progress)}%`;
+            
+            if (progress === 100) {
+                clearInterval(interval);
+                setTimeout(() => {
+                    progressDiv.classList.add('hidden');
+                    showFilePreview(file);
+                }, 500);
+            }
+        }, 200);
+    }
+    
+    function showFilePreview(file) {
         const filePreview = document.getElementById('filePreview');
         const fileName = document.getElementById('fileName');
         const fileSize = document.getElementById('fileSize');
+        const fileType = document.getElementById('fileType');
+        const fileIcon = document.getElementById('fileIcon');
+        const uploadStatus = document.getElementById('uploadStatus');
         
-        if (file) {
-            // Check file size (5MB limit)
-            if (file.size > 5 * 1024 * 1024) {
-                alert('File size must be less than 5MB');
-                this.value = '';
-                return;
-            }
-            
-            // Check file type
-            const validTypes = ['application/pdf', 'application/msword', 
-                              'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                              'image/jpeg', 'image/jpg', 'image/png'];
-            if (!validTypes.includes(file.type)) {
-                alert('Please upload PDF, DOC, or image files only');
-                this.value = '';
-                return;
-            }
-            
-            // Show file preview
-            fileName.textContent = file.name;
-            fileSize.textContent = (file.size / 1024).toFixed(1) + ' KB';
-            filePreview.classList.remove('hidden');
+        // Set file info
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        
+        // Set file type label
+        let typeLabel = 'Unknown';
+        let iconClass = 'file-icon-other';
+        let iconHtml = '<i class="fas fa-file text-xl"></i>';
+        
+        if (file.type === 'application/pdf') {
+            typeLabel = 'PDF';
+            iconClass = 'file-icon-pdf';
+            iconHtml = '<i class="fas fa-file-pdf text-xl"></i>';
+        } else if (file.type.includes('msword') || file.type.includes('wordprocessingml')) {
+            typeLabel = 'DOC';
+            iconClass = 'file-icon-doc';
+            iconHtml = '<i class="fas fa-file-word text-xl"></i>';
+        } else if (file.type.includes('image')) {
+            typeLabel = 'IMAGE';
+            iconClass = 'file-icon-img';
+            iconHtml = '<i class="fas fa-file-image text-xl"></i>';
         }
-    });
+        
+        fileType.textContent = typeLabel;
+        fileIcon.className = `w-12 h-12 flex items-center justify-center rounded-lg ${iconClass}`;
+        fileIcon.innerHTML = iconHtml;
+        
+        // Show preview and status
+        filePreview.classList.remove('hidden');
+        uploadStatus.classList.remove('hidden');
+        uploadStatus.innerHTML = `<i class="fas fa-check-circle text-green-500 mr-2"></i><span class="font-medium">${file.name} uploaded</span>`;
+        
+        // Create object URL for preview
+        fileUrl = URL.createObjectURL(file);
+        
+        // Enable submit button
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('submitBtn').innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Submit to Chairman';
+    }
+    
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+    
+    function previewFile() {
+        if (!currentFile || !fileUrl) return;
+        
+        const modal = document.getElementById('previewModal');
+        const title = document.getElementById('previewTitle');
+        const iframe = document.getElementById('previewFrame');
+        const image = document.getElementById('imagePreview');
+        const unsupported = document.getElementById('unsupportedPreview');
+        
+        title.textContent = currentFile.name;
+        
+        // Reset all displays
+        iframe.style.display = 'none';
+        image.style.display = 'none';
+        unsupported.style.display = 'none';
+        
+        // Show appropriate preview
+        if (currentFile.type === 'application/pdf') {
+            iframe.src = fileUrl;
+            iframe.style.display = 'block';
+        } else if (currentFile.type.includes('image')) {
+            image.src = fileUrl;
+            image.style.display = 'block';
+        } else {
+            unsupported.style.display = 'block';
+        }
+        
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closePreview() {
+        const modal = document.getElementById('previewModal');
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+    
+    function downloadFile() {
+        if (!currentFile || !fileUrl) return;
+        
+        const a = document.createElement('a');
+        a.href = fileUrl;
+        a.download = currentFile.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
     
     function removeFile() {
-        document.getElementById('loan_document').value = '';
-        document.getElementById('filePreview').classList.add('hidden');
+        const filePreview = document.getElementById('filePreview');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const fileInput = document.getElementById('loan_document');
+        
+        // Clean up
+        if (fileUrl) {
+            URL.revokeObjectURL(fileUrl);
+            fileUrl = null;
+        }
+        
+        currentFile = null;
+        fileInput.value = '';
+        filePreview.classList.add('hidden');
+        uploadStatus.classList.add('hidden');
+        
+        // Disable submit button until new file is uploaded
+        document.getElementById('submitBtn').disabled = true;
+    }
+    
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `fixed bottom-4 right-4 px-6 py-4 rounded-lg shadow-lg z-50 transition-all duration-300 flex items-center ${
+            type === 'error' ? 'bg-red-500 text-white' : 
+            type === 'success' ? 'bg-green-500 text-white' : 
+            'bg-blue-500 text-white'
+        }`;
+        toast.innerHTML = `
+            <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'} mr-3"></i>
+            <span>${message}</span>
+        `;
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+        
+        document.body.appendChild(toast);
+        
+        // Animate in
+        setTimeout(() => {
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0)';
+        }, 10);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(20px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 5000);
     }
     
     // Form validation
@@ -376,44 +661,41 @@
         const amount = parseFloat(document.getElementById('amount').value) || 0;
         const period = document.getElementById('period_months').value;
         const purpose = document.getElementById('purpose').value.trim();
-        const loanDocument = document.getElementById('loan_document').files[0];
         
         if (!memberId) {
             e.preventDefault();
-            alert('Please select a member');
+            showToast('Please select a member', 'error');
             return false;
         }
         
         if (amount < 1000) {
             e.preventDefault();
-            alert('Loan amount must be at least KES 1,000');
+            showToast('Loan amount must be at least KES 1,000', 'error');
             return false;
         }
         
         if (!period || period < 1 || period > 60) {
             e.preventDefault();
-            alert('Please enter a valid repayment period (1-60 months)');
+            showToast('Please enter a valid repayment period (1-60 months)', 'error');
             return false;
         }
         
         if (!purpose) {
             e.preventDefault();
-            alert('Please enter the loan purpose');
+            showToast('Please enter the loan purpose', 'error');
             return false;
         }
         
-        if (!loanDocument) {
+        if (!currentFile) {
             e.preventDefault();
-            alert('Please upload the loan application form document');
+            showToast('Please upload the loan application form document', 'error');
             return false;
         }
         
-        // Show loading
-        const submitBtn = this.querySelector('button[type="submit"]');
-        if (submitBtn) {
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
-            submitBtn.disabled = true;
-        }
+        // Show loading on submit button
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
+        submitBtn.disabled = true;
     });
     
     // Auto-hide toasts
@@ -429,6 +711,9 @@
         if (document.getElementById('amount').value) {
             calculateLoanPreview();
         }
+        
+        // Initially disable submit button until file is uploaded
+        document.getElementById('submitBtn').disabled = true;
     });
 </script>
 <?php $__env->stopPush(); ?>
