@@ -131,7 +131,7 @@ Route::middleware(['auth'])->group(function () {
         // Payments & Disbursements
         Route::get('/payments/disbursed', [MemberPaymentController::class, 'disbursedPayments'])
             ->name('payments.disbursed');
-        
+
         Route::get('/payment/{payment}', [MemberPaymentController::class, 'showPayment'])
             ->name('payment.show');
         // Reports
@@ -295,7 +295,7 @@ Route::middleware(['auth'])->group(function () {
         // Dashboard
         Route::get('/dashboard', [TreasurerController::class, 'dashboard'])->name('dashboard');
         Route::get('/savings-deductions', [TreasurerController::class, 'savingsWithDeductions'])
-        ->name('treasurer.savings.deductions');
+            ->name('treasurer.savings.deductions');
         // 1. Payment Processing
         Route::get('/payments', [TreasurerController::class, 'payments'])->name('payments');
         Route::post('/loans/{loan}/process-payment', [TreasurerController::class, 'processLoanPayment'])->name('loans.process-payment');
@@ -355,7 +355,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/financial-reports', [TreasurerController::class, 'financialReports'])->name('financial-reports');
         Route::post('/financial-reports/export', [TreasurerController::class, 'exportReport'])->name('financial-reports.export');
         Route::get('/savings-deductions', [TreasurerController::class, 'savingsWithDeductions'])
-        ->name('treasurer.savings.deductions');
+            ->name('treasurer.savings.deductions');
         Route::get('/savings-deductions', [TreasurerController::class, 'savingsWithDeductions'])->name('treasurer.savings.deductions');
         Route::post('/members/{user}/update-savings-rate', [TreasurerController::class, 'updateSavingsRate'])->name('treasurer.members.update-savings-rate');
         Route::post('/process-monthly-deductions', [TreasurerController::class, 'processMonthlyDeductions'])->name('treasurer.process-monthly-deductions');
@@ -363,6 +363,50 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/bulk-update-savings-rates', [TreasurerController::class, 'bulkUpdateSavingsRates'])->name('treasurer.bulk-update-savings-rates');
         Route::get('/members/{user}/deductions', [TreasurerController::class, 'viewMemberDeductions'])->name('treasurer.members.deductions');
         Route::post('/import-payroll-data', [TreasurerController::class, 'importPayrollData'])->name('treasurer.import-payroll-data');
+
+        // Monthly Deduction System
+        Route::get('/savings-deductions', [TreasurerController::class, 'savingsWithDeductions'])
+            ->name('treasurer.savings.deductions');
+
+        Route::post('/generate-deductions', [TreasurerController::class, 'generateDeductions'])
+            ->name('treasurer.generate-deductions');
+
+        Route::post('/regenerate-deductions', [TreasurerController::class, 'regenerateDeductions'])
+            ->name('treasurer.regenerate-deductions');
+
+        Route::post('/commit-month', [TreasurerController::class, 'commitMonth'])
+            ->name('treasurer.commit-month');
+
+        Route::post('/deductions/{deduction}/update', [TreasurerController::class, 'updateDeduction'])
+            ->name('treasurer.deductions.update');
+
+        Route::post('/deductions/{deduction}/reset', [TreasurerController::class, 'resetDeduction'])
+            ->name('treasurer.deductions.reset');
+
+        Route::get('/export-month-deductions', [TreasurerController::class, 'exportMonthDeductions'])
+            ->name('treasurer.export-month-deductions');
+
+        Route::get('/monthly-deductions', [TreasurerController::class, 'monthlyDeductionsSystem'])
+            ->name('treasurer.monthly.deductions');
+
+        //AJAX Routes
+        Route::post('/generate-deductions', [TreasurerController::class, 'generateDeductions'])
+            ->name('treasurer.generate-deductions');
+
+        Route::post('/regenerate-deductions', [TreasurerController::class, 'regenerateDeductions'])
+            ->name('treasurer.regenerate-deductions');
+
+        Route::post('/commit-month', [TreasurerController::class, 'commitMonth'])
+            ->name('treasurer.commit-month');
+
+        Route::post('/deductions/{deduction}/update', [TreasurerController::class, 'updateDeduction'])
+            ->name('treasurer.deductions.update');
+
+        Route::post('/deductions/{deduction}/reset', [TreasurerController::class, 'resetDeduction'])
+            ->name('treasurer.deductions.reset');
+
+        Route::get('/export-month-deductions', [TreasurerController::class, 'exportMonthDeductions'])
+            ->name('treasurer.export-month-deductions');
 
         // Report Routes by Type
         Route::prefix('reports')->name('reports.')->group(function () {

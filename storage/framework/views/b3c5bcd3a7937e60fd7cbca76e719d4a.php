@@ -744,7 +744,7 @@
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
                         </div>
-                        <div class="nav-item" data-tooltip="Loan Approvals">
+                        <div class="nav-item" data-tooltip="Loan Applications">
                             <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'secretary.loan-approvals','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
@@ -754,7 +754,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'secretary.loan-approvals','current' => ''.e($current).'']); ?>✅ <span class="nav-text">Loan Approvals</span> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'secretary.loan-approvals','current' => ''.e($current).'']); ?>✅ <span class="nav-text">Loan Applications</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -1561,7 +1561,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'secretary.loan-approvals','current' => ''.e($current).'']); ?>✅ Loan Approvals <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'secretary.loan-approvals','current' => ''.e($current).'']); ?>✅ Loan Applications <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>

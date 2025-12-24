@@ -13,6 +13,8 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\MonthCommitment;
+use App\Models\MonthlyDeduction;
 
 class TreasurerController extends Controller
 {
@@ -1157,267 +1159,818 @@ class TreasurerController extends Controller
     // Add these methods to your existing TreasurerController class
 
     // ============ PAYROLL DEDUCTION MANAGEMENT ============
-    public function savingsWithDeductions()
-{
-    // Calculate real statistics for the simple view
-    
-    // 1. Member statistics
-    $totalMembers = User::where('role', 'member')->count();
-    $activeMembers = User::where('role', 'member')->where('sacco_status', 'active')->count();
-    
-    // 2. Calculate average deduction rate
-    $usersWithSalary = User::where('role', 'member')
-        ->where('monthly_salary', '>', 0)
-        ->where('monthly_savings', '>', 0)
-        ->get();
-    
-    $avgDeductionRate = 0;
-    $totalRate = 0;
-    $countWithRates = 0;
-    
-    foreach ($usersWithSalary as $user) {
-        if ($user->monthly_salary > 0) {
-            $rate = ($user->monthly_savings / $user->monthly_salary) * 100;
-            $totalRate += $rate;
-            $countWithRates++;
-        }
-    }
-    
-    if ($countWithRates > 0) {
-        $avgDeductionRate = $totalRate / $countWithRates;
-    }
-    
-    // 3. Withdrawal statistics
-    $pendingWithdrawalsAmount = SavingsTransaction::where('type', 'withdrawal')
-        ->where('status', 'pending')
-        ->sum('amount');
-    
-    // 4. Monthly deduction statistics
-    $currentMonth = Carbon::now()->month;
-    $currentYear = Carbon::now()->year;
-    
-    $currentMonthDeductions = SavingsTransaction::where('type', 'payroll_deduction')
-        ->whereMonth('transaction_date', $currentMonth)
-        ->whereYear('transaction_date', $currentYear)
-        ->sum('amount');
-    
-    // 5. Compile all statistics for the simple view
-    $savingsStats = [
-        'total_savings' => Saving::sum('available_savings'),
-        'total_members' => $totalMembers,
-        'active_members' => $activeMembers,
-        'average_savings' => Saving::avg('available_savings') ?? 0,
-        'pending_withdrawals' => SavingsTransaction::where('type', 'withdrawal')
-            ->where('status', 'pending')
-            ->count(),
-        'pending_withdrawals_amount' => $pendingWithdrawalsAmount,
-        'monthly_deductions' => $currentMonthDeductions,
-        'avg_deduction_rate' => round($avgDeductionRate, 1),
-    ];
+    // In TreasurerController.php
 
-    // Get all members with their deduction details
-    $payrollDeductions = User::with([
-        'savings',
-        'loans' => function ($q) {
-            $q->whereIn('status', ['active', 'disbursed']);
-        }
-    ])->where('role', 'member')->get()->map(function ($user) {
-        // Calculate total loan deductions
-        $activeLoans = $user->loans->whereIn('status', ['active', 'disbursed']);
-        $totalLoanDeduction = $activeLoans->sum('monthly_payment');
+    /**
+     * Monthly Deduction Generation, Review, and Commitment System
+     */
+    /**
+     * Monthly Deduction Generation, Review, and Commitment System
+     */
+    public function savingsWithDeductions(Request $request)
+    {
+        try {
+            // Default to current month
+            $selectedMonth = $request->get('month', date('Y-m'));
 
-        // Use correct columns: monthly_salary and monthly_savings
-        $monthlySalary = $user->monthly_salary ?? 0;
-        $monthlySavings = $user->monthly_savings ?? 0;
-        
-        // Calculate savings deduction rate (percentage)
-        $savingsRate = 0;
-        if ($monthlySalary > 0 && $monthlySavings > 0) {
-            $savingsRate = ($monthlySavings / $monthlySalary) * 100;
-        }
+            // Get commitment status for selected month
+            $commitment = MonthCommitment::firstOrCreate(
+                ['month' => $selectedMonth],
+                ['status' => 'draft']
+            );
 
-        $totalDeduction = $monthlySavings + $totalLoanDeduction;
+            // Check if we need to generate deductions or show existing
+            $deductionsExist = MonthlyDeduction::forMonth($selectedMonth)->exists();
 
-        return [
-            'member' => $user,
-            'savings_deduction' => $monthlySavings,
-            'savings_rate' => $savingsRate,
-            'loan_deduction' => $totalLoanDeduction,
-            'active_loans' => $activeLoans->count(),
-            'total_monthly_deduction' => $totalDeduction,
-            'status' => ($monthlySavings > 0 || $totalLoanDeduction > 0) ? 'active' : 'inactive',
-            'basic_salary' => $monthlySalary,
-        ];
-    });
+            // Define canEdit based on commitment status
+            $canEdit = $commitment->canCommit();
 
-    // Payroll Summary
-    $payrollSummary = [
-        'total_deductions' => $payrollDeductions->sum('total_monthly_deduction'),
-        'total_members' => $payrollDeductions->count(),
-        'savings_deductions' => $payrollDeductions->sum('savings_deduction'),
-        'savings_members' => $payrollDeductions->where('savings_deduction', '>', 0)->count(),
-        'loan_deductions' => $payrollDeductions->sum('loan_deduction'),
-        'loan_members' => $payrollDeductions->where('loan_deduction', '>', 0)->count(),
-    ];
+            // ============ Generate monthOptions ============
+            $monthOptions = [];
+            for ($i = 0; $i < 12; $i++) {
+                $month = date('Y-m', strtotime("-$i months"));
+                $monthCommitment = MonthCommitment::where('month', $month)->first();
 
-    // Monthly summaries for dropdown
-    $monthlySummaries = collect();
-    for ($i = 0; $i < 6; $i++) {
-        $month = now()->subMonths($i);
-        $monthlySummaries->push([
-            'month' => $month->format('Y-m'),
-            'label' => $month->format('F Y'),
-            'is_current' => $i === 0
-        ]);
-    }
-    
-    $payrollMonths = collect();
-    for ($i = 0; $i < 12; $i++) {
-        $month = now()->subMonths($i);
-        $payrollMonths->push([
-            'value' => $month->format('Y-m'),
-            'label' => $month->format('F Y'),
-        ]);
-    }
-    
-    // Savings Deductions for the table
-    $savingsDeductions = User::where('role', 'member')
-        ->with(['savings'])
-        ->get()
-        ->map(function ($user) {
-            $monthlySalary = $user->monthly_salary ?? 0;
-            $monthlySavings = $user->monthly_savings ?? 0;
-            
-            // Calculate savings rate percentage
-            $savingsRate = 0;
-            if ($monthlySalary > 0 && $monthlySavings > 0) {
-                $savingsRate = ($monthlySavings / $monthlySalary) * 100;
+                $monthOptions[] = [
+                    'value' => $month,
+                    'label' => date('F Y', strtotime($month)),
+                    'status' => $monthCommitment ? $monthCommitment->status : 'draft',
+                    'is_current' => $month === date('Y-m')
+                ];
             }
 
-            // Calculate total deducted to date
-            $totalDeducted = SavingsTransaction::where('user_id', $user->id)
-                ->where('type', 'payroll_deduction')
-                ->sum('amount');
-
-            return (object) [
-                'id' => $user->id,
-                'user' => $user,
-                'deduction_rate' => $savingsRate,
-                'basic_salary' => $monthlySalary,
-                'monthly_amount' => $monthlySavings,
-                'total_deducted' => $totalDeducted,
-                'deduction_day' => 25,
-                'start_date' => $user->created_at,
-                'is_active' => ($monthlySavings > 0),
-                'updated_at' => $user->updated_at,
-                'updatedBy' => $user->approved_by ? User::find($user->approved_by) : null,
+            // Initialize all variables with defaults
+            $savingsSummary = collect();
+            $loanSummary = collect();
+            $totalSummary = collect();
+            $monthlySummaries = collect();
+            $savingsTotal = 0;
+            $loanTotal = 0;
+            $grandTotal = 0;
+            $stats = [
+                'total_members' => 0,
+                'total_savings' => 0,
+                'total_loans' => 0,
+                'total_amount' => 0,
+                'adjusted_count' => 0,
             ];
-        });
 
-    // Current month summary
-    $currentMonth = now()->format('Y-m');
-    $currentMonthSummary = [
-        'total_deductions' => $payrollDeductions->sum('total_monthly_deduction'),
-        'savings_amount' => $payrollDeductions->sum('savings_deduction'),
-        'loan_amount' => $payrollDeductions->sum('loan_deduction'),
-        'members_count' => $payrollDeductions->count(),
-        'processed_count' => 0,
-        'pending_count' => $payrollDeductions->count(),
-        'ready_amount' => $payrollDeductions->sum('total_monthly_deduction'),
-    ];
+            // If deductions exist, load them
+            if ($deductionsExist) {
+                // Tab 1: Savings Summary
+                $savingsSummary = $this->getSavingsSummary($selectedMonth);
+                $savingsTotal = $savingsSummary->sum('savings_final');
 
-    // Monthly trends - using actual transaction data
-    $monthlyTrends = collect();
-    for ($i = 5; $i >= 0; $i--) {
-        $month = now()->subMonths($i);
-        $monthDeductions = SavingsTransaction::where('type', 'payroll_deduction')
-            ->whereMonth('transaction_date', $month->month)
-            ->whereYear('transaction_date', $month->year)
-            ->sum('amount');
-            
-        $monthlyTrends->push([
-            'month' => $month->format('M Y'),
-            'short_label' => $month->format('M'),
-            'total' => $monthDeductions
+                // Tab 2: Loan Summary
+                $loanSummary = $this->getLoanSummary($selectedMonth);
+                $loanTotal = $loanSummary->sum('loan_final');
+
+                // Tab 3: Total Summary
+                $totalSummary = $this->getTotalSummary($selectedMonth);
+                $grandTotal = $totalSummary->sum('total_amount');
+
+                // Tab 4: Monthly Summaries data
+                $monthlySummaries = $this->getMonthlySummaries();
+
+                // Stats for header
+                $stats = [
+                    'total_members' => $totalSummary->count(),
+                    'total_savings' => $savingsTotal,
+                    'total_loans' => $loanTotal,
+                    'total_amount' => $grandTotal,
+                    'adjusted_count' => $totalSummary->where('is_adjusted', true)->count(),
+                ];
+            }
+
+            // DEBUG: Log what's being sent
+            \Log::info('Deductions exist: ' . ($deductionsExist ? 'Yes' : 'No'));
+            \Log::info('Can Edit: ' . ($canEdit ? 'Yes' : 'No'));
+            \Log::info('Savings summary count: ' . $savingsSummary->count());
+            \Log::info('Loan summary count: ' . $loanSummary->count());
+            \Log::info('Total summary count: ' . $totalSummary->count());
+
+            return view('treasurer.savings-with-deductions', compact(
+                'selectedMonth',
+                'commitment',
+                'deductionsExist',
+                'canEdit',  // Now this variable is defined
+                'monthOptions',
+                'savingsSummary',
+                'loanSummary',
+                'totalSummary',
+                'monthlySummaries',
+                'savingsTotal',
+                'loanTotal',
+                'grandTotal',
+                'stats'
+            ));
+
+        } catch (\Exception $e) {
+            \Log::error('Error in savingsWithDeductions: ' . $e->getMessage());
+            return back()->with('error', 'Error loading deductions: ' . $e->getMessage());
+        }
+    }
+    /**
+     * Generate deductions for a specific month
+     */
+    public function generateDeductions(Request $request)
+    {
+        $request->validate([
+            'month' => 'required|date_format:Y-m',
         ]);
+
+        $month = $request->month;
+
+        // Check if month is already committed
+        $commitment = MonthCommitment::where('month', $month)->first();
+
+        if ($commitment && $commitment->isCommitted()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This month has already been committed. Cannot generate new deductions.',
+            ], 400);
+        }
+
+        // Check if deductions already exist
+        if (MonthlyDeduction::forMonth($month)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Deductions for this month already exist. Use regenerate to overwrite.',
+            ], 400);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Create or update commitment record
+            $commitment = MonthCommitment::updateOrCreate(
+                ['month' => $month],
+                ['status' => 'draft']
+            );
+
+            // Get all active members with deduction_active = true
+            $activeMembers = User::where('role', 'member')
+                ->where('sacco_status', 'active')
+                ->where('deduction_active', true)
+                ->with([
+                    'loans' => function ($query) {
+                        $query->whereIn('status', ['active', 'disbursed']);
+                    }
+                ])
+                ->get();
+
+            $generatedCount = 0;
+
+            foreach ($activeMembers as $member) {
+                // Calculate savings deduction (fixed monthly_savings amount)
+                $savingsAmount = $member->monthly_savings ?? 0;
+
+                // Calculate loan deductions (sum of active loan monthly payments)
+                $loanAmount = $member->loans->sum('monthly_payment');
+
+                // Only create record if there are deductions
+                if ($savingsAmount > 0 || $loanAmount > 0) {
+                    MonthlyDeduction::create([
+                        'month' => $month,
+                        'user_id' => $member->id,
+                        'savings_amount' => $savingsAmount,
+                        'savings_final' => $savingsAmount,
+                        'loan_amount' => $loanAmount,
+                        'loan_final' => $loanAmount,
+                        'total_amount' => $savingsAmount + $loanAmount,
+                        'status' => 'draft',
+                    ]);
+
+                    $generatedCount++;
+                }
+            }
+
+            // Update commitment stats
+            $deductions = MonthlyDeduction::forMonth($month)->get();
+            $commitment->update([
+                'total_savings' => $deductions->sum('savings_final'),
+                'total_loans' => $deductions->sum('loan_final'),
+                'total_amount' => $deductions->sum('total_amount'),
+                'member_count' => $deductions->count(),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Generated deductions for {$generatedCount} members for {$month}",
+                'count' => $generatedCount,
+                'month' => $month,
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate deductions: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
-    $maxMonthlyTotal = $monthlyTrends->max('total') ?: 1;
-
-    // Loan Repayments
-    $loanRepayments = [
-        'total_amount' => Loan::whereIn('status', ['active', 'disbursed'])->sum('monthly_payment'),
-        'total_loans' => Loan::whereIn('status', ['active', 'disbursed'])->count(),
-        'total_members' => Loan::whereIn('status', ['active', 'disbursed'])->distinct('user_id')->count(),
-        'defaulted_count' => Loan::where('status', 'defaulted')->count(),
-        'breakdown' => Loan::whereIn('status', ['active', 'disbursed'])
-            ->with('user')
-            ->take(5)
+    /**
+     * Get savings summary for a month
+     */
+    private function getSavingsSummary($month)
+    {
+        return MonthlyDeduction::forMonth($month)
+            ->with([
+                'user' => function ($query) {
+                    $query->select('id', 'name', 'employee_number', 'department');
+                }
+            ])
+            ->orderByRaw('(SELECT name FROM users WHERE users.id = monthly_deductions.user_id)')
             ->get()
-            ->map(function ($loan) {
+            ->map(function ($deduction) {
                 return [
-                    'loan_number' => $loan->loan_number,
-                    'purpose' => $loan->purpose,
-                    'member_name' => $loan->user->name,
-                    'monthly_payment' => $loan->monthly_payment
+                    'id' => $deduction->id,
+                    'member' => $deduction->user,
+                    'employee_number' => $deduction->user->employee_number,
+                    'department' => $deduction->user->department,
+                    'savings_amount' => $deduction->savings_amount,
+                    'savings_adjustment' => $deduction->savings_adjustment,
+                    'savings_final' => $deduction->savings_final,
+                    'is_adjusted' => $deduction->is_adjusted,
+                    'adjustment_notes' => $deduction->adjustment_notes,
+                    'can_edit' => $deduction->canEdit(),
                 ];
-            })
-    ];
+            });
+    }
 
-    // Active Loan Deductions
-    $activeLoanDeductions = Loan::whereIn('status', ['active', 'disbursed'])
-        ->with('user')
-        ->get()
-        ->map(function ($loan) {
-            $loan->percentage_paid = $loan->remaining_balance > 0
-                ? (($loan->amount_paid ?? 0) / $loan->amount) * 100
-                : 100;
-            $loan->days_late = $loan->next_payment_date
-                ? max(0, now()->diffInDays(Carbon::parse($loan->next_payment_date)))
-                : 0;
-            $loan->is_defaulted = $loan->days_late > 30;
-            $loan->deduction_day = 25;
-            return $loan;
-        });
+    /**
+     * Get loan summary for a month
+     */
+    private function getLoanSummary($month)
+    {
+        return MonthlyDeduction::forMonth($month)
+            ->with([
+                'user' => function ($query) {
+                    $query->select('id', 'name', 'employee_number', 'department');
+                },
+                'user.loans' => function ($query) {
+                    $query->whereIn('status', ['active', 'disbursed'])
+                        ->select('id', 'user_id', 'loan_number', 'purpose', 'monthly_payment', 'remaining_balance');
+                }
+            ])
+            ->orderByRaw('(SELECT name FROM users WHERE users.id = monthly_deductions.user_id)')
+            ->get()
+            ->map(function ($deduction) {
+                $activeLoans = $deduction->user->loans ?? collect();
 
-    // All members for bulk operations
-    $allMembers = User::where('role', 'member')->get();
+                return [
+                    'id' => $deduction->id,
+                    'member' => $deduction->user,
+                    'employee_number' => $deduction->user->employee_number,
+                    'loan_amount' => $deduction->loan_amount,
+                    'loan_adjustment' => $deduction->loan_adjustment,
+                    'loan_final' => $deduction->loan_final,
+                    'active_loans' => $activeLoans->map(function ($loan) {
+                        return [
+                            'loan_number' => $loan->loan_number,
+                            'purpose' => $loan->purpose,
+                            'monthly_payment' => $loan->monthly_payment,
+                            'remaining_balance' => $loan->remaining_balance,
+                        ];
+                    }),
+                    'is_adjusted' => $deduction->is_adjusted,
+                    'adjustment_notes' => $deduction->adjustment_notes,
+                    'can_edit' => $deduction->canEdit(),
+                ];
+            });
+    }
 
-    // Your existing data
-    $savingsAccounts = Saving::with('user')->orderBy('available_savings', 'desc')->paginate(15);
-    $recentTransactions = SavingsTransaction::with('user')
-        ->orderBy('transaction_date', 'desc')
-        ->take(20)
-        ->get();
-    $withdrawalRequests = SavingsTransaction::where('type', 'withdrawal')
-        ->where('status', 'pending')
-        ->with('user')
-        ->get();
-    $topSavers = Saving::with('user')
-        ->orderBy('available_savings', 'desc')
-        ->take(10)
-        ->get();
+    /**
+     * Get total summary for a month
+     */
+    private function getTotalSummary($month)
+    {
+        return MonthlyDeduction::forMonth($month)
+            ->with([
+                'user' => function ($query) {
+                    $query->select('id', 'name', 'employee_number', 'department');
+                }
+            ])
+            ->orderByRaw('(SELECT name FROM users WHERE users.id = monthly_deductions.user_id)')
+            ->get()
+            ->map(function ($deduction) {
+                return [
+                    'id' => $deduction->id,
+                    'member' => $deduction->user,
+                    'employee_number' => $deduction->user->employee_number,
+                    'department' => $deduction->user->department,
+                    'savings_final' => $deduction->savings_final,
+                    'loan_final' => $deduction->loan_final,
+                    'total_amount' => $deduction->total_amount,
+                    'is_adjusted' => $deduction->is_adjusted,
+                    'adjustment_notes' => $deduction->adjustment_notes,
+                    'status' => $deduction->status,
+                    'can_edit' => $deduction->canEdit(),
+                ];
+            });
+    }
+    /**
+     * Get monthly summaries for all months
+     */
+    private function getMonthlySummaries()
+    {
+        return MonthCommitment::orderBy('month', 'desc')
+            ->take(12)
+            ->get()
+            ->map(function ($commitment) {
+                return [
+                    'month' => $commitment->month,
+                    'label' => date('F Y', strtotime($commitment->month)),
+                    'status' => $commitment->status,
+                    'total_savings' => $commitment->total_savings,
+                    'total_loans' => $commitment->total_loans,
+                    'total_amount' => $commitment->total_amount,
+                    'member_count' => $commitment->member_count,
+                    'adjusted_count' => $commitment->adjusted_count,
+                    'committed_at' => $commitment->committed_at ? $commitment->committed_at->format('d M Y H:i') : null,
+                    'committed_by' => $commitment->committedBy ? $commitment->committedBy->name : null,
+                ];
+            });
+    }
 
-    return view('treasurer.savings-with-deductions', compact(
-        'savingsStats',
-        'payrollSummary',
-        'payrollDeductions',
-        'monthlySummaries',
-        'payrollMonths',
-        'currentMonthSummary',
-        'monthlyTrends',
-        'maxMonthlyTotal',
-        'savingsDeductions',
-        'loanRepayments',
-        'activeLoanDeductions',
-        'allMembers',
-        'savingsAccounts',
-        'recentTransactions',
-        'withdrawalRequests',
-        'topSavers'
-    ));
-}
+    /**
+     * Update a deduction adjustment
+     */
+    public function updateDeduction(Request $request, $deductionId)
+    {
+        $request->validate([
+            'type' => 'required|in:savings,loan',
+            'adjustment' => 'required|numeric',
+            'notes' => 'nullable|string|max:500',
+        ]);
 
+        $deduction = MonthlyDeduction::findOrFail($deductionId);
+
+        // Check if deduction can be edited
+        if (!$deduction->canEdit()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This deduction cannot be edited because the month is already committed.',
+            ], 400);
+        }
+
+        DB::beginTransaction();
+        try {
+            $success = $deduction->applyAdjustment(
+                $request->type,
+                $request->adjustment,
+                $request->notes,
+                auth()->id()
+            );
+
+            if ($success) {
+                // Update month commitment totals
+                $commitment = MonthCommitment::where('month', $deduction->month)->first();
+                if ($commitment) {
+                    $deductions = MonthlyDeduction::forMonth($deduction->month)->get();
+                    $commitment->update([
+                        'total_savings' => $deductions->sum('savings_final'),
+                        'total_loans' => $deductions->sum('loan_final'),
+                        'total_amount' => $deductions->sum('total_amount'),
+                        'adjusted_count' => $deductions->where('is_adjusted', true)->count(),
+                    ]);
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Deduction updated successfully',
+                    'deduction' => $deduction,
+                ]);
+            } else {
+                throw new \Exception('Failed to update deduction');
+            }
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update deduction: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Reset a deduction adjustment
+     */
+    public function resetDeduction($deductionId)
+    {
+        $deduction = MonthlyDeduction::findOrFail($deductionId);
+
+        // Check if deduction can be edited
+        if (!$deduction->canEdit()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This deduction cannot be edited because the month is already committed.',
+            ], 400);
+        }
+
+        DB::beginTransaction();
+        try {
+            $success = $deduction->resetAdjustment();
+
+            if ($success) {
+                // Update month commitment totals
+                $commitment = MonthCommitment::where('month', $deduction->month)->first();
+                if ($commitment) {
+                    $deductions = MonthlyDeduction::forMonth($deduction->month)->get();
+                    $commitment->update([
+                        'total_savings' => $deductions->sum('savings_final'),
+                        'total_loans' => $deductions->sum('loan_final'),
+                        'total_amount' => $deductions->sum('total_amount'),
+                        'adjusted_count' => $deductions->where('is_adjusted', true)->count(),
+                    ]);
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Deduction reset to original values',
+                    'deduction' => $deduction,
+                ]);
+            } else {
+                throw new \Exception('Failed to reset deduction');
+            }
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to reset deduction: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Commit a month's deductions
+     */
+    public function commitMonth(Request $request)
+    {
+        $request->validate([
+            'month' => 'required|date_format:Y-m',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $month = $request->month;
+
+        DB::beginTransaction();
+        try {
+            $commitment = MonthCommitment::where('month', $month)->first();
+
+            if (!$commitment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No commitment record found for this month.',
+                ], 404);
+            }
+
+            if (!$commitment->canCommit()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This month cannot be committed. It may already be committed or locked.',
+                ], 400);
+            }
+
+            // Check if there are any deductions
+            $deductionCount = MonthlyDeduction::forMonth($month)->count();
+            if ($deductionCount === 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No deductions found for this month. Please generate deductions first.',
+                ], 400);
+            }
+
+            // Commit the month
+            $success = $commitment->commitDeductions(auth()->id(), $request->notes);
+
+            if ($success) {
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => "Month {$month} committed successfully",
+                    'commitment' => $commitment,
+                ]);
+            } else {
+                throw new \Exception('Failed to commit month');
+            }
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to commit month: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Regenerate deductions for a month (overwrites existing draft deductions)
+     */
+    public function regenerateDeductions(Request $request)
+    {
+        $request->validate([
+            'month' => 'required|date_format:Y-m',
+        ]);
+
+        $month = $request->month;
+
+        // Check if month is already committed
+        $commitment = MonthCommitment::where('month', $month)->first();
+
+        if ($commitment && $commitment->isCommitted()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This month has already been committed. Cannot regenerate deductions.',
+            ], 400);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Delete existing draft deductions for this month
+            MonthlyDeduction::forMonth($month)->draft()->delete();
+
+            // Create or update commitment record
+            $commitment = MonthCommitment::updateOrCreate(
+                ['month' => $month],
+                ['status' => 'draft']
+            );
+
+            // Get all active members with deduction_active = true
+            $activeMembers = User::where('role', 'member')
+                ->where('sacco_status', 'active')
+                ->where('deduction_active', true)
+                ->with([
+                    'loans' => function ($query) {
+                        $query->whereIn('status', ['active', 'disbursed']);
+                    }
+                ])
+                ->get();
+
+            $generatedCount = 0;
+
+            foreach ($activeMembers as $member) {
+                // Calculate savings deduction (fixed monthly_savings amount)
+                $savingsAmount = $member->monthly_savings ?? 0;
+
+                // Calculate loan deductions (sum of active loan monthly payments)
+                $loanAmount = $member->loans->sum('monthly_payment');
+
+                // Only create record if there are deductions
+                if ($savingsAmount > 0 || $loanAmount > 0) {
+                    MonthlyDeduction::create([
+                        'month' => $month,
+                        'user_id' => $member->id,
+                        'savings_amount' => $savingsAmount,
+                        'savings_final' => $savingsAmount,
+                        'loan_amount' => $loanAmount,
+                        'loan_final' => $loanAmount,
+                        'total_amount' => $savingsAmount + $loanAmount,
+                        'status' => 'draft',
+                    ]);
+
+                    $generatedCount++;
+                }
+            }
+
+            // Update commitment stats
+            $deductions = MonthlyDeduction::forMonth($month)->get();
+            $commitment->update([
+                'total_savings' => $deductions->sum('savings_final'),
+                'total_loans' => $deductions->sum('loan_final'),
+                'total_amount' => $deductions->sum('total_amount'),
+                'member_count' => $deductions->count(),
+                'adjusted_count' => 0,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Regenerated deductions for {$generatedCount} members for {$month}",
+                'count' => $generatedCount,
+                'month' => $month,
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to regenerate deductions: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Export deductions for a month
+     */
+    /**
+     * Export deductions for a month with detailed summary
+     */
+    public function exportMonthDeductions(Request $request)
+    {
+        $request->validate([
+            'month' => 'required|date_format:Y-m',
+            'type' => 'required|in:savings,loan,total',
+        ]);
+
+        $month = $request->month;
+        $type = $request->type;
+
+        $commitment = MonthCommitment::where('month', $month)->first();
+
+        if (!$commitment || !$commitment->isCommitted()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Month must be committed before exporting.',
+            ], 400);
+        }
+
+        // Get deductions with user info
+        $deductions = MonthlyDeduction::forMonth($month)
+            ->join('users', 'monthly_deductions.user_id', '=', 'users.id')
+            ->with('user')
+            ->select('monthly_deductions.*')
+            ->orderBy('users.name')
+            ->get();
+
+        $filename = "deductions-{$type}-{$month}.csv";
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function () use ($deductions, $type, $month, $commitment) {
+            $file = fopen('php://output', 'w');
+
+            // ============ HEADER SECTION ============
+            fputcsv($file, ['MONTHLY DEDUCTIONS EXPORT']);
+            fputcsv($file, ['Month:', date('F Y', strtotime($month))]);
+            fputcsv($file, ['Export Date:', now()->format('d-m-Y H:i:s')]);
+            fputcsv($file, ['Status:', ucfirst($commitment->status)]);
+            fputcsv($file, ['Committed By:', $commitment->committedBy->name ?? 'System']);
+            fputcsv($file, ['Committed Date:', $commitment->committed_at ? $commitment->committed_at->format('d-m-Y H:i:s') : 'N/A']);
+            fputcsv($file, []); // Empty row
+
+            // ============ SUMMARY SECTION ============
+            $totalSavings = $deductions->sum('savings_final');
+            $totalLoan = $deductions->sum('loan_final');
+            $totalAmount = $deductions->sum('total_amount');
+            $adjustedCount = $deductions->where('is_adjusted', true)->count();
+            $standardCount = $deductions->count() - $adjustedCount;
+
+            fputcsv($file, ['SUMMARY']);
+            fputcsv($file, ['Total Members:', $deductions->count()]);
+            fputcsv($file, ['Standard Deductions:', $standardCount]);
+            fputcsv($file, ['Adjusted Deductions:', $adjustedCount]);
+            fputcsv($file, ['Total Savings Deductions:', 'KES ' . number_format($totalSavings, 2)]);
+            fputcsv($file, ['Total Loan Repayments:', 'KES ' . number_format($totalLoan, 2)]);
+            fputcsv($file, ['Grand Total:', 'KES ' . number_format($totalAmount, 2)]);
+            fputcsv($file, []); // Empty row
+
+            // ============ DETAILED DATA SECTION ============
+            fputcsv($file, ['DETAILED DEDUCTIONS']);
+
+            if ($type === 'savings') {
+                fputcsv($file, ['No.', 'Employee No.', 'Name', 'Department', 'Standard Amount', 'Adjustment', 'Final Amount', 'Status', 'Notes']);
+
+                $counter = 1;
+                foreach ($deductions as $deduction) {
+                    fputcsv($file, [
+                        $counter++,
+                        $deduction->user->employee_number ?? 'N/A',
+                        $deduction->user->name ?? 'Unknown',
+                        $deduction->user->department ?? 'N/A',
+                        number_format($deduction->savings_amount, 2),
+                        number_format($deduction->savings_adjustment, 2),
+                        number_format($deduction->savings_final, 2),
+                        $deduction->is_adjusted ? 'Adjusted' : 'Standard',
+                        $deduction->adjustment_notes ?? ''
+                    ]);
+                }
+
+                // Footer with totals
+                fputcsv($file, []);
+                fputcsv($file, [
+                    'TOTALS',
+                    '',
+                    '',
+                    '',
+                    number_format($deductions->sum('savings_amount'), 2),
+                    number_format($deductions->sum('savings_adjustment'), 2),
+                    number_format($totalSavings, 2),
+                    '',
+                    ''
+                ]);
+
+            } elseif ($type === 'loan') {
+                fputcsv($file, ['No.', 'Employee No.', 'Name', 'Department', 'Standard Amount', 'Adjustment', 'Final Amount', 'Status', 'Notes']);
+
+                $counter = 1;
+                foreach ($deductions as $deduction) {
+                    fputcsv($file, [
+                        $counter++,
+                        $deduction->user->employee_number ?? 'N/A',
+                        $deduction->user->name ?? 'Unknown',
+                        $deduction->user->department ?? 'N/A',
+                        number_format($deduction->loan_amount, 2),
+                        number_format($deduction->loan_adjustment, 2),
+                        number_format($deduction->loan_final, 2),
+                        $deduction->is_adjusted ? 'Adjusted' : 'Standard',
+                        $deduction->adjustment_notes ?? ''
+                    ]);
+                }
+
+                // Footer with totals
+                fputcsv($file, []);
+                fputcsv($file, [
+                    'TOTALS',
+                    '',
+                    '',
+                    '',
+                    number_format($deductions->sum('loan_amount'), 2),
+                    number_format($deductions->sum('loan_adjustment'), 2),
+                    number_format($totalLoan, 2),
+                    '',
+                    ''
+                ]);
+
+            } else {
+                fputcsv($file, ['No.', 'Employee No.', 'Name', 'Department', 'Savings', 'Loans', 'Total', 'Status', 'Notes']);
+
+                $counter = 1;
+                foreach ($deductions as $deduction) {
+                    fputcsv($file, [
+                        $counter++,
+                        $deduction->user->employee_number ?? 'N/A',
+                        $deduction->user->name ?? 'Unknown',
+                        $deduction->user->department ?? 'N/A',
+                        number_format($deduction->savings_final, 2),
+                        number_format($deduction->loan_final, 2),
+                        number_format($deduction->total_amount, 2),
+                        $deduction->is_adjusted ? 'Adjusted' : 'Standard',
+                        $deduction->adjustment_notes ?? ''
+                    ]);
+                }
+
+                // Footer with totals
+                fputcsv($file, []);
+                fputcsv($file, [
+                    'TOTALS',
+                    '',
+                    '',
+                    '',
+                    number_format($totalSavings, 2),
+                    number_format($totalLoan, 2),
+                    number_format($totalAmount, 2),
+                    '',
+                    ''
+                ]);
+            }
+
+            // ============ STATISTICS SECTION ============
+            fputcsv($file, []);
+            fputcsv($file, ['STATISTICS']);
+
+            if ($type === 'savings') {
+                fputcsv($file, ['Average Savings Deduction:', 'KES ' . number_format($deductions->avg('savings_final'), 2)]);
+                fputcsv($file, ['Highest Savings Deduction:', 'KES ' . number_format($deductions->max('savings_final'), 2)]);
+                fputcsv($file, ['Lowest Savings Deduction:', 'KES ' . number_format($deductions->min('savings_final'), 2)]);
+                fputcsv($file, ['Percentage Adjusted:', number_format(($adjustedCount / $deductions->count()) * 100, 1) . '%']);
+            } elseif ($type === 'loan') {
+                fputcsv($file, ['Average Loan Repayment:', 'KES ' . number_format($deductions->avg('loan_final'), 2)]);
+                fputcsv($file, ['Highest Loan Repayment:', 'KES ' . number_format($deductions->max('loan_final'), 2)]);
+                fputcsv($file, ['Lowest Loan Repayment:', 'KES ' . number_format($deductions->min('loan_final'), 2)]);
+                fputcsv($file, ['Percentage Adjusted:', number_format(($adjustedCount / $deductions->count()) * 100, 1) . '%']);
+            } else {
+                fputcsv($file, ['Average Total Deduction:', 'KES ' . number_format($deductions->avg('total_amount'), 2)]);
+                fputcsv($file, ['Highest Total Deduction:', 'KES ' . number_format($deductions->max('total_amount'), 2)]);
+                fputcsv($file, ['Lowest Total Deduction:', 'KES ' . number_format($deductions->min('total_amount'), 2)]);
+                fputcsv($file, ['Savings Percentage:', number_format(($totalSavings / $totalAmount) * 100, 1) . '%']);
+                fputcsv($file, ['Loans Percentage:', number_format(($totalLoan / $totalAmount) * 100, 1) . '%']);
+                fputcsv($file, ['Percentage Adjusted:', number_format(($adjustedCount / $deductions->count()) * 100, 1) . '%']);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
     /**
      * Update member's savings deduction rate
      */

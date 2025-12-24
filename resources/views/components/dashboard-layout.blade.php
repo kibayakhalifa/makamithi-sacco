@@ -276,8 +276,8 @@
                         <div class="nav-item" data-tooltip="Dashboard">
                             <x-nav.link route="secretary.dashboard" current="{{ $current }}">📊 <span class="nav-text">Dashboard</span></x-nav.link>
                         </div>
-                        <div class="nav-item" data-tooltip="Loan Approvals">
-                            <x-nav.link route="secretary.loan-approvals" current="{{ $current }}">✅ <span class="nav-text">Loan Approvals</span></x-nav.link>
+                        <div class="nav-item" data-tooltip="Loan Applications">
+                            <x-nav.link route="secretary.loan-approvals" current="{{ $current }}">✅ <span class="nav-text">Loan Applications</span></x-nav.link>
                         </div>
                         <div class="nav-item" data-tooltip="Member Management">
                             <x-nav.link route="secretary.members" current="{{ $current }}">👥 <span class="nav-text">Member Management</span></x-nav.link>
@@ -469,7 +469,7 @@
                         {{-- SECRETARY --}}
                     @elseif($userRole === 'secretary')
                         <x-nav.link route="secretary.dashboard" current="{{ $current }}">📊 Dashboard</x-nav.link>
-                        <x-nav.link route="secretary.loan-approvals" current="{{ $current }}">✅ Loan Approvals</x-nav.link>
+                        <x-nav.link route="secretary.loan-approvals" current="{{ $current }}">✅ Loan Applications</x-nav.link>
                         <x-nav.link route="secretary.members" current="{{ $current }}">👥 Member Management</x-nav.link>
                         <x-nav.link route="secretary.communications" current="{{ $current }}">📧 Communications</x-nav.link>
                         <x-nav.link route="secretary.documents" current="{{ $current }}">📄 Documents</x-nav.link>
