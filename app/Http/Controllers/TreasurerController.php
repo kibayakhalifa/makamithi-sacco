@@ -2597,4 +2597,182 @@ class TreasurerController extends Controller
 
         return $totalSavings - $loanReceivables - $expenses + 1200000;
     }
+    // ============ 8. MEMBERS MANAGEMENT ============
+    /**
+     * View all members with their details
+     */
+    public function members(Request $request)
+    {
+        // Get filter parameters
+        $search = $request->get('search');
+        $status = $request->get('status');
+        $department = $request->get('department');
+
+        // Base query
+        $query = User::where('role', 'member')
+            ->with([
+                'savings',
+                'loans' => function ($q) {
+                    $q->orderBy('created_at', 'desc');
+                }
+            ]);
+
+        // Apply filters
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('employee_number', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($status && $status !== 'all') {
+            $query->where('sacco_status', $status);
+        }
+
+        if ($department && $department !== 'all') {
+            $query->where('department', $department);
+        }
+
+        // Paginate results
+        $members = $query->orderBy('name')->paginate(20);
+
+        // Get stats
+        $stats = [
+            'total_members' => User::where('role', 'member')->count(),
+            'active_members' => User::where('role', 'member')->where('sacco_status', 'active')->count(),
+            'inactive_members' => User::where('role', 'member')->where('sacco_status', 'inactive')->count(),
+            'suspended_members' => User::where('role', 'member')->where('sacco_status', 'suspended')->count(),
+            'total_savings' => Saving::sum('available_savings'),
+            'total_loans' => Loan::whereIn('status', ['active', 'disbursed'])->sum('remaining_balance'),
+        ];
+
+        // Get unique departments for filter
+        $departments = User::where('role', 'member')
+            ->whereNotNull('department')
+            ->distinct()
+            ->pluck('department')
+            ->filter()
+            ->sort()
+            ->values();
+
+        return view('treasurer.members', compact(
+            'members',
+            'stats',
+            'departments',
+            'search',
+            'status',
+            'department'
+        ));
+    }
+
+    /**
+     * View single member details
+     */
+    public function viewMember($id)
+    {
+        $member = User::with([
+            'savings',
+            'loans' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            },
+            'loans.payments' => function ($query) {
+                $query->orderBy('payment_date', 'desc');
+            },
+            'savingsTransactions' => function ($query) {
+                $query->orderBy('transaction_date', 'desc')->limit(20);
+            }
+        ])->findOrFail($id);
+
+        // Calculate totals
+        $totalSavings = $member->savings->available_savings ?? 0;
+        $totalLoans = $member->loans->whereIn('status', ['active', 'disbursed'])->sum('remaining_balance');
+        $totalPaidLoans = $member->loans->where('status', 'paid')->sum('amount');
+        $activeLoans = $member->loans->whereIn('status', ['active', 'disbursed']);
+        $loanEligibility = ($totalSavings * 1.5) - $totalLoans;
+
+        return view('treasurer.member-detail', compact(
+            'member',
+            'totalSavings',
+            'totalLoans',
+            'totalPaidLoans',
+            'activeLoans',
+            'loanEligibility'
+        ));
+    }
+
+    /**
+     * Update member status
+     */
+    public function updateMemberStatus(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'sacco_status' => 'required|in:active,inactive,suspended',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $member = User::findOrFail($id);
+        $oldStatus = $member->sacco_status;
+
+        $member->update([
+            'sacco_status' => $validated['sacco_status'],
+            'status_updated_at' => now(),
+            'status_updated_by' => auth()->id(),
+        ]);
+
+        // Log the status change
+        \Log::info('Member status updated', [
+            'member_id' => $id,
+            'old_status' => $oldStatus,
+            'new_status' => $validated['sacco_status'],
+            'updated_by' => auth()->id(),
+            'notes' => $validated['notes'] ?? ''
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Member status updated successfully',
+            'new_status' => $validated['sacco_status']
+        ]);
+    }
+
+    /**
+     * Update member deduction settings
+     */
+    public function updateMemberDeduction(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'monthly_savings' => 'required|numeric|min:0',
+            'deduction_active' => 'boolean',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $member = User::findOrFail($id);
+        $oldSavings = $member->monthly_savings;
+        $oldDeductionStatus = $member->deduction_active;
+
+        $member->update([
+            'monthly_savings' => $validated['monthly_savings'],
+            'deduction_active' => $request->has('deduction_active') ? true : false,
+            'deduction_updated_at' => now(),
+            'deduction_updated_by' => auth()->id(),
+        ]);
+
+        // Log the change
+        \Log::info('Member deduction updated', [
+            'member_id' => $id,
+            'old_monthly_savings' => $oldSavings,
+            'new_monthly_savings' => $validated['monthly_savings'],
+            'old_deduction_active' => $oldDeductionStatus,
+            'new_deduction_active' => $member->deduction_active,
+            'updated_by' => auth()->id(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Member deduction settings updated',
+            'monthly_savings' => $validated['monthly_savings'],
+            'deduction_active' => $member->deduction_active
+        ]);
+    }
 }

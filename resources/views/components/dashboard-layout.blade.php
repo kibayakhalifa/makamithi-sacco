@@ -254,6 +254,11 @@
                                 💵 <span class="nav-text">Payroll Deductions</span>
                             </x-nav.link>
                         </div>
+                        <div class="nav-item" data-tooltip="Members Management">
+                            <x-nav.link route="treasurer.members" current="{{ $current }}">
+                                👥 <span class="nav-text">Members Management</span>
+                            </x-nav.link>
+                        </div>
                         <div class="nav-item" data-tooltip="Expenses Tracking">
                             <x-nav.link route="treasurer.expenses" current="{{ $current }}">📊 <span class="nav-text">Expenses Tracking</span></x-nav.link>
                         </div>
@@ -459,6 +464,7 @@
                         <x-nav.link route="treasurer.loans" current="{{ $current }}">📋 Loans Management</x-nav.link>
                         <x-nav.link route="treasurer.savings" current="{{ $current }}">💰 Savings Summary</x-nav.link>
                         <x-nav.link route="treasurer.treasurer.savings.deductions" current="{{ $current }}">💵 Payroll Deductions</x-nav.link>
+                        <x-nav.link route="treasurer.members" current="{{ $current }}">👥 Members Management</x-nav.link>
                         <x-nav.link route="treasurer.expenses" current="{{ $current }}">📊 Expenses Tracking</x-nav.link>
                         <x-nav.link route="treasurer.cheques" current="{{ $current }}">🏦 Cheque Management</x-nav.link>
                         <x-nav.link route="treasurer.financial-reports" current="{{ $current }}">📈 Financial Reports</x-nav.link>

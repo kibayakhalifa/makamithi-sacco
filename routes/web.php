@@ -408,6 +408,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/export-month-deductions', [TreasurerController::class, 'exportMonthDeductions'])
             ->name('treasurer.export-month-deductions');
 
+        //members
+        Route::get('/members', [TreasurerController::class, 'members'])->name('members');
+        Route::get('/member/{id}', [TreasurerController::class, 'viewMember'])->name('member.view');
+        Route::post('/member/{id}/update-status', [TreasurerController::class, 'updateMemberStatus'])->name('member.update-status');
+        Route::post('/member/{id}/update-deduction', [TreasurerController::class, 'updateMemberDeduction'])->name('member.update-deduction');
+
         // Report Routes by Type
         Route::prefix('reports')->name('reports.')->group(function () {
             // Payment Reports
@@ -437,6 +443,8 @@ Route::middleware(['auth'])->group(function () {
             // Financial Reports
             Route::get('/financial/{type}', [TreasurerController::class, 'financialReport'])->name('financial');
             Route::get('/financial/export', [TreasurerController::class, 'exportFinancialReports'])->name('financial.export');
+
+            
         });
     });
 
