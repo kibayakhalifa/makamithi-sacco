@@ -411,6 +411,9 @@ class SecretaryController extends Controller
     /**
      * Store assisted loan application 
      */
+    /**
+     * Store assisted loan application 
+     */
     public function storeAssistedLoan(Request $request)
     {
         // Validate the request
@@ -424,8 +427,8 @@ class SecretaryController extends Controller
         ]);
 
         try {
-            // Get member with their savings
-            $member = User::with('savings')->findOrFail($validated['member_id']);
+            // Get member with their savings and loans
+            $member = User::with(['savings', 'loans'])->findOrFail($validated['member_id']);
 
             // Check if member has savings record
             if (!$member->savings) {
@@ -446,31 +449,40 @@ class SecretaryController extends Controller
 
             // Loan type specific validations
             if ($validated['loan_type'] === 'first_loan') {
-                // Check if member already has a first loan
-                $existingFirstLoan = $member->loans()
+                // Check if member already has an active first loan
+                $existingActiveFirstLoan = $member->loans()
                     ->where('loan_type', 'first_loan')
                     ->whereIn('status', ['pending', 'approved', 'disbursed', 'active'])
                     ->first();
 
-                if ($existingFirstLoan) {
+                if ($existingActiveFirstLoan) {
                     return redirect()->back()
-                        ->with('error', 'Member already has a first loan. Consider applying for a second loan instead.')
+                        ->with('error', 'Member already has an active first loan. Consider applying for a second loan instead.')
                         ->withInput();
                 }
             } elseif ($validated['loan_type'] === 'second_loan') {
-                // Check if member has completed their first loan
-                $completedFirstLoan = $member->loans()
+                // Check if member has a first loan
+                $firstLoan = $member->loans()
                     ->where('loan_type', 'first_loan')
-                    ->where('status', 'completed')
+                    ->whereIn('status', ['active', 'disbursed', 'completed', 'paid'])
                     ->first();
 
-                if (!$completedFirstLoan) {
+                if (!$firstLoan) {
                     return redirect()->back()
-                        ->with('error', 'Member must have completed their first loan before applying for a second loan.')
+                        ->with('error', 'Member must have an existing first loan before applying for a second loan.')
                         ->withInput();
                 }
 
-                // Check if member already has a second loan
+                // Check if at least 50% of the first loan is paid
+                $firstLoanPercentagePaid = $firstLoan->percentage_paid ?? 0;
+
+                if ($firstLoanPercentagePaid < 50) {
+                    return redirect()->back()
+                        ->with('error', 'Member must have paid at least 50% of their first loan before applying for a second loan. Currently paid: ' . $firstLoanPercentagePaid . '%')
+                        ->withInput();
+                }
+
+                // Check if member already has a second loan (active or pending)
                 $existingSecondLoan = $member->loans()
                     ->where('loan_type', 'second_loan')
                     ->whereIn('status', ['pending', 'approved', 'disbursed', 'active'])
@@ -512,7 +524,7 @@ class SecretaryController extends Controller
                     'months_remaining' => $validated['period_months'],
                     'percentage_paid' => 0,
                     'purpose' => $validated['purpose'],
-                    'support_document' => $documentPath, // Store document path
+                    'support_document' => $documentPath,
                     'application_type' => 'assisted',
                     'assisted_by' => auth()->id(),
                     'status' => 'pending',
@@ -654,6 +666,9 @@ class SecretaryController extends Controller
     /**
      * Show loan assistance page
      */
+    /**
+     * Show loan assistance page
+     */
     public function loanAssist()
     {
         // Get all active members who can apply for loans
@@ -662,15 +677,29 @@ class SecretaryController extends Controller
             ->with([
                 'savings' => function ($query) {
                     $query->select('user_id', 'available_savings', 'loan_eligibility');
+                },
+                'loans' => function ($query) {
+                    $query->whereIn('status', ['active', 'disbursed', 'completed', 'paid'])
+                        ->select('user_id', 'loan_type', 'percentage_paid', 'status');
                 }
             ])
             ->orderBy('name')
             ->get(['id', 'employee_number', 'name', 'email', 'department', 'position']);
 
+        // Add loan eligibility info to each member
+        $members = $members->map(function ($member) {
+            // Calculate first loan payment percentage
+            $firstLoan = $member->loans->where('loan_type', 'first_loan')->first();
+            $firstLoanPaidPercentage = $firstLoan ? ($firstLoan->percentage_paid ?? 0) : 0;
+
+            $member->first_loan_paid_percentage = $firstLoanPaidPercentage;
+            $member->is_eligible_for_second_loan = $firstLoanPaidPercentage >= 50;
+
+            return $member;
+        });
+
         return view('secretary.loan-assist', compact('members'));
     }
-
-
 
     /**
      * Show loan approval detail page

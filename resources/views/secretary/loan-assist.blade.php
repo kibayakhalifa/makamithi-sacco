@@ -44,11 +44,18 @@
                             @php
                                 $savings = $member->savings->available_savings ?? 0;
                                 $maxLoan = $savings * 1.5;
+                                $firstLoanPercentage = $member->first_loan_paid_percentage ?? 0;
+                                $isEligibleForSecondLoan = $member->is_eligible_for_second_loan ?? false;
                             @endphp
                             <option value="{{ $member->id }}" 
                                     data-savings="{{ $savings }}"
-                                    data-max-loan="{{ $maxLoan }}">
+                                    data-max-loan="{{ $maxLoan }}"
+                                    data-first-loan-percentage="{{ $firstLoanPercentage }}"
+                                    data-eligible-second="{{ $isEligibleForSecondLoan ? 'true' : 'false' }}">
                                 {{ $member->name }} ({{ $member->employee_number }}) - Savings: KES {{ number_format($savings, 2) }}
+                                @if($firstLoanPercentage > 0)
+                                    - First Loan: {{ $firstLoanPercentage }}% paid
+                                @endif
                             </option>
                         @endforeach
                     </select>
@@ -66,6 +73,16 @@
                             <p id="loanEligibility" class="font-medium text-blue-600">KES 0.00</p>
                         </div>
                     </div>
+                    <!-- First Loan Info -->
+                    <div id="firstLoanInfo" class="hidden"></div>
+                </div>
+            </div>
+
+            <!-- Loan Type Warning -->
+            <div id="loanTypeWarning" class="mb-6 p-4 rounded-lg bg-yellow-50 border border-yellow-200 hidden">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>
+                    <span class="text-sm text-yellow-700" id="loanTypeWarningMessage"></span>
                 </div>
             </div>
 
@@ -108,7 +125,8 @@
                         <div class="flex items-center">
                             <input type="radio" id="loan_type_first" name="loan_type" value="first_loan" 
                                    class="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300" 
-                                   {{ old('loan_type', 'first_loan') == 'first_loan' ? 'checked' : '' }} required>
+                                   {{ old('loan_type', 'first_loan') == 'first_loan' ? 'checked' : '' }} required
+                                   onchange="validateLoanType()">
                             <label for="loan_type_first" class="ml-2 block text-sm text-gray-700">
                                 First Loan
                             </label>
@@ -116,13 +134,14 @@
                         <div class="flex items-center">
                             <input type="radio" id="loan_type_second" name="loan_type" value="second_loan" 
                                    class="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300" 
-                                   {{ old('loan_type') == 'second_loan' ? 'checked' : '' }}>
+                                   {{ old('loan_type') == 'second_loan' ? 'checked' : '' }}
+                                   onchange="validateLoanType()">
                             <label for="loan_type_second" class="ml-2 block text-sm text-gray-700">
                                 Second Loan
                             </label>
                         </div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-2">Second loan requires completed first loan</p>
+                    <p class="text-xs text-gray-500 mt-2">Second loan requires at least 50% payment of first loan</p>
                 </div>
 
                 <!-- Purpose -->
@@ -161,11 +180,10 @@
                 </div>
             </div>
 
-            <!-- Document Upload - SIMPLIFIED FIXED VERSION -->
+            <!-- Document Upload -->
             <div class="mb-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">3. Upload Loan Application Form</h3>
                 
-                <!-- Simple file input with custom styling -->
                 <div class="mb-4">
                     <label for="loan_document" class="block text-sm font-medium text-gray-700 mb-2">
                         Loan Document *
@@ -275,7 +293,7 @@
                 </div>
             </div>
 
-            <!-- Warning -->
+            <!-- Eligibility Warning -->
             <div id="eligibilityWarning" class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 hidden">
                 <div class="flex items-center">
                     <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
@@ -294,6 +312,7 @@
                         <ul class="text-xs text-yellow-700 mt-1 list-disc pl-5 space-y-1">
                             <li>Loans issued at 1.5× member's savings</li>
                             <li>5% fixed interest rate</li>
+                            <li>First loan must be at least 50% paid for second loan eligibility</li>
                             <li>Requires Chairman approval</li>
                         </ul>
                     </div>
@@ -378,16 +397,35 @@
             const savings = parseFloat(selectedOption.getAttribute('data-savings')) || 0;
             const maxLoan = parseFloat(selectedOption.getAttribute('data-max-loan')) || 0;
             
+            // Get loan eligibility info
+            const firstLoanPercentage = parseFloat(selectedOption.getAttribute('data-first-loan-percentage')) || 0;
+            const isEligibleForSecondLoan = selectedOption.getAttribute('data-eligible-second') === 'true';
+            
             document.getElementById('availableSavings').textContent = 
                 'KES ' + savings.toLocaleString('en-US', {minimumFractionDigits: 2});
             
             document.getElementById('loanEligibility').textContent = 
                 'KES ' + maxLoan.toLocaleString('en-US', {minimumFractionDigits: 2});
             
+            // Show first loan info if exists
+            if (firstLoanPercentage > 0) {
+                document.getElementById('firstLoanInfo').innerHTML = `
+                    <div class="mt-3 pt-3 border-t border-gray-200">
+                        <p class="text-gray-500 text-sm">First Loan Paid: <span class="font-medium ${firstLoanPercentage >= 50 ? 'text-green-600' : 'text-yellow-600'}">${firstLoanPercentage}%</span></p>
+                        <p class="text-gray-500 text-sm mt-1">Second Loan Eligibility: <span class="font-medium ${isEligibleForSecondLoan ? 'text-green-600' : 'text-yellow-600'}">${isEligibleForSecondLoan ? 'Eligible' : 'Not Eligible (Need 50% paid)'}</span></p>
+                    </div>
+                `;
+                document.getElementById('firstLoanInfo').classList.remove('hidden');
+            } else {
+                document.getElementById('firstLoanInfo').classList.add('hidden');
+            }
+            
             memberInfoDiv.classList.remove('hidden');
             validateLoanAmount();
+            validateLoanType();
         } else {
             memberInfoDiv.classList.add('hidden');
+            document.getElementById('firstLoanInfo').classList.add('hidden');
         }
     });
     
@@ -444,7 +482,33 @@
         }
     }
     
-    // File upload handling - SIMPLIFIED
+    // Validate loan type (50% rule for second loans)
+    function validateLoanType() {
+        const memberSelect = document.getElementById('member_id');
+        const selectedOption = memberSelect.options[memberSelect.selectedIndex];
+        const loanTypeSecond = document.getElementById('loan_type_second');
+        const loanTypeFirst = document.getElementById('loan_type_first');
+        const warningDiv = document.getElementById('loanTypeWarning');
+        const warningMessage = document.getElementById('loanTypeWarningMessage');
+        
+        if (selectedOption && selectedOption.value) {
+            const isEligibleForSecondLoan = selectedOption.getAttribute('data-eligible-second') === 'true';
+            const firstLoanPercentage = parseFloat(selectedOption.getAttribute('data-first-loan-percentage')) || 0;
+            
+            if (loanTypeSecond.checked && !isEligibleForSecondLoan) {
+                warningMessage.textContent = 
+                    `Member has paid only ${firstLoanPercentage}% of their first loan. Need at least 50% to qualify for a second loan.`;
+                warningDiv.classList.remove('hidden');
+                loanTypeSecond.disabled = true;
+                loanTypeFirst.checked = true;
+            } else {
+                warningDiv.classList.add('hidden');
+                loanTypeSecond.disabled = false;
+            }
+        }
+    }
+    
+    // File upload handling
     function handleFileSelect(input) {
         const file = input.files[0];
         if (file) {
@@ -662,6 +726,7 @@
         const amount = parseFloat(document.getElementById('amount').value) || 0;
         const period = document.getElementById('period_months').value;
         const purpose = document.getElementById('purpose').value.trim();
+        const loanType = document.querySelector('input[name="loan_type"]:checked');
         
         if (!memberId) {
             e.preventDefault();
@@ -685,6 +750,26 @@
             e.preventDefault();
             showToast('Please enter the loan purpose', 'error');
             return false;
+        }
+        
+        if (!loanType) {
+            e.preventDefault();
+            showToast('Please select a loan type', 'error');
+            return false;
+        }
+        
+        // Additional validation for second loans
+        if (loanType.value === 'second_loan') {
+            const memberSelect = document.getElementById('member_id');
+            const selectedOption = memberSelect.options[memberSelect.selectedIndex];
+            const isEligibleForSecondLoan = selectedOption.getAttribute('data-eligible-second') === 'true';
+            
+            if (!isEligibleForSecondLoan) {
+                e.preventDefault();
+                const firstLoanPercentage = parseFloat(selectedOption.getAttribute('data-first-loan-percentage')) || 0;
+                showToast(`Member has only paid ${firstLoanPercentage}% of first loan. Need 50% for second loan.`, 'error');
+                return false;
+            }
         }
         
         if (!currentFile) {
@@ -715,6 +800,9 @@
         
         // Initially disable submit button until file is uploaded
         document.getElementById('submitBtn').disabled = true;
+        
+        // Validate loan type on page load if second loan is selected
+        validateLoanType();
     });
 </script>
 @endpush
