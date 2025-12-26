@@ -371,7 +371,8 @@
                         
 
 
-                        
+                    
+                    
                     <?php elseif($userRole === 'chairman'): ?>
                         <div class="nav-item" data-tooltip="Dashboard">
                             <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
@@ -394,17 +395,120 @@
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
                         </div>
-                        <div class="nav-item" data-tooltip="Loan Approvals">
-                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        
+                        <!-- Loan Management - Simple icon when collapsed -->
+                        <div class="nav-item" data-tooltip="Loan Management">
+                            <div class="relative">
+                                <!-- Always visible link to main loan page -->
+                                <a href="<?php echo e(route('chairman.loan-approvals')); ?>" 
+                                class="flex items-center gap-2 px-2 py-1.5 rounded-md text-gray-700 hover:bg-gray-100 text-xs <?php echo e($current == 'chairman.loan-approvals' || $current == 'chairman.loans.pending' || $current == 'chairman.loans.approved' || $current == 'chairman.loans.disbursed' ? 'bg-gray-100' : ''); ?>">
+                                    <span>✅</span>
+                                    <span class="nav-text">Loan Management</span>
+                                </a>
+                                
+                                <!-- Quick access dropdown - only shows text when expanded -->
+                                <div class="nav-text ml-4 mt-1 space-y-1">
+                                    <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'chairman.loan-approvals','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'chairman.loans.pending','current' => ''.e($current).'','class' => 'text-xs pl-6']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'chairman.loan-approvals','current' => ''.e($current).'']); ?>✅ <span class="nav-text">Loan Approvals</span> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'chairman.loans.pending','current' => ''.e($current).'','class' => 'text-xs pl-6']); ?>
+                                        📋 Pending
+                                     <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+                                    <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'chairman.loan-approvals','current' => ''.e($current).'','class' => 'text-xs pl-6']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('nav.link'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['route' => 'chairman.loan-approvals','current' => ''.e($current).'','class' => 'text-xs pl-6']); ?>
+                                        ✅ Approve
+                                     <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+                                    <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'chairman.loans.approved','current' => ''.e($current).'','class' => 'text-xs pl-6']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('nav.link'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['route' => 'chairman.loans.approved','current' => ''.e($current).'','class' => 'text-xs pl-6']); ?>
+                                        📄 Approved
+                                     <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+                                    <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'chairman.loans.disbursed','current' => ''.e($current).'','class' => 'text-xs pl-6']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('nav.link'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['route' => 'chairman.loans.disbursed','current' => ''.e($current).'','class' => 'text-xs pl-6']); ?>
+                                        💳 Disbursed
+                                     <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Other links remain the same -->
+                        
+                        <div class="nav-item" data-tooltip="Members">
+                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'chairman.members','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('nav.link'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['route' => 'chairman.members','current' => ''.e($current).'']); ?>👥 <span class="nav-text">Members</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -426,27 +530,6 @@
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['route' => 'reports.index','current' => ''.e($current).'']); ?>📈 <span class="nav-text">Reports</span> <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
-<?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
-<?php unset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
-<?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
-<?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
-<?php endif; ?>
-                        </div>
-                        <div class="nav-item" data-tooltip="Members">
-                            <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'chairman.members','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('nav.link'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['route' => 'chairman.members','current' => ''.e($current).'']); ?>👥 <span class="nav-text">Members</span> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -499,8 +582,6 @@
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
                         </div>
-
-
                         
                     <?php elseif($userRole === 'treasurer'): ?>
                         <div class="nav-item" data-tooltip="Dashboard">
@@ -1241,6 +1322,7 @@
 
 
                         
+                    
                     <?php elseif($userRole === 'chairman'): ?>
                         <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
@@ -1261,16 +1343,26 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+                        
+                        <!-- Loan Management in Mobile -->
+                        <details class="group">
+                            <summary class="flex items-center justify-between px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg cursor-pointer">
+                                <span class="flex items-center gap-2">
+                                    ✅ Loan Management
+                                </span>
+                                <span class="transition-transform group-open:rotate-90">▶</span>
+                            </summary>
+                            <div class="ml-4 mt-1 space-y-1">
+                                <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'chairman.loan-approvals','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'chairman.loans.pending','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('nav.link'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['route' => 'chairman.loan-approvals','current' => ''.e($current).'']); ?>✅ Loan Approvals <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['route' => 'chairman.loans.pending','current' => ''.e($current).'']); ?>Pending Loans <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
 <?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
@@ -1280,6 +1372,66 @@
 <?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
 <?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
 <?php endif; ?>
+                                <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'chairman.loan-approvals','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('nav.link'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['route' => 'chairman.loan-approvals','current' => ''.e($current).'']); ?>Approve Loans <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+                                <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'chairman.loans.approved','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('nav.link'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['route' => 'chairman.loans.approved','current' => ''.e($current).'']); ?>Approved Loans <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+                                <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'chairman.loans.disbursed','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('nav.link'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['route' => 'chairman.loans.disbursed','current' => ''.e($current).'']); ?>Disbursed Loans <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $attributes = $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__attributesOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c)): ?>
+<?php $component = $__componentOriginal5335e6a8fe017583baf62f034ee7c13c; ?>
+<?php unset($__componentOriginal5335e6a8fe017583baf62f034ee7c13c); ?>
+<?php endif; ?>
+                            </div>
+                        </details>
+                        
                         <?php if (isset($component)) { $__componentOriginal5335e6a8fe017583baf62f034ee7c13c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5335e6a8fe017583baf62f034ee7c13c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav.link','data' => ['route' => 'chairman.members','current' => ''.e($current).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>

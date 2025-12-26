@@ -729,4 +729,71 @@ class ChairmanController extends Controller
             return redirect()->back()->with('error', 'Failed to reject loan: ' . $e->getMessage());
         }
     }
+    // Add these methods to your ChairmanController class
+
+    /**
+     * Show pending loans page
+     */
+    public function pendingLoans()
+    {
+        $pendingLoans = Loan::with('user', 'user.savings')
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        $stats = [
+            'pending_loans' => Loan::where('status', 'pending')->count(),
+            'approved_today' => Loan::where('status', 'approved')
+                ->whereDate('approved_date', today())
+                ->count(),
+            'total_approved' => Loan::where('status', 'approved')->count(),
+            'total_disbursed' => Loan::whereIn('status', ['active', 'disbursed'])->sum('amount'),
+        ];
+
+        return view('chairman.loans.pending', compact('pendingLoans', 'stats'));
+    }
+
+    /**
+     * Show approved loans page
+     */
+    public function approvedLoans()
+    {
+        $approvedLoans = Loan::with('user', 'user.savings', 'approver')
+            ->where('status', 'approved')
+            ->orderBy('approved_date', 'desc')
+            ->paginate(10);
+
+        $stats = [
+            'total_approved' => Loan::where('status', 'approved')->count(),
+            'approved_this_month' => Loan::where('status', 'approved')
+                ->whereMonth('approved_date', now()->month)
+                ->whereYear('approved_date', now()->year)
+                ->count(),
+            'approved_amount' => Loan::where('status', 'approved')->sum('amount'),
+            'pending_approvals' => Loan::where('status', 'pending')->count(),
+        ];
+
+        return view('chairman.loans.approved', compact('approvedLoans', 'stats'));
+    }
+
+    /**
+     * Show disbursed loans page
+     */
+    public function disbursedLoans()
+    {
+        $disbursedLoans = Loan::with('user', 'user.savings', 'disburser')
+            ->whereIn('status', ['active', 'disbursed'])
+            ->orderBy('disbursed_date', 'desc')
+            ->paginate(10);
+
+        $stats = [
+            'total_disbursed' => Loan::whereIn('status', ['active', 'disbursed'])->count(),
+            'disbursed_amount' => Loan::whereIn('status', ['active', 'disbursed'])->sum('amount'),
+            'active_loans' => Loan::where('status', 'active')->count(),
+            'completed_loans' => Loan::where('status', 'paid')->count(),
+            'defaulted_loans' => Loan::where('status', 'defaulted')->count(),
+        ];
+
+        return view('chairman.loans.disbursed', compact('disbursedLoans', 'stats'));
+    }
 }

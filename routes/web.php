@@ -162,6 +162,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/loans/{loan}/approve', [ChairmanController::class, 'approveLoanApplication'])->name('loans.approve');
         Route::post('/loans/{loan}/reject', [ChairmanController::class, 'rejectLoanApplication'])->name('loans.reject');
 
+        Route::get('/loans/pending', [ChairmanController::class, 'pendingLoans'])->name('loans.pending');
+        Route::get('/loans/approved', [ChairmanController::class, 'approvedLoans'])->name('loans.approved');
+        Route::get('/loans/disbursed', [ChairmanController::class, 'disbursedLoans'])->name('loans.disbursed');
+
         // Reports and Statistics
         Route::get('/dashboard-stats', [ChairmanController::class, 'getDashboardStats'])->name('dashboard.stats');
         Route::get('/filtered-members', [ChairmanController::class, 'getFilteredMembers'])->name('members.filtered');

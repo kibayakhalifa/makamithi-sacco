@@ -209,19 +209,48 @@
                         
 
 
-                        {{-- CHAIRMAN --}}
+                    {{-- CHAIRMAN SIDEBAR --}}
+                    {{-- CHAIRMAN --}}
                     @elseif($userRole === 'chairman')
                         <div class="nav-item" data-tooltip="Dashboard">
                             <x-nav.link route="chairman.dashboard" current="{{ $current }}">📊 <span class="nav-text">Dashboard</span></x-nav.link>
                         </div>
-                        <div class="nav-item" data-tooltip="Loan Approvals">
-                            <x-nav.link route="chairman.loan-approvals" current="{{ $current }}">✅ <span class="nav-text">Loan Approvals</span></x-nav.link>
+                        
+                        <!-- Loan Management - Simple icon when collapsed -->
+                        <div class="nav-item" data-tooltip="Loan Management">
+                            <div class="relative">
+                                <!-- Always visible link to main loan page -->
+                                <a href="{{ route('chairman.loan-approvals') }}" 
+                                class="flex items-center gap-2 px-2 py-1.5 rounded-md text-gray-700 hover:bg-gray-100 text-xs {{ $current == 'chairman.loan-approvals' || $current == 'chairman.loans.pending' || $current == 'chairman.loans.approved' || $current == 'chairman.loans.disbursed' ? 'bg-gray-100' : '' }}">
+                                    <span>✅</span>
+                                    <span class="nav-text">Loan Management</span>
+                                </a>
+                                
+                                <!-- Quick access dropdown - only shows text when expanded -->
+                                <div class="nav-text ml-4 mt-1 space-y-1">
+                                    <x-nav.link route="chairman.loans.pending" current="{{ $current }}" class="text-xs pl-6">
+                                        📋 Pending
+                                    </x-nav.link>
+                                    <x-nav.link route="chairman.loan-approvals" current="{{ $current }}" class="text-xs pl-6">
+                                        ✅ Approve
+                                    </x-nav.link>
+                                    <x-nav.link route="chairman.loans.approved" current="{{ $current }}" class="text-xs pl-6">
+                                        📄 Approved
+                                    </x-nav.link>
+                                    <x-nav.link route="chairman.loans.disbursed" current="{{ $current }}" class="text-xs pl-6">
+                                        💳 Disbursed
+                                    </x-nav.link>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Other links remain the same -->
+                        
+                        <div class="nav-item" data-tooltip="Members">
+                            <x-nav.link route="chairman.members" current="{{ $current }}">👥 <span class="nav-text">Members</span></x-nav.link>
                         </div>
                         <div class="nav-item" data-tooltip="Reports">
                             <x-nav.link route="reports.index" current="{{ $current }}">📈 <span class="nav-text">Reports</span></x-nav.link>
-                        </div>
-                        <div class="nav-item" data-tooltip="Members">
-                            <x-nav.link route="chairman.members" current="{{ $current }}">👥 <span class="nav-text">Members</span></x-nav.link>
                         </div>
                         <div class="nav-item" data-tooltip="Documents">
                             <x-nav.link route="documents.index" current="{{ $current }}">📄 <span class="nav-text">Documents</span></x-nav.link>
@@ -229,8 +258,6 @@
                         <div class="nav-item" data-tooltip="Communications">
                             <x-nav.link route="communications.index" current="{{ $current }}">📧 <span class="nav-text">Communications</span></x-nav.link>
                         </div>
-
-
                         {{-- TREASURER --}}
                     @elseif($userRole === 'treasurer')
                         <div class="nav-item" data-tooltip="Dashboard">
@@ -446,9 +473,26 @@
 
 
                         {{-- CHAIRMAN --}}
+                    {{-- CHAIRMAN MOBILE MENU --}}
                     @elseif($userRole === 'chairman')
                         <x-nav.link route="chairman.dashboard" current="{{ $current }}">📊 Dashboard</x-nav.link>
-                        <x-nav.link route="chairman.loan-approvals" current="{{ $current }}">✅ Loan Approvals</x-nav.link>
+                        
+                        <!-- Loan Management in Mobile -->
+                        <details class="group">
+                            <summary class="flex items-center justify-between px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg cursor-pointer">
+                                <span class="flex items-center gap-2">
+                                    ✅ Loan Management
+                                </span>
+                                <span class="transition-transform group-open:rotate-90">▶</span>
+                            </summary>
+                            <div class="ml-4 mt-1 space-y-1">
+                                <x-nav.link route="chairman.loans.pending" current="{{ $current }}">Pending Loans</x-nav.link>
+                                <x-nav.link route="chairman.loan-approvals" current="{{ $current }}">Approve Loans</x-nav.link>
+                                <x-nav.link route="chairman.loans.approved" current="{{ $current }}">Approved Loans</x-nav.link>
+                                <x-nav.link route="chairman.loans.disbursed" current="{{ $current }}">Disbursed Loans</x-nav.link>
+                            </div>
+                        </details>
+                        
                         <x-nav.link route="chairman.members" current="{{ $current }}">👥 Members</x-nav.link>
                         <x-nav.link route="reports.index" current="{{ $current }}">📈 Reports</x-nav.link>
                         <x-nav.link route="documents.index" current="{{ $current }}">📄 Documents</x-nav.link>
