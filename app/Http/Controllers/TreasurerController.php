@@ -1779,7 +1779,7 @@ class TreasurerController extends Controller
      * Export deductions for a month
      */
     /**
-     * Export deductions for a month with detailed summary
+     * Export deductions for a month in Excel format
      */
     public function exportMonthDeductions(Request $request)
     {
@@ -1815,41 +1815,31 @@ class TreasurerController extends Controller
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ];
 
-        $callback = function () use ($deductions, $type, $month, $commitment) {
+        $callback = function () use ($deductions, $type, $month) {
             $file = fopen('php://output', 'w');
 
-            // ============ HEADER SECTION ============
-            fputcsv($file, ['MONTHLY DEDUCTIONS EXPORT']);
-            fputcsv($file, ['Month:', date('F Y', strtotime($month))]);
-            fputcsv($file, ['Export Date:', now()->format('d-m-Y H:i:s')]);
-            fputcsv($file, ['Status:', ucfirst($commitment->status)]);
-            fputcsv($file, ['Committed By:', $commitment->committedBy->name ?? 'System']);
-            fputcsv($file, ['Committed Date:', $commitment->committed_at ? $commitment->committed_at->format('d-m-Y H:i:s') : 'N/A']);
-            fputcsv($file, []); // Empty row
-
-            // ============ SUMMARY SECTION ============
-            $totalSavings = $deductions->sum('savings_final');
-            $totalLoan = $deductions->sum('loan_final');
-            $totalAmount = $deductions->sum('total_amount');
-            $adjustedCount = $deductions->where('is_adjusted', true)->count();
-            $standardCount = $deductions->count() - $adjustedCount;
-
-            fputcsv($file, ['SUMMARY']);
-            fputcsv($file, ['Total Members:', $deductions->count()]);
-            fputcsv($file, ['Standard Deductions:', $standardCount]);
-            fputcsv($file, ['Adjusted Deductions:', $adjustedCount]);
-            fputcsv($file, ['Total Savings Deductions:', 'KES ' . number_format($totalSavings, 2)]);
-            fputcsv($file, ['Total Loan Repayments:', 'KES ' . number_format($totalLoan, 2)]);
-            fputcsv($file, ['Grand Total:', 'KES ' . number_format($totalAmount, 2)]);
-            fputcsv($file, []); // Empty row
-
-            // ============ DETAILED DATA SECTION ============
-            fputcsv($file, ['DETAILED DEDUCTIONS']);
+            // Add UTF-8 BOM for Excel compatibility
+            fwrite($file, "\xEF\xBB\xBF");
 
             if ($type === 'savings') {
-                fputcsv($file, ['No.', 'Employee No.', 'Name', 'Department', 'Standard Amount', 'Adjustment', 'Final Amount', 'Status', 'Notes']);
+                // SAVINGS DEDUCTIONS
+                fputcsv($file, [
+                    'No.',
+                    'Employee No.',
+                    'Name',
+                    'Department',
+                    'Standard Amount',
+                    'Adjustment',
+                    'Final Amount',
+                    'Status',
+                    'Notes'
+                ]);
 
                 $counter = 1;
+                $totalStandard = 0;
+                $totalAdjustment = 0;
+                $totalFinal = 0;
+
                 foreach ($deductions as $deduction) {
                     fputcsv($file, [
                         $counter++,
@@ -1862,26 +1852,47 @@ class TreasurerController extends Controller
                         $deduction->is_adjusted ? 'Adjusted' : 'Standard',
                         $deduction->adjustment_notes ?? ''
                     ]);
+
+                    $totalStandard += $deduction->savings_amount;
+                    $totalAdjustment += $deduction->savings_adjustment;
+                    $totalFinal += $deduction->savings_final;
                 }
 
-                // Footer with totals
+                // Add empty row
                 fputcsv($file, []);
+
+                // Add totals row
                 fputcsv($file, [
                     'TOTALS',
                     '',
                     '',
                     '',
-                    number_format($deductions->sum('savings_amount'), 2),
-                    number_format($deductions->sum('savings_adjustment'), 2),
-                    number_format($totalSavings, 2),
+                    number_format($totalStandard, 2),
+                    number_format($totalAdjustment, 2),
+                    number_format($totalFinal, 2),
                     '',
                     ''
                 ]);
 
             } elseif ($type === 'loan') {
-                fputcsv($file, ['No.', 'Employee No.', 'Name', 'Department', 'Standard Amount', 'Adjustment', 'Final Amount', 'Status', 'Notes']);
+                // LOAN DEDUCTIONS
+                fputcsv($file, [
+                    'No.',
+                    'Employee No.',
+                    'Name',
+                    'Department',
+                    'Standard Amount',
+                    'Adjustment',
+                    'Final Amount',
+                    'Status',
+                    'Notes'
+                ]);
 
                 $counter = 1;
+                $totalStandard = 0;
+                $totalAdjustment = 0;
+                $totalFinal = 0;
+
                 foreach ($deductions as $deduction) {
                     fputcsv($file, [
                         $counter++,
@@ -1894,26 +1905,47 @@ class TreasurerController extends Controller
                         $deduction->is_adjusted ? 'Adjusted' : 'Standard',
                         $deduction->adjustment_notes ?? ''
                     ]);
+
+                    $totalStandard += $deduction->loan_amount;
+                    $totalAdjustment += $deduction->loan_adjustment;
+                    $totalFinal += $deduction->loan_final;
                 }
 
-                // Footer with totals
+                // Add empty row
                 fputcsv($file, []);
+
+                // Add totals row
                 fputcsv($file, [
                     'TOTALS',
                     '',
                     '',
                     '',
-                    number_format($deductions->sum('loan_amount'), 2),
-                    number_format($deductions->sum('loan_adjustment'), 2),
-                    number_format($totalLoan, 2),
+                    number_format($totalStandard, 2),
+                    number_format($totalAdjustment, 2),
+                    number_format($totalFinal, 2),
                     '',
                     ''
                 ]);
 
             } else {
-                fputcsv($file, ['No.', 'Employee No.', 'Name', 'Department', 'Savings', 'Loans', 'Total', 'Status', 'Notes']);
+                // TOTAL DEDUCTIONS
+                fputcsv($file, [
+                    'No.',
+                    'Employee No.',
+                    'Name',
+                    'Department',
+                    'Savings',
+                    'Loans',
+                    'Total',
+                    'Status',
+                    'Notes'
+                ]);
 
                 $counter = 1;
+                $totalSavings = 0;
+                $totalLoans = 0;
+                $totalAmount = 0;
+
                 foreach ($deductions as $deduction) {
                     fputcsv($file, [
                         $counter++,
@@ -1926,44 +1958,27 @@ class TreasurerController extends Controller
                         $deduction->is_adjusted ? 'Adjusted' : 'Standard',
                         $deduction->adjustment_notes ?? ''
                     ]);
+
+                    $totalSavings += $deduction->savings_final;
+                    $totalLoans += $deduction->loan_final;
+                    $totalAmount += $deduction->total_amount;
                 }
 
-                // Footer with totals
+                // Add empty row
                 fputcsv($file, []);
+
+                // Add totals row
                 fputcsv($file, [
                     'TOTALS',
                     '',
                     '',
                     '',
                     number_format($totalSavings, 2),
-                    number_format($totalLoan, 2),
+                    number_format($totalLoans, 2),
                     number_format($totalAmount, 2),
                     '',
                     ''
                 ]);
-            }
-
-            // ============ STATISTICS SECTION ============
-            fputcsv($file, []);
-            fputcsv($file, ['STATISTICS']);
-
-            if ($type === 'savings') {
-                fputcsv($file, ['Average Savings Deduction:', 'KES ' . number_format($deductions->avg('savings_final'), 2)]);
-                fputcsv($file, ['Highest Savings Deduction:', 'KES ' . number_format($deductions->max('savings_final'), 2)]);
-                fputcsv($file, ['Lowest Savings Deduction:', 'KES ' . number_format($deductions->min('savings_final'), 2)]);
-                fputcsv($file, ['Percentage Adjusted:', number_format(($adjustedCount / $deductions->count()) * 100, 1) . '%']);
-            } elseif ($type === 'loan') {
-                fputcsv($file, ['Average Loan Repayment:', 'KES ' . number_format($deductions->avg('loan_final'), 2)]);
-                fputcsv($file, ['Highest Loan Repayment:', 'KES ' . number_format($deductions->max('loan_final'), 2)]);
-                fputcsv($file, ['Lowest Loan Repayment:', 'KES ' . number_format($deductions->min('loan_final'), 2)]);
-                fputcsv($file, ['Percentage Adjusted:', number_format(($adjustedCount / $deductions->count()) * 100, 1) . '%']);
-            } else {
-                fputcsv($file, ['Average Total Deduction:', 'KES ' . number_format($deductions->avg('total_amount'), 2)]);
-                fputcsv($file, ['Highest Total Deduction:', 'KES ' . number_format($deductions->max('total_amount'), 2)]);
-                fputcsv($file, ['Lowest Total Deduction:', 'KES ' . number_format($deductions->min('total_amount'), 2)]);
-                fputcsv($file, ['Savings Percentage:', number_format(($totalSavings / $totalAmount) * 100, 1) . '%']);
-                fputcsv($file, ['Loans Percentage:', number_format(($totalLoan / $totalAmount) * 100, 1) . '%']);
-                fputcsv($file, ['Percentage Adjusted:', number_format(($adjustedCount / $deductions->count()) * 100, 1) . '%']);
             }
 
             fclose($file);
