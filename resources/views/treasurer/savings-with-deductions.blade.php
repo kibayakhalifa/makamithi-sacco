@@ -20,8 +20,7 @@
                 
                 <!-- Month Selection -->
                 <div class="mt-4 flex items-center gap-3">
-                    <select id="monthSelect" onchange="loadMonth()" 
-                            class="px-4 py-2 border border-gray-300 rounded-lg text-sm">
+                    <select id="monthSelect" class="px-4 py-2 border border-gray-300 rounded-lg text-sm">
                         @foreach($monthOptions as $option)
                             <option value="{{ $option['value'] }}" 
                                     {{ $selectedMonth == $option['value'] ? 'selected' : '' }}
@@ -139,21 +138,21 @@
     @if($deductionsExist)
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         <div class="border-b border-gray-200">
-            <nav class="flex overflow-x-auto">
+            <nav class="flex">
                 <button onclick="switchTab('savings')" id="savingsTab"
-                    class="px-6 py-4 font-medium border-b-2 border-green-600 text-green-700 whitespace-nowrap">
+                    class="flex-1 px-4 py-4 font-medium border-b-2 border-green-600 text-green-700 whitespace-nowrap text-center">
                     💰 Savings Summary
                 </button>
                 <button onclick="switchTab('loans')" id="loansTab"
-                    class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
+                    class="flex-1 px-4 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap text-center border-b-2 border-transparent">
                     🏦 Loan Summary
                 </button>
                 <button onclick="switchTab('total')" id="totalTab"
-                    class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
-                    📊 Total (Combined) Summary
+                    class="flex-1 px-4 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap text-center border-b-2 border-transparent">
+                    📊 Total Summary
                 </button>
                 <button onclick="switchTab('monthly')" id="monthlyTab"
-                    class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
+                    class="flex-1 px-4 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap text-center border-b-2 border-transparent">
                     📅 Monthly Summaries
                 </button>
             </nav>
@@ -173,55 +172,56 @@
             </div>
             
             <div class="overflow-x-auto border border-gray-300 rounded-lg">
-                <table class="min-w-full divide-y divide-gray-200">
+                <table class="min-w-full border-collapse border border-gray-300">
                     <thead>
                         <tr class="bg-gray-50">
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Member</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Standard Amount</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Adjustment</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Final Amount</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase w-12">#</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Member Name</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Employee No.</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Department</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Standard Amount</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Adjustment</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Final Amount</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
                             @if($canEdit)
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
                             @endif
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($savingsSummary as $deduction)
+                    <tbody>
+                        @foreach($savingsSummary as $index => $deduction)
                         <tr class="hover:bg-gray-50 {{ $deduction['is_adjusted'] ? 'bg-yellow-50' : '' }}">
-                            <td class="px-4 py-3">
-                                <div class="flex items-center">
-                                    <div class="w-8 h-8 {{ $deduction['is_adjusted'] ? 'bg-yellow-100' : 'bg-green-100' }} rounded-full flex items-center justify-center mr-3">
-                                        <span class="{{ $deduction['is_adjusted'] ? 'text-yellow-700' : 'text-green-700' }} text-sm font-medium">
-                                            {{ strtoupper(substr($deduction['member']->name, 0, 1)) }}
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-gray-900 text-sm">{{ $deduction['member']->name }}</p>
-                                        <p class="text-gray-500 text-xs">{{ $deduction['employee_number'] }}</p>
-                                        <p class="text-gray-500 text-xs">{{ $deduction['department'] ?? 'N/A' }}</p>
-                                    </div>
-                                </div>
+                            <td class="border border-gray-300 px-4 py-3 text-center text-gray-600">{{ $index + 1 }}</td>
+                            <td class="border border-gray-300 px-4 py-3">
+                                <p class="font-medium text-gray-900">{{ $deduction['member']->name }}</p>
                             </td>
-                            <td class="px-4 py-3">
-                                <p class="font-medium text-gray-900">KES {{ number_format($deduction['savings_amount'], 2) }}</p>
+                            <td class="border border-gray-300 px-4 py-3">
+                                <p class="text-gray-600">{{ $deduction['employee_number'] }}</p>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="border border-gray-300 px-4 py-3">
+                                <p class="text-gray-600">{{ $deduction['department'] ?? 'N/A' }}</p>
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-right">
+                                <p class="font-medium text-gray-900">{{ number_format($deduction['savings_amount'], 2) }}</p>
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3">
                                 @if($deduction['savings_adjustment'] != 0)
-                                    <p class="font-medium {{ $deduction['savings_adjustment'] > 0 ? 'text-green-600' : 'text-red-600' }}">
-                                        {{ $deduction['savings_adjustment'] > 0 ? '+' : '' }}KES {{ number_format($deduction['savings_adjustment'], 2) }}
-                                    </p>
-                                    @if($deduction['adjustment_notes'])
-                                        <p class="text-gray-500 text-xs mt-1">{{ $deduction['adjustment_notes'] }}</p>
-                                    @endif
+                                    <div class="text-right">
+                                        <p class="font-medium {{ $deduction['savings_adjustment'] > 0 ? 'text-green-600' : 'text-red-600' }}">
+                                            {{ $deduction['savings_adjustment'] > 0 ? '+' : '' }}{{ number_format($deduction['savings_adjustment'], 2) }}
+                                        </p>
+                                        @if($deduction['adjustment_notes'])
+                                            <p class="text-gray-500 text-xs mt-1 text-left">{{ $deduction['adjustment_notes'] }}</p>
+                                        @endif
+                                    </div>
                                 @else
-                                    <p class="text-gray-400 text-sm">No adjustment</p>
+                                    <p class="text-gray-400 text-sm text-center">-</p>
                                 @endif
                             </td>
-                            <td class="px-4 py-3">
-                                <p class="font-bold text-gray-900">KES {{ number_format($deduction['savings_final'], 2) }}</p>
+                            <td class="border border-gray-300 px-4 py-3 text-right">
+                                <p class="font-bold text-gray-900">{{ number_format($deduction['savings_final'], 2) }}</p>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="border border-gray-300 px-4 py-3">
                                 @if($deduction['is_adjusted'])
                                     <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
                                         Adjusted
@@ -233,22 +233,46 @@
                                 @endif
                             </td>
                             @if($canEdit)
-                            <td class="px-4 py-3">
-                                <button onclick="editDeduction({{ $deduction['id'] }}, 'savings', {{ $deduction['savings_amount'] }}, {{ $deduction['savings_adjustment'] }})"
-                                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium">
-                                    Edit
-                                </button>
-                                @if($deduction['is_adjusted'])
-                                <button onclick="resetDeduction({{ $deduction['id'] }})"
-                                        class="ml-2 bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded text-xs font-medium">
-                                    Reset
-                                </button>
-                                @endif
+                            <td class="border border-gray-300 px-4 py-3 text-center">
+                                <div class="flex gap-2 justify-center">
+                                    <button onclick="editDeduction({{ $deduction['id'] }}, 'savings', {{ $deduction['savings_amount'] }}, {{ $deduction['savings_adjustment'] }})"
+                                            class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium">
+                                        Edit
+                                    </button>
+                                    @if($deduction['is_adjusted'])
+                                    <button onclick="resetDeduction({{ $deduction['id'] }})"
+                                            class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded text-xs font-medium">
+                                        Reset
+                                    </button>
+                                    @endif
+                                </div>
                             </td>
                             @endif
                         </tr>
                         @endforeach
                     </tbody>
+                    <tfoot>
+                        <tr class="bg-gray-50">
+                            <td colspan="4" class="border border-gray-300 px-4 py-3 text-right font-medium">Totals:</td>
+                            <td class="border border-gray-300 px-4 py-3 text-right font-bold text-gray-900">
+                                {{ number_format($savingsSummary->sum('savings_amount'), 2) }}
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-right font-bold text-gray-900">
+                                {{ number_format($savingsSummary->sum('savings_adjustment'), 2) }}
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-right font-bold text-green-700">
+                                {{ number_format($savingsTotal, 2) }}
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-center">
+                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+                                    {{ $savingsSummary->where('is_adjusted', true)->count() }} Adjusted
+                                </span>
+                            </td>
+                            @if($canEdit)
+                            <td class="border border-gray-300 px-4 py-3"></td>
+                            @endif
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>
@@ -258,105 +282,225 @@
             <div class="mb-6 flex justify-between items-center">
                 <div>
                     <h3 class="text-lg font-semibold text-gray-900">Loan Repayment Deductions</h3>
-                    <p class="text-gray-500 text-sm">Active loan repayments with adjustments</p>
+                    <p class="text-gray-500 text-sm">Active loan repayments with adjustments. Members with multiple loans appear multiple times.</p>
                 </div>
                 <div class="text-right">
                     <p class="text-gray-600 text-sm">Total: <span class="font-bold text-purple-600">KES {{ number_format($loanTotal, 2) }}</span></p>
-                    <p class="text-gray-500 text-xs">{{ $loanSummary->count() }} members</p>
+                    <p class="text-gray-500 text-xs">{{ $loanEntriesCount ?? $loanSummary->count() }} loan entries</p>
                 </div>
             </div>
             
             <div class="overflow-x-auto border border-gray-300 rounded-lg">
-                <table class="min-w-full divide-y divide-gray-200">
+                <table class="min-w-full border-collapse border border-gray-300">
                     <thead>
                         <tr class="bg-gray-50">
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Member</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Active Loans</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Standard Amount</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Adjustment</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Final Amount</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase w-12">#</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Member Name</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Employee No.</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Loan Type</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Loan Number</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Standard Amount</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Adjustment</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Final Amount</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
                             @if($canEdit)
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
                             @endif
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody>
+                        @php 
+                            $counter = 1;
+                            $loanEntriesCount = 0;
+                        @endphp
                         @foreach($loanSummary as $deduction)
-                        <tr class="hover:bg-gray-50 {{ $deduction['is_adjusted'] ? 'bg-yellow-50' : '' }}">
-                            <td class="px-4 py-3">
-                                <div class="flex items-center">
-                                    <div class="w-8 h-8 {{ $deduction['is_adjusted'] ? 'bg-yellow-100' : 'bg-purple-100' }} rounded-full flex items-center justify-center mr-3">
-                                        <span class="{{ $deduction['is_adjusted'] ? 'text-yellow-700' : 'text-purple-700' }} text-sm font-medium">
-                                            {{ strtoupper(substr($deduction['member']->name, 0, 1)) }}
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-gray-900 text-sm">{{ $deduction['member']->name }}</p>
-                                        <p class="text-gray-500 text-xs">{{ $deduction['employee_number'] }}</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-4 py-3">
-                                @if(count($deduction['active_loans']) > 0)
-                                    <div class="space-y-1">
-                                        @foreach($deduction['active_loans'] as $loan)
-                                        <div class="text-xs">
-                                            <span class="font-medium">#{{ $loan['loan_number'] }}</span>
-                                            <span class="text-gray-500"> - KES {{ number_format($loan['monthly_payment'], 2) }}</span>
+                            @php
+                                // Count all active loans for this member
+                                $activeLoans = $deduction['active_loans'] ?? collect();
+                                $loanCount = count($activeLoans);
+                                $loanEntriesCount += $loanCount > 0 ? $loanCount : 1;
+                                
+                                // Determine if adjustment applies to specific loan or total
+                                $hasMultipleLoans = $loanCount > 1;
+                                $hasAdjustment = $deduction['loan_adjustment'] != 0;
+                                
+                                // For members with multiple loans, we need to distribute the adjustment proportionally
+                                if ($hasMultipleLoans && $hasAdjustment) {
+                                    $totalLoanAmount = $deduction['loan_amount'];
+                                    if ($totalLoanAmount > 0) {
+                                        $adjustmentPerLoan = [];
+                                        foreach ($activeLoans as $loanIndex => $loan) {
+                                            $loanPercentage = $loan['monthly_payment'] / $totalLoanAmount;
+                                            $adjustmentPerLoan[] = [
+                                                'amount' => $deduction['loan_adjustment'] * $loanPercentage,
+                                                'percentage' => $loanPercentage * 100
+                                            ];
+                                        }
+                                    }
+                                }
+                            @endphp
+                            
+                            @if($loanCount > 0)
+                                @foreach($activeLoans as $loanIndex => $loan)
+                                <tr class="hover:bg-gray-50 {{ $deduction['is_adjusted'] ? 'bg-yellow-50' : '' }}">
+                                    <td class="border border-gray-300 px-4 py-3 text-center text-gray-600">{{ $counter++ }}</td>
+                                    <td class="border border-gray-300 px-4 py-3">
+                                        <p class="font-medium text-gray-900">{{ $deduction['member']->name }}</p>
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-3">
+                                        <p class="text-gray-600">{{ $deduction['employee_number'] }}</p>
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-3">
+                                        @php
+                                            // Determine loan type based on index or loan data
+                                            if (isset($loan['loan_type']) && !empty($loan['loan_type'])) {
+                                                $loanType = $loan['loan_type'];
+                                            } else {
+                                                $loanType = $loanIndex == 0 ? 'First Loan' : 'Second Loan';
+                                            }
+                                        @endphp
+                                        <p class="font-medium {{ $loanType == 'First Loan' ? 'text-blue-600' : 'text-green-600' }}">
+                                            {{ $loanType }}
+                                        </p>
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-3">
+                                        <p class="font-medium text-gray-700">#{{ $loan['loan_number'] }}</p>
+                                        @if(isset($loan['purpose']) && !empty($loan['purpose']))
+                                            <p class="text-gray-500 text-xs">{{ $loan['purpose'] }}</p>
+                                        @endif
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-3 text-right">
+                                        <p class="font-medium text-gray-900">{{ number_format($loan['monthly_payment'], 2) }}</p>
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-3">
+                                        @if($deduction['loan_adjustment'] != 0)
+                                            <div class="text-right">
+                                                @if($hasMultipleLoans)
+                                                    @php
+                                                        $loanAdjustment = $adjustmentPerLoan[$loanIndex]['amount'] ?? 0;
+                                                        $adjustmentPercentage = $adjustmentPerLoan[$loanIndex]['percentage'] ?? 0;
+                                                    @endphp
+                                                    <p class="font-medium {{ $loanAdjustment > 0 ? 'text-green-600' : 'text-red-600' }}">
+                                                        {{ $loanAdjustment > 0 ? '+' : '' }}{{ number_format($loanAdjustment, 2) }}
+                                                    </p>
+                                                    <p class="text-gray-500 text-xs mt-1">
+                                                        {{ number_format($adjustmentPercentage, 1) }}% of total adjustment
+                                                    </p>
+                                                @else
+                                                    <p class="font-medium {{ $deduction['loan_adjustment'] > 0 ? 'text-green-600' : 'text-red-600' }}">
+                                                        {{ $deduction['loan_adjustment'] > 0 ? '+' : '' }}{{ number_format($deduction['loan_adjustment'], 2) }}
+                                                    </p>
+                                                @endif
+                                                @if($deduction['adjustment_notes'] && !$hasMultipleLoans)
+                                                    <p class="text-gray-500 text-xs mt-1 text-left">{{ $deduction['adjustment_notes'] }}</p>
+                                                @endif
+                                            </div>
+                                        @else
+                                            <p class="text-gray-400 text-sm text-center">-</p>
+                                        @endif
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-3 text-right">
+                                        @if($hasMultipleLoans && $hasAdjustment)
+                                            @php
+                                                $loanFinal = $loan['monthly_payment'] + ($adjustmentPerLoan[$loanIndex]['amount'] ?? 0);
+                                            @endphp
+                                            <p class="font-bold text-gray-900">{{ number_format($loanFinal, 2) }}</p>
+                                        @elseif(!$hasMultipleLoans)
+                                            <p class="font-bold text-gray-900">{{ number_format($deduction['loan_final'], 2) }}</p>
+                                        @else
+                                            <p class="text-gray-500 text-xs">Part of {{ $loanCount }} loans</p>
+                                        @endif
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-3">
+                                        @if($deduction['is_adjusted'])
+                                            <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                                Adjusted
+                                            </span>
+                                        @else
+                                            <span class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800 border border-purple-200">
+                                                Standard
+                                            </span>
+                                        @endif
+                                        @if($hasMultipleLoans)
+                                            <p class="text-gray-500 text-xs mt-1">{{ $loanCount }} loans</p>
+                                        @endif
+                                    </td>
+                                    @if($canEdit)
+                                    <td class="border border-gray-300 px-4 py-3 text-center">
+                                        <div class="flex gap-2 justify-center">
+                                            @if(!$hasMultipleLoans || ($hasMultipleLoans && $loanCount == 1))
+                                                <button onclick="editDeduction({{ $deduction['id'] }}, 'loan', {{ $deduction['loan_amount'] }}, {{ $deduction['loan_adjustment'] }})"
+                                                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium">
+                                                    Edit
+                                                </button>
+                                            @else
+                                                <button onclick="editMultipleLoans({{ $deduction['id'] }}, {{ json_encode($activeLoans) }}, {{ $deduction['loan_amount'] }}, {{ $deduction['loan_adjustment'] }})"
+                                                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium">
+                                                    Edit All
+                                                </button>
+                                            @endif
+                                            @if($deduction['is_adjusted'])
+                                                <button onclick="resetDeduction({{ $deduction['id'] }})"
+                                                        class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded text-xs font-medium">
+                                                    Reset
+                                                </button>
+                                            @endif
                                         </div>
-                                        @endforeach
-                                    </div>
-                                @else
-                                    <p class="text-gray-400 text-sm">No active loans</p>
-                                @endif
-                            </td>
-                            <td class="px-4 py-3">
-                                <p class="font-medium text-gray-900">KES {{ number_format($deduction['loan_amount'], 2) }}</p>
-                            </td>
-                            <td class="px-4 py-3">
-                                @if($deduction['loan_adjustment'] != 0)
-                                    <p class="font-medium {{ $deduction['loan_adjustment'] > 0 ? 'text-green-600' : 'text-red-600' }}">
-                                        {{ $deduction['loan_adjustment'] > 0 ? '+' : '' }}KES {{ number_format($deduction['loan_adjustment'], 2) }}
-                                    </p>
-                                    @if($deduction['adjustment_notes'])
-                                        <p class="text-gray-500 text-xs mt-1">{{ $deduction['adjustment_notes'] }}</p>
+                                    </td>
                                     @endif
-                                @else
-                                    <p class="text-gray-400 text-sm">No adjustment</p>
-                                @endif
-                            </td>
-                            <td class="px-4 py-3">
-                                <p class="font-bold text-gray-900">KES {{ number_format($deduction['loan_final'], 2) }}</p>
-                            </td>
-                            <td class="px-4 py-3">
-                                @if($deduction['is_adjusted'])
-                                    <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
-                                        Adjusted
-                                    </span>
-                                @else
-                                    <span class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800 border border-purple-200">
-                                        Standard
-                                    </span>
-                                @endif
-                            </td>
-                            @if($canEdit)
-                            <td class="px-4 py-3">
-                                <button onclick="editDeduction({{ $deduction['id'] }}, 'loan', {{ $deduction['loan_amount'] }}, {{ $deduction['loan_adjustment'] }})"
-                                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium">
-                                    Edit
-                                </button>
-                                @if($deduction['is_adjusted'])
-                                <button onclick="resetDeduction({{ $deduction['id'] }})"
-                                        class="ml-2 bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded text-xs font-medium">
-                                    Reset
-                                </button>
-                                @endif
-                            </td>
+                                </tr>
+                                @endforeach
+                            @else
+                                <tr class="hover:bg-gray-50">
+                                    <td class="border border-gray-300 px-4 py-3 text-center text-gray-600">{{ $counter++ }}</td>
+                                    <td class="border border-gray-300 px-4 py-3">
+                                        <p class="font-medium text-gray-900">{{ $deduction['member']->name }}</p>
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-3">
+                                        <p class="text-gray-600">{{ $deduction['employee_number'] }}</p>
+                                    </td>
+                                    <td colspan="4" class="border border-gray-300 px-4 py-3 text-center">
+                                        <p class="text-gray-400 text-sm">No active loans</p>
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-3 text-center">
+                                        <p class="text-gray-400 text-sm">-</p>
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-3 text-center">
+                                        <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800 border border-gray-200">
+                                            No Loans
+                                        </span>
+                                    </td>
+                                    @if($canEdit)
+                                    <td class="border border-gray-300 px-4 py-3"></td>
+                                    @endif
+                                </tr>
                             @endif
-                        </tr>
                         @endforeach
                     </tbody>
+                    <tfoot>
+                        <tr class="bg-gray-50">
+                            <td colspan="5" class="border border-gray-300 px-4 py-3 text-right font-medium">Totals:</td>
+                            <td class="border border-gray-300 px-4 py-3 text-right font-bold text-gray-900">
+                                {{ number_format($loanSummary->sum(function($item) {
+                                    return collect($item['active_loans'] ?? [])->sum('monthly_payment');
+                                }), 2) }}
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-right font-bold text-gray-900">
+                                {{ number_format($loanSummary->sum('loan_adjustment'), 2) }}
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-right font-bold text-purple-700">
+                                {{ number_format($loanTotal, 2) }}
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-center">
+                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+                                    {{ $loanSummary->where('is_adjusted', true)->count() }} Adjusted
+                                </span>
+                            </td>
+                            @if($canEdit)
+                            <td class="border border-gray-300 px-4 py-3"></td>
+                            @endif
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>
@@ -375,50 +519,51 @@
             </div>
             
             <div class="overflow-x-auto border border-gray-300 rounded-lg">
-                <table class="min-w-full divide-y divide-gray-200">
+                <table class="min-w-full border-collapse border border-gray-300">
                     <thead>
                         <tr class="bg-gray-50">
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Member</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Savings</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Loans</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Total</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase w-12">#</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Member Name</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Employee No.</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Department</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Savings</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Loans</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Total Amount</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($totalSummary as $deduction)
+                    <tbody>
+                        @foreach($totalSummary as $index => $deduction)
                         <tr class="hover:bg-gray-50 {{ $deduction['is_adjusted'] ? 'bg-yellow-50' : '' }}">
-                            <td class="px-4 py-3">
-                                <div class="flex items-center">
-                                    <div class="w-8 h-8 {{ $deduction['is_adjusted'] ? 'bg-yellow-100' : 'bg-blue-100' }} rounded-full flex items-center justify-center mr-3">
-                                        <span class="{{ $deduction['is_adjusted'] ? 'text-yellow-700' : 'text-blue-700' }} text-sm font-medium">
-                                            {{ strtoupper(substr($deduction['member']->name, 0, 1)) }}
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-gray-900 text-sm">{{ $deduction['member']->name }}</p>
-                                        <p class="text-gray-500 text-xs">{{ $deduction['employee_number'] }}</p>
-                                        <p class="text-gray-500 text-xs">{{ $deduction['department'] ?? 'N/A' }}</p>
-                                    </div>
-                                </div>
+                            <td class="border border-gray-300 px-4 py-3 text-center text-gray-600">{{ $index + 1 }}</td>
+                            <td class="border border-gray-300 px-4 py-3">
+                                <p class="font-medium text-gray-900">{{ $deduction['member']->name }}</p>
                             </td>
-                            <td class="px-4 py-3">
-                                <p class="font-medium text-green-600">KES {{ number_format($deduction['savings_final'], 2) }}</p>
+                            <td class="border border-gray-300 px-4 py-3">
+                                <p class="text-gray-600">{{ $deduction['employee_number'] }}</p>
                             </td>
-                            <td class="px-4 py-3">
-                                <p class="font-medium text-purple-600">KES {{ number_format($deduction['loan_final'], 2) }}</p>
+                            <td class="border border-gray-300 px-4 py-3">
+                                <p class="text-gray-600">{{ $deduction['department'] ?? 'N/A' }}</p>
                             </td>
-                            <td class="px-4 py-3">
-                                <p class="font-bold text-gray-900">KES {{ number_format($deduction['total_amount'], 2) }}</p>
+                            <td class="border border-gray-300 px-4 py-3 text-right">
+                                <p class="font-medium text-green-600">{{ number_format($deduction['savings_final'], 2) }}</p>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="border border-gray-300 px-4 py-3 text-right">
+                                <p class="font-medium text-purple-600">{{ number_format($deduction['loan_final'], 2) }}</p>
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-right">
+                                <p class="font-bold text-gray-900">{{ number_format($deduction['total_amount'], 2) }}</p>
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3">
                                 @if($deduction['is_adjusted'])
-                                    <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
-                                        Adjusted
-                                    </span>
-                                    @if($deduction['adjustment_notes'])
-                                        <p class="text-gray-500 text-xs mt-1">{{ $deduction['adjustment_notes'] }}</p>
-                                    @endif
+                                    <div>
+                                        <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                            Adjusted
+                                        </span>
+                                        @if($deduction['adjustment_notes'])
+                                            <p class="text-gray-500 text-xs mt-1">{{ $deduction['adjustment_notes'] }}</p>
+                                        @endif
+                                    </div>
                                 @else
                                     <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 border border-green-200">
                                         Standard
@@ -428,6 +573,25 @@
                         </tr>
                         @endforeach
                     </tbody>
+                    <tfoot>
+                        <tr class="bg-gray-50">
+                            <td colspan="4" class="border border-gray-300 px-4 py-3 text-right font-medium">Totals:</td>
+                            <td class="border border-gray-300 px-4 py-3 text-right font-bold text-green-700">
+                                {{ number_format($savingsTotal, 2) }}
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-right font-bold text-purple-700">
+                                {{ number_format($loanTotal, 2) }}
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-right font-bold text-blue-700">
+                                {{ number_format($grandTotal, 2) }}
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-center">
+                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+                                    {{ $totalSummary->where('is_adjusted', true)->count() }} Adjusted
+                                </span>
+                            </td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>
@@ -440,26 +604,28 @@
             </div>
             
             <div class="overflow-x-auto border border-gray-300 rounded-lg">
-                <table class="min-w-full divide-y divide-gray-200">
+                <table class="min-w-full border-collapse border border-gray-300">
                     <thead>
                         <tr class="bg-gray-50">
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Month</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Members</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Savings</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Loans</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Total</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Adjusted</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Committed</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase w-12">#</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Month</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Members</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Savings</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Loans</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Total</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Adjusted</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Committed</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($monthlySummaries as $summary)
+                    <tbody>
+                        @foreach($monthlySummaries as $index => $summary)
                         <tr class="hover:bg-gray-50 cursor-pointer" onclick="loadSpecificMonth('{{ $summary['month'] }}')">
-                            <td class="px-4 py-3">
+                            <td class="border border-gray-300 px-4 py-3 text-center text-gray-600">{{ $index + 1 }}</td>
+                            <td class="border border-gray-300 px-4 py-3">
                                 <p class="font-medium text-gray-900">{{ $summary['label'] }}</p>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="border border-gray-300 px-4 py-3">
                                 @if($summary['status'] == 'draft')
                                     <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
                                         Draft
@@ -474,27 +640,27 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="border border-gray-300 px-4 py-3 text-center">
                                 <p class="text-gray-900">{{ $summary['member_count'] }}</p>
                             </td>
-                            <td class="px-4 py-3">
-                                <p class="text-green-600 font-medium">KES {{ number_format($summary['total_savings'], 2) }}</p>
+                            <td class="border border-gray-300 px-4 py-3 text-right">
+                                <p class="text-green-600 font-medium">{{ number_format($summary['total_savings'], 2) }}</p>
                             </td>
-                            <td class="px-4 py-3">
-                                <p class="text-purple-600 font-medium">KES {{ number_format($summary['total_loans'], 2) }}</p>
+                            <td class="border border-gray-300 px-4 py-3 text-right">
+                                <p class="text-purple-600 font-medium">{{ number_format($summary['total_loans'], 2) }}</p>
                             </td>
-                            <td class="px-4 py-3">
-                                <p class="font-bold text-gray-900">KES {{ number_format($summary['total_amount'], 2) }}</p>
+                            <td class="border border-gray-300 px-4 py-3 text-right">
+                                <p class="font-bold text-gray-900">{{ number_format($summary['total_amount'], 2) }}</p>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="border border-gray-300 px-4 py-3 text-center">
                                 <p class="text-gray-900">{{ $summary['adjusted_count'] }}</p>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="border border-gray-300 px-4 py-3">
                                 @if($summary['committed_at'])
                                     <p class="text-gray-900 text-sm">{{ $summary['committed_at'] }}</p>
                                     <p class="text-gray-500 text-xs">by {{ $summary['committed_by'] ?? 'System' }}</p>
                                 @else
-                                    <p class="text-gray-400 text-sm">Not committed</p>
+                                    <p class="text-gray-400 text-sm text-center">-</p>
                                 @endif
                             </td>
                         </tr>
@@ -539,6 +705,7 @@
         </div>
         
         <form id="editForm" class="p-6">
+            @csrf
             <input type="hidden" id="deductionId">
             <input type="hidden" id="deductionType">
             <input type="hidden" id="standardAmount">
@@ -550,7 +717,7 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Adjustment Amount (KES)</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Adjustment Amount</label>
                     <input type="number" id="adjustmentAmount" step="0.01" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                            placeholder="Enter adjustment amount (positive or negative)">
@@ -597,6 +764,7 @@
         </div>
         
         <form id="commitForm" class="p-6">
+            @csrf
             <div class="space-y-4">
                 <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                     <div class="flex items-center">
@@ -612,9 +780,9 @@
                     <p class="text-gray-700 text-sm mb-2">You are about to commit:</p>
                     <ul class="text-sm text-gray-600 space-y-1">
                         <li>• {{ $stats['total_members'] ?? 0 }} members</li>
-                        <li>• KES {{ number_format($stats['total_savings'] ?? 0, 2) }} in savings deductions</li>
-                        <li>• KES {{ number_format($stats['total_loans'] ?? 0, 2) }} in loan repayments</li>
-                        <li>• KES {{ number_format($stats['total_amount'] ?? 0, 2) }} total amount</li>
+                        <li>• {{ number_format($stats['total_savings'] ?? 0, 2) }} in savings deductions</li>
+                        <li>• {{ number_format($stats['total_loans'] ?? 0, 2) }} in loan repayments</li>
+                        <li>• {{ number_format($stats['total_amount'] ?? 0, 2) }} total amount</li>
                     </ul>
                 </div>
                 
@@ -641,7 +809,7 @@
 </div>
 
 <script>
-// Tab switching - FIXED
+// Tab switching
 function switchTab(tabName) {
     // Hide all content
     ['savings', 'loans', 'total', 'monthly'].forEach(tab => {
@@ -653,21 +821,13 @@ function switchTab(tabName) {
         }
         
         if (tabBtn) {
-            // Remove specific border and text classes
             tabBtn.classList.remove(
-                'border-b-2', 
-                'border-green-600', 
-                'text-green-700',
-                'border-purple-600', 
-                'text-purple-700',
-                'border-blue-600', 
-                'text-blue-700',
-                'border-gray-600', 
-                'text-gray-700'
+                'border-green-600', 'text-green-700',
+                'border-purple-600', 'text-purple-700',
+                'border-blue-600', 'text-blue-700',
+                'border-gray-600', 'text-gray-700'
             );
-            
-            // Add default styling
-            tabBtn.classList.add('text-gray-500');
+            tabBtn.classList.add('text-gray-500', 'border-transparent');
         }
     });
 
@@ -680,10 +840,8 @@ function switchTab(tabName) {
     }
     
     if (selectedTab) {
-        // Remove default styling
-        selectedTab.classList.remove('text-gray-500');
+        selectedTab.classList.remove('text-gray-500', 'border-transparent');
         
-        // Add active styling based on tab
         const borderClass = tabName === 'savings' ? 'border-green-600' :
                            tabName === 'loans' ? 'border-purple-600' :
                            tabName === 'total' ? 'border-blue-600' :
@@ -694,7 +852,7 @@ function switchTab(tabName) {
                          tabName === 'total' ? 'text-blue-700' :
                          'text-gray-700';
         
-        selectedTab.classList.add('border-b-2', borderClass, textClass);
+        selectedTab.classList.add(borderClass, textClass);
     }
 }
 
@@ -778,21 +936,55 @@ async function regenerateDeductions() {
 // Edit deduction modal
 function editDeduction(id, type, standardAmount, currentAdjustment) {
     const modal = document.getElementById('editModal');
-    const form = document.getElementById('editForm');
     const deductionId = document.getElementById('deductionId');
     const deductionType = document.getElementById('deductionType');
     const standardAmountInput = document.getElementById('standardAmount');
     const standardAmountDisplay = document.getElementById('standardAmountDisplay');
     const adjustmentAmount = document.getElementById('adjustmentAmount');
-    const finalAmountDisplay = document.getElementById('finalAmountDisplay');
     const adjustmentNotes = document.getElementById('adjustmentNotes');
     
     deductionId.value = id;
     deductionType.value = type;
     standardAmountInput.value = standardAmount;
-    standardAmountDisplay.textContent = 'KES ' + standardAmount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+    standardAmountDisplay.textContent = standardAmount.toLocaleString('en-US', { minimumFractionDigits: 2 });
     adjustmentAmount.value = currentAdjustment || 0;
     adjustmentNotes.value = '';
+    
+    // Calculate initial final amount
+    updateFinalAmountDisplay();
+    
+    // Show modal
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+// Function to handle editing multiple loans for a member
+function editMultipleLoans(id, activeLoans, totalLoanAmount, currentAdjustment) {
+    const modal = document.getElementById('editModal');
+    const deductionId = document.getElementById('deductionId');
+    const deductionType = document.getElementById('deductionType');
+    const standardAmountInput = document.getElementById('standardAmount');
+    const standardAmountDisplay = document.getElementById('standardAmountDisplay');
+    const adjustmentAmount = document.getElementById('adjustmentAmount');
+    const adjustmentNotes = document.getElementById('adjustmentNotes');
+    
+    deductionId.value = id;
+    deductionType.value = 'loan';
+    standardAmountInput.value = totalLoanAmount;
+    standardAmountDisplay.textContent = totalLoanAmount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+    adjustmentAmount.value = currentAdjustment || 0;
+    adjustmentNotes.value = '';
+    
+    // Add note about multiple loans
+    const noteElement = document.createElement('div');
+    noteElement.className = 'bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-2';
+    noteElement.innerHTML = `
+        <p class="text-yellow-800 text-sm font-medium">⚠️ Member has ${activeLoans.length} active loans</p>
+        <p class="text-yellow-600 text-xs mt-1">Adjustment will be distributed proportionally across all loans</p>
+    `;
+    
+    const standardAmountDiv = standardAmountDisplay.parentNode;
+    standardAmountDiv.appendChild(noteElement);
     
     // Calculate initial final amount
     updateFinalAmountDisplay();
@@ -808,7 +1000,7 @@ function updateFinalAmountDisplay() {
     const finalAmount = standardAmount + adjustment;
     
     document.getElementById('finalAmountDisplay').textContent = 
-        'KES ' + finalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+        finalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 });
 }
 
 // Close edit modal
@@ -820,6 +1012,12 @@ function closeEditModal() {
     // Reset form
     document.getElementById('editForm').reset();
     document.getElementById('adjustmentNotes').value = '';
+    
+    // Remove any added notes
+    const noteElement = document.querySelector('.bg-yellow-50.border-yellow-200');
+    if (noteElement) {
+        noteElement.remove();
+    }
 }
 
 // Save deduction adjustment
@@ -964,29 +1162,17 @@ document.addEventListener('DOMContentLoaded', function() {
         monthSelect.addEventListener('change', loadMonth);
     }
     
-    // Add click handlers for tab buttons
-    document.querySelectorAll('nav button[id$="Tab"]').forEach(button => {
-        button.addEventListener('click', function() {
-            const tabName = this.id.replace('Tab', '');
-            switchTab(tabName);
-        });
-    });
-    
     // Close modals when clicking outside
     document.addEventListener('click', function(event) {
         const editModal = document.getElementById('editModal');
         const commitModal = document.getElementById('commitModal');
         
-        if (editModal && !editModal.classList.contains('hidden')) {
-            if (event.target === editModal) {
-                closeEditModal();
-            }
+        if (editModal && !editModal.classList.contains('hidden') && event.target === editModal) {
+            closeEditModal();
         }
         
-        if (commitModal && !commitModal.classList.contains('hidden')) {
-            if (event.target === commitModal) {
-                closeCommitModal();
-            }
+        if (commitModal && !commitModal.classList.contains('hidden') && event.target === commitModal) {
+            closeCommitModal();
         }
     });
     

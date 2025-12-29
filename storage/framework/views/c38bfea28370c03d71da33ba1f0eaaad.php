@@ -20,8 +20,7 @@
                 
                 <!-- Month Selection -->
                 <div class="mt-4 flex items-center gap-3">
-                    <select id="monthSelect" onchange="loadMonth()" 
-                            class="px-4 py-2 border border-gray-300 rounded-lg text-sm">
+                    <select id="monthSelect" class="px-4 py-2 border border-gray-300 rounded-lg text-sm">
                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $monthOptions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <option value="<?php echo e($option['value']); ?>" 
                                     <?php echo e($selectedMonth == $option['value'] ? 'selected' : ''); ?>
@@ -143,21 +142,21 @@
     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($deductionsExist): ?>
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         <div class="border-b border-gray-200">
-            <nav class="flex overflow-x-auto">
+            <nav class="flex">
                 <button onclick="switchTab('savings')" id="savingsTab"
-                    class="px-6 py-4 font-medium border-b-2 border-green-600 text-green-700 whitespace-nowrap">
+                    class="flex-1 px-4 py-4 font-medium border-b-2 border-green-600 text-green-700 whitespace-nowrap text-center">
                     💰 Savings Summary
                 </button>
                 <button onclick="switchTab('loans')" id="loansTab"
-                    class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
+                    class="flex-1 px-4 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap text-center border-b-2 border-transparent">
                     🏦 Loan Summary
                 </button>
                 <button onclick="switchTab('total')" id="totalTab"
-                    class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
-                    📊 Total (Combined) Summary
+                    class="flex-1 px-4 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap text-center border-b-2 border-transparent">
+                    📊 Total Summary
                 </button>
                 <button onclick="switchTab('monthly')" id="monthlyTab"
-                    class="px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
+                    class="flex-1 px-4 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap text-center border-b-2 border-transparent">
                     📅 Monthly Summaries
                 </button>
             </nav>
@@ -177,57 +176,57 @@
             </div>
             
             <div class="overflow-x-auto border border-gray-300 rounded-lg">
-                <table class="min-w-full divide-y divide-gray-200">
+                <table class="min-w-full border-collapse border border-gray-300">
                     <thead>
                         <tr class="bg-gray-50">
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Member</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Standard Amount</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Adjustment</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Final Amount</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase w-12">#</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Member Name</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Employee No.</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Department</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Standard Amount</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Adjustment</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Final Amount</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
                             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canEdit): ?>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
                             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $savingsSummary; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $deduction): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <tbody>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $savingsSummary; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $deduction): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr class="hover:bg-gray-50 <?php echo e($deduction['is_adjusted'] ? 'bg-yellow-50' : ''); ?>">
-                            <td class="px-4 py-3">
-                                <div class="flex items-center">
-                                    <div class="w-8 h-8 <?php echo e($deduction['is_adjusted'] ? 'bg-yellow-100' : 'bg-green-100'); ?> rounded-full flex items-center justify-center mr-3">
-                                        <span class="<?php echo e($deduction['is_adjusted'] ? 'text-yellow-700' : 'text-green-700'); ?> text-sm font-medium">
-                                            <?php echo e(strtoupper(substr($deduction['member']->name, 0, 1))); ?>
-
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-gray-900 text-sm"><?php echo e($deduction['member']->name); ?></p>
-                                        <p class="text-gray-500 text-xs"><?php echo e($deduction['employee_number']); ?></p>
-                                        <p class="text-gray-500 text-xs"><?php echo e($deduction['department'] ?? 'N/A'); ?></p>
-                                    </div>
-                                </div>
+                            <td class="border border-gray-300 px-4 py-3 text-center text-gray-600"><?php echo e($index + 1); ?></td>
+                            <td class="border border-gray-300 px-4 py-3">
+                                <p class="font-medium text-gray-900"><?php echo e($deduction['member']->name); ?></p>
                             </td>
-                            <td class="px-4 py-3">
-                                <p class="font-medium text-gray-900">KES <?php echo e(number_format($deduction['savings_amount'], 2)); ?></p>
+                            <td class="border border-gray-300 px-4 py-3">
+                                <p class="text-gray-600"><?php echo e($deduction['employee_number']); ?></p>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="border border-gray-300 px-4 py-3">
+                                <p class="text-gray-600"><?php echo e($deduction['department'] ?? 'N/A'); ?></p>
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-right">
+                                <p class="font-medium text-gray-900"><?php echo e(number_format($deduction['savings_amount'], 2)); ?></p>
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3">
                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($deduction['savings_adjustment'] != 0): ?>
-                                    <p class="font-medium <?php echo e($deduction['savings_adjustment'] > 0 ? 'text-green-600' : 'text-red-600'); ?>">
-                                        <?php echo e($deduction['savings_adjustment'] > 0 ? '+' : ''); ?>KES <?php echo e(number_format($deduction['savings_adjustment'], 2)); ?>
+                                    <div class="text-right">
+                                        <p class="font-medium <?php echo e($deduction['savings_adjustment'] > 0 ? 'text-green-600' : 'text-red-600'); ?>">
+                                            <?php echo e($deduction['savings_adjustment'] > 0 ? '+' : ''); ?><?php echo e(number_format($deduction['savings_adjustment'], 2)); ?>
 
-                                    </p>
-                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($deduction['adjustment_notes']): ?>
-                                        <p class="text-gray-500 text-xs mt-1"><?php echo e($deduction['adjustment_notes']); ?></p>
-                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                        </p>
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($deduction['adjustment_notes']): ?>
+                                            <p class="text-gray-500 text-xs mt-1 text-left"><?php echo e($deduction['adjustment_notes']); ?></p>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    </div>
                                 <?php else: ?>
-                                    <p class="text-gray-400 text-sm">No adjustment</p>
+                                    <p class="text-gray-400 text-sm text-center">-</p>
                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
-                            <td class="px-4 py-3">
-                                <p class="font-bold text-gray-900">KES <?php echo e(number_format($deduction['savings_final'], 2)); ?></p>
+                            <td class="border border-gray-300 px-4 py-3 text-right">
+                                <p class="font-bold text-gray-900"><?php echo e(number_format($deduction['savings_final'], 2)); ?></p>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="border border-gray-300 px-4 py-3">
                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($deduction['is_adjusted']): ?>
                                     <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
                                         Adjusted
@@ -239,22 +238,49 @@
                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
                             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canEdit): ?>
-                            <td class="px-4 py-3">
-                                <button onclick="editDeduction(<?php echo e($deduction['id']); ?>, 'savings', <?php echo e($deduction['savings_amount']); ?>, <?php echo e($deduction['savings_adjustment']); ?>)"
-                                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium">
-                                    Edit
-                                </button>
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($deduction['is_adjusted']): ?>
-                                <button onclick="resetDeduction(<?php echo e($deduction['id']); ?>)"
-                                        class="ml-2 bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded text-xs font-medium">
-                                    Reset
-                                </button>
-                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            <td class="border border-gray-300 px-4 py-3 text-center">
+                                <div class="flex gap-2 justify-center">
+                                    <button onclick="editDeduction(<?php echo e($deduction['id']); ?>, 'savings', <?php echo e($deduction['savings_amount']); ?>, <?php echo e($deduction['savings_adjustment']); ?>)"
+                                            class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium">
+                                        Edit
+                                    </button>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($deduction['is_adjusted']): ?>
+                                    <button onclick="resetDeduction(<?php echo e($deduction['id']); ?>)"
+                                            class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded text-xs font-medium">
+                                        Reset
+                                    </button>
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                </div>
                             </td>
                             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </tr>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </tbody>
+                    <tfoot>
+                        <tr class="bg-gray-50">
+                            <td colspan="4" class="border border-gray-300 px-4 py-3 text-right font-medium">Totals:</td>
+                            <td class="border border-gray-300 px-4 py-3 text-right font-bold text-gray-900">
+                                <?php echo e(number_format($savingsSummary->sum('savings_amount'), 2)); ?>
+
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-right font-bold text-gray-900">
+                                <?php echo e(number_format($savingsSummary->sum('savings_adjustment'), 2)); ?>
+
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-right font-bold text-green-700">
+                                <?php echo e(number_format($savingsTotal, 2)); ?>
+
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-center">
+                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+                                    <?php echo e($savingsSummary->where('is_adjusted', true)->count()); ?> Adjusted
+                                </span>
+                            </td>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canEdit): ?>
+                            <td class="border border-gray-300 px-4 py-3"></td>
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>
@@ -264,107 +290,231 @@
             <div class="mb-6 flex justify-between items-center">
                 <div>
                     <h3 class="text-lg font-semibold text-gray-900">Loan Repayment Deductions</h3>
-                    <p class="text-gray-500 text-sm">Active loan repayments with adjustments</p>
+                    <p class="text-gray-500 text-sm">Active loan repayments with adjustments. Members with multiple loans appear multiple times.</p>
                 </div>
                 <div class="text-right">
                     <p class="text-gray-600 text-sm">Total: <span class="font-bold text-purple-600">KES <?php echo e(number_format($loanTotal, 2)); ?></span></p>
-                    <p class="text-gray-500 text-xs"><?php echo e($loanSummary->count()); ?> members</p>
+                    <p class="text-gray-500 text-xs"><?php echo e($loanEntriesCount ?? $loanSummary->count()); ?> loan entries</p>
                 </div>
             </div>
             
             <div class="overflow-x-auto border border-gray-300 rounded-lg">
-                <table class="min-w-full divide-y divide-gray-200">
+                <table class="min-w-full border-collapse border border-gray-300">
                     <thead>
                         <tr class="bg-gray-50">
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Member</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Active Loans</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Standard Amount</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Adjustment</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Final Amount</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase w-12">#</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Member Name</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Employee No.</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Loan Type</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Loan Number</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Standard Amount</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Adjustment</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Final Amount</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
                             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canEdit): ?>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
                             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $loanSummary; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $deduction): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <tr class="hover:bg-gray-50 <?php echo e($deduction['is_adjusted'] ? 'bg-yellow-50' : ''); ?>">
-                            <td class="px-4 py-3">
-                                <div class="flex items-center">
-                                    <div class="w-8 h-8 <?php echo e($deduction['is_adjusted'] ? 'bg-yellow-100' : 'bg-purple-100'); ?> rounded-full flex items-center justify-center mr-3">
-                                        <span class="<?php echo e($deduction['is_adjusted'] ? 'text-yellow-700' : 'text-purple-700'); ?> text-sm font-medium">
-                                            <?php echo e(strtoupper(substr($deduction['member']->name, 0, 1))); ?>
+                    <tbody>
+                        <?php 
+                            $counter = 1;
+                            $loanEntriesCount = 0;
+                        ?>
+                        <?php $__currentLoopData = $loanSummary; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $deduction): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
+                                // Count all active loans for this member
+                                $activeLoans = $deduction['active_loans'] ?? collect();
+                                $loanCount = count($activeLoans);
+                                $loanEntriesCount += $loanCount > 0 ? $loanCount : 1;
+                                
+                                // Determine if adjustment applies to specific loan or total
+                                $hasMultipleLoans = $loanCount > 1;
+                                $hasAdjustment = $deduction['loan_adjustment'] != 0;
+                                
+                                // For members with multiple loans, we need to distribute the adjustment proportionally
+                                if ($hasMultipleLoans && $hasAdjustment) {
+                                    $totalLoanAmount = $deduction['loan_amount'];
+                                    if ($totalLoanAmount > 0) {
+                                        $adjustmentPerLoan = [];
+                                        foreach ($activeLoans as $loanIndex => $loan) {
+                                            $loanPercentage = $loan['monthly_payment'] / $totalLoanAmount;
+                                            $adjustmentPerLoan[] = [
+                                                'amount' => $deduction['loan_adjustment'] * $loanPercentage,
+                                                'percentage' => $loanPercentage * 100
+                                            ];
+                                        }
+                                    }
+                                }
+                            ?>
+                            
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($loanCount > 0): ?>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $activeLoans; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $loanIndex => $loan): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <tr class="hover:bg-gray-50 <?php echo e($deduction['is_adjusted'] ? 'bg-yellow-50' : ''); ?>">
+                                    <td class="border border-gray-300 px-4 py-3 text-center text-gray-600"><?php echo e($counter++); ?></td>
+                                    <td class="border border-gray-300 px-4 py-3">
+                                        <p class="font-medium text-gray-900"><?php echo e($deduction['member']->name); ?></p>
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-3">
+                                        <p class="text-gray-600"><?php echo e($deduction['employee_number']); ?></p>
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-3">
+                                        <?php
+                                            // Determine loan type based on index or loan data
+                                            if (isset($loan['loan_type']) && !empty($loan['loan_type'])) {
+                                                $loanType = $loan['loan_type'];
+                                            } else {
+                                                $loanType = $loanIndex == 0 ? 'First Loan' : 'Second Loan';
+                                            }
+                                        ?>
+                                        <p class="font-medium <?php echo e($loanType == 'First Loan' ? 'text-blue-600' : 'text-green-600'); ?>">
+                                            <?php echo e($loanType); ?>
 
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-gray-900 text-sm"><?php echo e($deduction['member']->name); ?></p>
-                                        <p class="text-gray-500 text-xs"><?php echo e($deduction['employee_number']); ?></p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-4 py-3">
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(count($deduction['active_loans']) > 0): ?>
-                                    <div class="space-y-1">
-                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $deduction['active_loans']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $loan): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                        <div class="text-xs">
-                                            <span class="font-medium">#<?php echo e($loan['loan_number']); ?></span>
-                                            <span class="text-gray-500"> - KES <?php echo e(number_format($loan['monthly_payment'], 2)); ?></span>
+                                        </p>
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-3">
+                                        <p class="font-medium text-gray-700">#<?php echo e($loan['loan_number']); ?></p>
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(isset($loan['purpose']) && !empty($loan['purpose'])): ?>
+                                            <p class="text-gray-500 text-xs"><?php echo e($loan['purpose']); ?></p>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-3 text-right">
+                                        <p class="font-medium text-gray-900"><?php echo e(number_format($loan['monthly_payment'], 2)); ?></p>
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-3">
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($deduction['loan_adjustment'] != 0): ?>
+                                            <div class="text-right">
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($hasMultipleLoans): ?>
+                                                    <?php
+                                                        $loanAdjustment = $adjustmentPerLoan[$loanIndex]['amount'] ?? 0;
+                                                        $adjustmentPercentage = $adjustmentPerLoan[$loanIndex]['percentage'] ?? 0;
+                                                    ?>
+                                                    <p class="font-medium <?php echo e($loanAdjustment > 0 ? 'text-green-600' : 'text-red-600'); ?>">
+                                                        <?php echo e($loanAdjustment > 0 ? '+' : ''); ?><?php echo e(number_format($loanAdjustment, 2)); ?>
+
+                                                    </p>
+                                                    <p class="text-gray-500 text-xs mt-1">
+                                                        <?php echo e(number_format($adjustmentPercentage, 1)); ?>% of total adjustment
+                                                    </p>
+                                                <?php else: ?>
+                                                    <p class="font-medium <?php echo e($deduction['loan_adjustment'] > 0 ? 'text-green-600' : 'text-red-600'); ?>">
+                                                        <?php echo e($deduction['loan_adjustment'] > 0 ? '+' : ''); ?><?php echo e(number_format($deduction['loan_adjustment'], 2)); ?>
+
+                                                    </p>
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($deduction['adjustment_notes'] && !$hasMultipleLoans): ?>
+                                                    <p class="text-gray-500 text-xs mt-1 text-left"><?php echo e($deduction['adjustment_notes']); ?></p>
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                            </div>
+                                        <?php else: ?>
+                                            <p class="text-gray-400 text-sm text-center">-</p>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-3 text-right">
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($hasMultipleLoans && $hasAdjustment): ?>
+                                            <?php
+                                                $loanFinal = $loan['monthly_payment'] + ($adjustmentPerLoan[$loanIndex]['amount'] ?? 0);
+                                            ?>
+                                            <p class="font-bold text-gray-900"><?php echo e(number_format($loanFinal, 2)); ?></p>
+                                        <?php elseif(!$hasMultipleLoans): ?>
+                                            <p class="font-bold text-gray-900"><?php echo e(number_format($deduction['loan_final'], 2)); ?></p>
+                                        <?php else: ?>
+                                            <p class="text-gray-500 text-xs">Part of <?php echo e($loanCount); ?> loans</p>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-3">
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($deduction['is_adjusted']): ?>
+                                            <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                                Adjusted
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800 border border-purple-200">
+                                                Standard
+                                            </span>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($hasMultipleLoans): ?>
+                                            <p class="text-gray-500 text-xs mt-1"><?php echo e($loanCount); ?> loans</p>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    </td>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canEdit): ?>
+                                    <td class="border border-gray-300 px-4 py-3 text-center">
+                                        <div class="flex gap-2 justify-center">
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$hasMultipleLoans || ($hasMultipleLoans && $loanCount == 1)): ?>
+                                                <button onclick="editDeduction(<?php echo e($deduction['id']); ?>, 'loan', <?php echo e($deduction['loan_amount']); ?>, <?php echo e($deduction['loan_adjustment']); ?>)"
+                                                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium">
+                                                    Edit
+                                                </button>
+                                            <?php else: ?>
+                                                <button onclick="editMultipleLoans(<?php echo e($deduction['id']); ?>, <?php echo e(json_encode($activeLoans)); ?>, <?php echo e($deduction['loan_amount']); ?>, <?php echo e($deduction['loan_adjustment']); ?>)"
+                                                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium">
+                                                    Edit All
+                                                </button>
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($deduction['is_adjusted']): ?>
+                                                <button onclick="resetDeduction(<?php echo e($deduction['id']); ?>)"
+                                                        class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded text-xs font-medium">
+                                                    Reset
+                                                </button>
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                         </div>
-                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                                    </div>
-                                <?php else: ?>
-                                    <p class="text-gray-400 text-sm">No active loans</p>
-                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                            </td>
-                            <td class="px-4 py-3">
-                                <p class="font-medium text-gray-900">KES <?php echo e(number_format($deduction['loan_amount'], 2)); ?></p>
-                            </td>
-                            <td class="px-4 py-3">
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($deduction['loan_adjustment'] != 0): ?>
-                                    <p class="font-medium <?php echo e($deduction['loan_adjustment'] > 0 ? 'text-green-600' : 'text-red-600'); ?>">
-                                        <?php echo e($deduction['loan_adjustment'] > 0 ? '+' : ''); ?>KES <?php echo e(number_format($deduction['loan_adjustment'], 2)); ?>
-
-                                    </p>
-                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($deduction['adjustment_notes']): ?>
-                                        <p class="text-gray-500 text-xs mt-1"><?php echo e($deduction['adjustment_notes']); ?></p>
+                                    </td>
                                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                                <?php else: ?>
-                                    <p class="text-gray-400 text-sm">No adjustment</p>
-                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                            </td>
-                            <td class="px-4 py-3">
-                                <p class="font-bold text-gray-900">KES <?php echo e(number_format($deduction['loan_final'], 2)); ?></p>
-                            </td>
-                            <td class="px-4 py-3">
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($deduction['is_adjusted']): ?>
-                                    <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
-                                        Adjusted
-                                    </span>
-                                <?php else: ?>
-                                    <span class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800 border border-purple-200">
-                                        Standard
-                                    </span>
-                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                            </td>
-                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canEdit): ?>
-                            <td class="px-4 py-3">
-                                <button onclick="editDeduction(<?php echo e($deduction['id']); ?>, 'loan', <?php echo e($deduction['loan_amount']); ?>, <?php echo e($deduction['loan_adjustment']); ?>)"
-                                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium">
-                                    Edit
-                                </button>
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($deduction['is_adjusted']): ?>
-                                <button onclick="resetDeduction(<?php echo e($deduction['id']); ?>)"
-                                        class="ml-2 bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded text-xs font-medium">
-                                    Reset
-                                </button>
-                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                            </td>
+                                </tr>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            <?php else: ?>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="border border-gray-300 px-4 py-3 text-center text-gray-600"><?php echo e($counter++); ?></td>
+                                    <td class="border border-gray-300 px-4 py-3">
+                                        <p class="font-medium text-gray-900"><?php echo e($deduction['member']->name); ?></p>
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-3">
+                                        <p class="text-gray-600"><?php echo e($deduction['employee_number']); ?></p>
+                                    </td>
+                                    <td colspan="4" class="border border-gray-300 px-4 py-3 text-center">
+                                        <p class="text-gray-400 text-sm">No active loans</p>
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-3 text-center">
+                                        <p class="text-gray-400 text-sm">-</p>
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-3 text-center">
+                                        <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800 border border-gray-200">
+                                            No Loans
+                                        </span>
+                                    </td>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canEdit): ?>
+                                    <td class="border border-gray-300 px-4 py-3"></td>
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                </tr>
                             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                        </tr>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </tbody>
+                    <tfoot>
+                        <tr class="bg-gray-50">
+                            <td colspan="5" class="border border-gray-300 px-4 py-3 text-right font-medium">Totals:</td>
+                            <td class="border border-gray-300 px-4 py-3 text-right font-bold text-gray-900">
+                                <?php echo e(number_format($loanSummary->sum(function($item) {
+                                    return collect($item['active_loans'] ?? [])->sum('monthly_payment');
+                                }), 2)); ?>
+
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-right font-bold text-gray-900">
+                                <?php echo e(number_format($loanSummary->sum('loan_adjustment'), 2)); ?>
+
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-right font-bold text-purple-700">
+                                <?php echo e(number_format($loanTotal, 2)); ?>
+
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-center">
+                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+                                    <?php echo e($loanSummary->where('is_adjusted', true)->count()); ?> Adjusted
+                                </span>
+                            </td>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canEdit): ?>
+                            <td class="border border-gray-300 px-4 py-3"></td>
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>
@@ -383,51 +533,51 @@
             </div>
             
             <div class="overflow-x-auto border border-gray-300 rounded-lg">
-                <table class="min-w-full divide-y divide-gray-200">
+                <table class="min-w-full border-collapse border border-gray-300">
                     <thead>
                         <tr class="bg-gray-50">
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Member</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Savings</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Loans</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Total</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase w-12">#</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Member Name</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Employee No.</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Department</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Savings</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Loans</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Total Amount</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $totalSummary; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $deduction): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <tbody>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $totalSummary; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $deduction): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr class="hover:bg-gray-50 <?php echo e($deduction['is_adjusted'] ? 'bg-yellow-50' : ''); ?>">
-                            <td class="px-4 py-3">
-                                <div class="flex items-center">
-                                    <div class="w-8 h-8 <?php echo e($deduction['is_adjusted'] ? 'bg-yellow-100' : 'bg-blue-100'); ?> rounded-full flex items-center justify-center mr-3">
-                                        <span class="<?php echo e($deduction['is_adjusted'] ? 'text-yellow-700' : 'text-blue-700'); ?> text-sm font-medium">
-                                            <?php echo e(strtoupper(substr($deduction['member']->name, 0, 1))); ?>
-
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-gray-900 text-sm"><?php echo e($deduction['member']->name); ?></p>
-                                        <p class="text-gray-500 text-xs"><?php echo e($deduction['employee_number']); ?></p>
-                                        <p class="text-gray-500 text-xs"><?php echo e($deduction['department'] ?? 'N/A'); ?></p>
-                                    </div>
-                                </div>
+                            <td class="border border-gray-300 px-4 py-3 text-center text-gray-600"><?php echo e($index + 1); ?></td>
+                            <td class="border border-gray-300 px-4 py-3">
+                                <p class="font-medium text-gray-900"><?php echo e($deduction['member']->name); ?></p>
                             </td>
-                            <td class="px-4 py-3">
-                                <p class="font-medium text-green-600">KES <?php echo e(number_format($deduction['savings_final'], 2)); ?></p>
+                            <td class="border border-gray-300 px-4 py-3">
+                                <p class="text-gray-600"><?php echo e($deduction['employee_number']); ?></p>
                             </td>
-                            <td class="px-4 py-3">
-                                <p class="font-medium text-purple-600">KES <?php echo e(number_format($deduction['loan_final'], 2)); ?></p>
+                            <td class="border border-gray-300 px-4 py-3">
+                                <p class="text-gray-600"><?php echo e($deduction['department'] ?? 'N/A'); ?></p>
                             </td>
-                            <td class="px-4 py-3">
-                                <p class="font-bold text-gray-900">KES <?php echo e(number_format($deduction['total_amount'], 2)); ?></p>
+                            <td class="border border-gray-300 px-4 py-3 text-right">
+                                <p class="font-medium text-green-600"><?php echo e(number_format($deduction['savings_final'], 2)); ?></p>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="border border-gray-300 px-4 py-3 text-right">
+                                <p class="font-medium text-purple-600"><?php echo e(number_format($deduction['loan_final'], 2)); ?></p>
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-right">
+                                <p class="font-bold text-gray-900"><?php echo e(number_format($deduction['total_amount'], 2)); ?></p>
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3">
                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($deduction['is_adjusted']): ?>
-                                    <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
-                                        Adjusted
-                                    </span>
-                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($deduction['adjustment_notes']): ?>
-                                        <p class="text-gray-500 text-xs mt-1"><?php echo e($deduction['adjustment_notes']); ?></p>
-                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    <div>
+                                        <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                            Adjusted
+                                        </span>
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($deduction['adjustment_notes']): ?>
+                                            <p class="text-gray-500 text-xs mt-1"><?php echo e($deduction['adjustment_notes']); ?></p>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    </div>
                                 <?php else: ?>
                                     <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 border border-green-200">
                                         Standard
@@ -437,6 +587,28 @@
                         </tr>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </tbody>
+                    <tfoot>
+                        <tr class="bg-gray-50">
+                            <td colspan="4" class="border border-gray-300 px-4 py-3 text-right font-medium">Totals:</td>
+                            <td class="border border-gray-300 px-4 py-3 text-right font-bold text-green-700">
+                                <?php echo e(number_format($savingsTotal, 2)); ?>
+
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-right font-bold text-purple-700">
+                                <?php echo e(number_format($loanTotal, 2)); ?>
+
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-right font-bold text-blue-700">
+                                <?php echo e(number_format($grandTotal, 2)); ?>
+
+                            </td>
+                            <td class="border border-gray-300 px-4 py-3 text-center">
+                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+                                    <?php echo e($totalSummary->where('is_adjusted', true)->count()); ?> Adjusted
+                                </span>
+                            </td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>
@@ -449,26 +621,28 @@
             </div>
             
             <div class="overflow-x-auto border border-gray-300 rounded-lg">
-                <table class="min-w-full divide-y divide-gray-200">
+                <table class="min-w-full border-collapse border border-gray-300">
                     <thead>
                         <tr class="bg-gray-50">
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Month</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Members</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Savings</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Loans</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Total</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Adjusted</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Committed</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase w-12">#</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Month</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Members</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Savings</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Loans</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Total</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Adjusted</th>
+                            <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Committed</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $monthlySummaries; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $summary): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <tbody>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $monthlySummaries; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $summary): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr class="hover:bg-gray-50 cursor-pointer" onclick="loadSpecificMonth('<?php echo e($summary['month']); ?>')">
-                            <td class="px-4 py-3">
+                            <td class="border border-gray-300 px-4 py-3 text-center text-gray-600"><?php echo e($index + 1); ?></td>
+                            <td class="border border-gray-300 px-4 py-3">
                                 <p class="font-medium text-gray-900"><?php echo e($summary['label']); ?></p>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="border border-gray-300 px-4 py-3">
                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($summary['status'] == 'draft'): ?>
                                     <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
                                         Draft
@@ -483,27 +657,27 @@
                                     </span>
                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="border border-gray-300 px-4 py-3 text-center">
                                 <p class="text-gray-900"><?php echo e($summary['member_count']); ?></p>
                             </td>
-                            <td class="px-4 py-3">
-                                <p class="text-green-600 font-medium">KES <?php echo e(number_format($summary['total_savings'], 2)); ?></p>
+                            <td class="border border-gray-300 px-4 py-3 text-right">
+                                <p class="text-green-600 font-medium"><?php echo e(number_format($summary['total_savings'], 2)); ?></p>
                             </td>
-                            <td class="px-4 py-3">
-                                <p class="text-purple-600 font-medium">KES <?php echo e(number_format($summary['total_loans'], 2)); ?></p>
+                            <td class="border border-gray-300 px-4 py-3 text-right">
+                                <p class="text-purple-600 font-medium"><?php echo e(number_format($summary['total_loans'], 2)); ?></p>
                             </td>
-                            <td class="px-4 py-3">
-                                <p class="font-bold text-gray-900">KES <?php echo e(number_format($summary['total_amount'], 2)); ?></p>
+                            <td class="border border-gray-300 px-4 py-3 text-right">
+                                <p class="font-bold text-gray-900"><?php echo e(number_format($summary['total_amount'], 2)); ?></p>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="border border-gray-300 px-4 py-3 text-center">
                                 <p class="text-gray-900"><?php echo e($summary['adjusted_count']); ?></p>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="border border-gray-300 px-4 py-3">
                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($summary['committed_at']): ?>
                                     <p class="text-gray-900 text-sm"><?php echo e($summary['committed_at']); ?></p>
                                     <p class="text-gray-500 text-xs">by <?php echo e($summary['committed_by'] ?? 'System'); ?></p>
                                 <?php else: ?>
-                                    <p class="text-gray-400 text-sm">Not committed</p>
+                                    <p class="text-gray-400 text-sm text-center">-</p>
                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
                         </tr>
@@ -549,6 +723,7 @@
         </div>
         
         <form id="editForm" class="p-6">
+            <?php echo csrf_field(); ?>
             <input type="hidden" id="deductionId">
             <input type="hidden" id="deductionType">
             <input type="hidden" id="standardAmount">
@@ -560,7 +735,7 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Adjustment Amount (KES)</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Adjustment Amount</label>
                     <input type="number" id="adjustmentAmount" step="0.01" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                            placeholder="Enter adjustment amount (positive or negative)">
@@ -607,6 +782,7 @@
         </div>
         
         <form id="commitForm" class="p-6">
+            <?php echo csrf_field(); ?>
             <div class="space-y-4">
                 <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                     <div class="flex items-center">
@@ -622,9 +798,9 @@
                     <p class="text-gray-700 text-sm mb-2">You are about to commit:</p>
                     <ul class="text-sm text-gray-600 space-y-1">
                         <li>• <?php echo e($stats['total_members'] ?? 0); ?> members</li>
-                        <li>• KES <?php echo e(number_format($stats['total_savings'] ?? 0, 2)); ?> in savings deductions</li>
-                        <li>• KES <?php echo e(number_format($stats['total_loans'] ?? 0, 2)); ?> in loan repayments</li>
-                        <li>• KES <?php echo e(number_format($stats['total_amount'] ?? 0, 2)); ?> total amount</li>
+                        <li>• <?php echo e(number_format($stats['total_savings'] ?? 0, 2)); ?> in savings deductions</li>
+                        <li>• <?php echo e(number_format($stats['total_loans'] ?? 0, 2)); ?> in loan repayments</li>
+                        <li>• <?php echo e(number_format($stats['total_amount'] ?? 0, 2)); ?> total amount</li>
                     </ul>
                 </div>
                 
@@ -651,7 +827,7 @@
 </div>
 
 <script>
-// Tab switching - FIXED
+// Tab switching
 function switchTab(tabName) {
     // Hide all content
     ['savings', 'loans', 'total', 'monthly'].forEach(tab => {
@@ -663,21 +839,13 @@ function switchTab(tabName) {
         }
         
         if (tabBtn) {
-            // Remove specific border and text classes
             tabBtn.classList.remove(
-                'border-b-2', 
-                'border-green-600', 
-                'text-green-700',
-                'border-purple-600', 
-                'text-purple-700',
-                'border-blue-600', 
-                'text-blue-700',
-                'border-gray-600', 
-                'text-gray-700'
+                'border-green-600', 'text-green-700',
+                'border-purple-600', 'text-purple-700',
+                'border-blue-600', 'text-blue-700',
+                'border-gray-600', 'text-gray-700'
             );
-            
-            // Add default styling
-            tabBtn.classList.add('text-gray-500');
+            tabBtn.classList.add('text-gray-500', 'border-transparent');
         }
     });
 
@@ -690,10 +858,8 @@ function switchTab(tabName) {
     }
     
     if (selectedTab) {
-        // Remove default styling
-        selectedTab.classList.remove('text-gray-500');
+        selectedTab.classList.remove('text-gray-500', 'border-transparent');
         
-        // Add active styling based on tab
         const borderClass = tabName === 'savings' ? 'border-green-600' :
                            tabName === 'loans' ? 'border-purple-600' :
                            tabName === 'total' ? 'border-blue-600' :
@@ -704,7 +870,7 @@ function switchTab(tabName) {
                          tabName === 'total' ? 'text-blue-700' :
                          'text-gray-700';
         
-        selectedTab.classList.add('border-b-2', borderClass, textClass);
+        selectedTab.classList.add(borderClass, textClass);
     }
 }
 
@@ -788,21 +954,55 @@ async function regenerateDeductions() {
 // Edit deduction modal
 function editDeduction(id, type, standardAmount, currentAdjustment) {
     const modal = document.getElementById('editModal');
-    const form = document.getElementById('editForm');
     const deductionId = document.getElementById('deductionId');
     const deductionType = document.getElementById('deductionType');
     const standardAmountInput = document.getElementById('standardAmount');
     const standardAmountDisplay = document.getElementById('standardAmountDisplay');
     const adjustmentAmount = document.getElementById('adjustmentAmount');
-    const finalAmountDisplay = document.getElementById('finalAmountDisplay');
     const adjustmentNotes = document.getElementById('adjustmentNotes');
     
     deductionId.value = id;
     deductionType.value = type;
     standardAmountInput.value = standardAmount;
-    standardAmountDisplay.textContent = 'KES ' + standardAmount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+    standardAmountDisplay.textContent = standardAmount.toLocaleString('en-US', { minimumFractionDigits: 2 });
     adjustmentAmount.value = currentAdjustment || 0;
     adjustmentNotes.value = '';
+    
+    // Calculate initial final amount
+    updateFinalAmountDisplay();
+    
+    // Show modal
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+// Function to handle editing multiple loans for a member
+function editMultipleLoans(id, activeLoans, totalLoanAmount, currentAdjustment) {
+    const modal = document.getElementById('editModal');
+    const deductionId = document.getElementById('deductionId');
+    const deductionType = document.getElementById('deductionType');
+    const standardAmountInput = document.getElementById('standardAmount');
+    const standardAmountDisplay = document.getElementById('standardAmountDisplay');
+    const adjustmentAmount = document.getElementById('adjustmentAmount');
+    const adjustmentNotes = document.getElementById('adjustmentNotes');
+    
+    deductionId.value = id;
+    deductionType.value = 'loan';
+    standardAmountInput.value = totalLoanAmount;
+    standardAmountDisplay.textContent = totalLoanAmount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+    adjustmentAmount.value = currentAdjustment || 0;
+    adjustmentNotes.value = '';
+    
+    // Add note about multiple loans
+    const noteElement = document.createElement('div');
+    noteElement.className = 'bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-2';
+    noteElement.innerHTML = `
+        <p class="text-yellow-800 text-sm font-medium">⚠️ Member has ${activeLoans.length} active loans</p>
+        <p class="text-yellow-600 text-xs mt-1">Adjustment will be distributed proportionally across all loans</p>
+    `;
+    
+    const standardAmountDiv = standardAmountDisplay.parentNode;
+    standardAmountDiv.appendChild(noteElement);
     
     // Calculate initial final amount
     updateFinalAmountDisplay();
@@ -818,7 +1018,7 @@ function updateFinalAmountDisplay() {
     const finalAmount = standardAmount + adjustment;
     
     document.getElementById('finalAmountDisplay').textContent = 
-        'KES ' + finalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+        finalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 });
 }
 
 // Close edit modal
@@ -830,6 +1030,12 @@ function closeEditModal() {
     // Reset form
     document.getElementById('editForm').reset();
     document.getElementById('adjustmentNotes').value = '';
+    
+    // Remove any added notes
+    const noteElement = document.querySelector('.bg-yellow-50.border-yellow-200');
+    if (noteElement) {
+        noteElement.remove();
+    }
 }
 
 // Save deduction adjustment
@@ -974,29 +1180,17 @@ document.addEventListener('DOMContentLoaded', function() {
         monthSelect.addEventListener('change', loadMonth);
     }
     
-    // Add click handlers for tab buttons
-    document.querySelectorAll('nav button[id$="Tab"]').forEach(button => {
-        button.addEventListener('click', function() {
-            const tabName = this.id.replace('Tab', '');
-            switchTab(tabName);
-        });
-    });
-    
     // Close modals when clicking outside
     document.addEventListener('click', function(event) {
         const editModal = document.getElementById('editModal');
         const commitModal = document.getElementById('commitModal');
         
-        if (editModal && !editModal.classList.contains('hidden')) {
-            if (event.target === editModal) {
-                closeEditModal();
-            }
+        if (editModal && !editModal.classList.contains('hidden') && event.target === editModal) {
+            closeEditModal();
         }
         
-        if (commitModal && !commitModal.classList.contains('hidden')) {
-            if (event.target === commitModal) {
-                closeCommitModal();
-            }
+        if (commitModal && !commitModal.classList.contains('hidden') && event.target === commitModal) {
+            closeCommitModal();
         }
     });
     
